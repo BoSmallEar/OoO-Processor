@@ -23,18 +23,29 @@ module rrat(
     output logic [31:0][`PRF_LEN-1:0] rat_packets_backup,
     output logic [`PRF_LEN-1:0]       rrat_prev_preg_idx,
     output logic [`PRF_SIZE-1:0]      rrat_free_backup,
-    output logic ['PRF_SIZE-1:0]      rrat_valid_backup
+    output logic ['PRF_SIZE-1:0]      rrat_valid_backup,
+    output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0] rrat_free_preg_queue_backup;        // rrat
+    output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_head_backup;   // rrat
+    output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_tail_backup;   // rrat
 );
 
     logic [31:0] [`PRF_LEN-1:0] rrat_packets;
+
+    logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue;
+    logic [`PRF_LEN-1:0]                  free_preg_queue_head;
+    logic [`PRF_LEN-1:0]                  free_preg_queue_tail;
 
     assign rat_packets_backup = rrat_packets;
     assign rrat_prev_preg_idx = rrat_packets[rob_commit_dest_areg_idx]; 
 
     always_ff @(posedge clock) begin
         if (reset) begin
+            rrat_packets      <= `SD '{32{`PRF_LEN'b0}};
             rrat_free_backup  <= `SD `PRF_SIZE'b1;
             rrat_valid_backup <= `SD `PRF_SIZE'b0;
+            rrat_free_preg_queue_backup       <= `SD 256*8'hffffffff...; // not include 0 in free queue
+            rrat_free_preg_queue_head_backup  <= `SD `PRF_LEN'b1;
+            rrat_free_preg_queue_tail_backup  <= `SD `PRF_LEN'b1; 
         end
         else if (enable) begin
             rrat_packets[rob_commit_dest_areg_idx]      <= `SD rob_commit_dest_preg_idx;
@@ -42,6 +53,11 @@ module rrat(
             rrat_valid_backup[rrat_prev_preg_idx]       <= `SD 1'b0;
             rrat_free_backup[rob_commit_dest_preg_idx]  <= `SD 1'b0;
             rrat_valid_backup[rob_commit_dest_preg_dix] <= `SD 1'b1;
+            if (rrat_prev_preg_idx != `PRF_LEN'b0) begin
+                rrat_free_preg_queue_backup[rrat_free_preg_queue_tail_backup] <= `SD rrat_prev_preg_idx;
+                rrat_free_preg_queue_tail_backup <= `SD rrat_free_preg_queue_tail_backup == `PRF_SIZE-1 ? 1 : rrat_free_preg_queue_tail_backup+1;
+            end
+            rrat_free_preg_queue_head_backup <= `SD rrat_free_preg_queue_head_backup == `PRF_SIZE-1 ? 1 : rrat_free_preg_queue_head_backup+1;
         end
     end
 

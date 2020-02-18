@@ -34,7 +34,9 @@ module rat(
     assign opb_preg_idx = rat_packets[opb_areg_idx];
 
     always_ff @(posedge clock) begin
-        if (commit_mis_pred)
+        if (reset) 
+            rat_packets      <= `SD'{32{`PRF_LEN'b0}};
+        else if (commit_mis_pred)
             rat_packets <= `SD rat_packets_backup;
         else if (enable)
             rat_packets[dest_areg_idx] <= `SD prf_free_preg_idx;
