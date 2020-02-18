@@ -297,4 +297,53 @@ typedef struct packed {
 	logic [2:0]       mem_size; // byte, half-word or word
 } EX_MEM_PACKET;
 
+//////////////////////////////////////////////
+//
+// Some macros of size and length.
+//
+//////////////////////////////////////////////
+
+`define PRF_SIZE      256	// number of entries
+`define PRF_LEN		  8		// length in bits == log(PRF_SIZE)
+`define ROB_SIZE      128	// number of entries
+`define ROB_LEN       7		// length in bits == log(ROB_SIZE)
+`define RS_SIZE		  8		// number of entries
+`define RAT_SIZE      32	// number of entries == number of arch reg
+
+`define XLENFU		  4		// number of function units
+
+//////////////////////////////////////////////
+//
+// ROB Packets:
+// Data stored in ROB.
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic [`XLEN-1:0]    PC;			// alu_result
+	logic                executed;		// is this ROB executed ??
+	logic [`PRF_LEN-1:0] dest_preg_idx;	// dest physcial reg index
+	logic [4:0]          dest_areg_idx;	// dest arch reg index
+	logic                rob_mis_pred;  // whether this is a mispredicted branch
+} ROB_PACKET;
+
+//////////////////////////////////////////////
+//
+// RS Packets:
+// Data stored in RS.
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic [`XLENFU-1:0]  fu_type;
+	logic 				 opa_ready;
+	logic 				 opb_ready;
+	logic [`XLEN-1:0]	 opa_value;
+	logic [`XLEN-1:0] 	 opb_value;
+	logic [`PRF_LEN-1:0] dest_preg_idx;	// dest physcial reg index
+	logic [`ROB_LEN-1:0] rob_idx;
+	ID_EX_PACKET		 id_packet_in;
+} RS_PACKET;
+
+
 `endif // __SYS_DEFS_VH__
