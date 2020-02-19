@@ -38,5 +38,5 @@ void rob_print_close()
 void rob_print(int entry, int PC, int executed, int dest_areg, int dest_preg, int rob_mis_pred) 
 {
   if (ppfile != NULL)
-    fprintf(ppfile, "%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d", entry, PC, executed, dest_areg, dest_preg, rob_mis_pred, H_or_T);
+    fprintf(ppfile, "%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d", entry, PC, executed, dest_areg, dest_preg, rob_mis_pred);
 }

@@ -11,6 +11,8 @@
 `ifndef DEBUG
 `define DEBUG
 
+`timescale 1ns/100ps
+
 extern void rob_print_header(int head, int tail);
 extern void rob_print_cycles();
 extern void rob_print_input(int clock, 
@@ -58,9 +60,9 @@ logic [`ROB_LEN-1:0]        rob_tail;
 logic                       rob_full;
 logic                       commit_valid;           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
 logic                       mis_pred_is_head;
-output logic [`ROB_LEN-1:0]       rob_head
-output logic                      rob_empty
-output ROB_PACKET [`ROB_SIZE-1:0] rob_packets
+logic [`ROB_LEN-1:0]       rob_head;
+logic                      rob_empty;
+ROB_PACKET [`ROB_SIZE-1:0] rob_packets0;
 // Correct Outputs
 logic [4:0]                 correct_rob_commit_dest_areg_idx;
 logic [`PRF_LEN-1:0]        correct_rob_commit_dest_preg_idx;
@@ -76,7 +78,7 @@ int i;
 
 // Now we declare an instance of the module we'd like to test, in this case
 // the 64-bit full adder. We also wire in the signals declared above.
-module rob(
+rob rob0(
     .clock(clock),
     .reset(reset),
     .PC(PC),
@@ -95,7 +97,7 @@ module rob(
     .mis_pred_is_head(mis_pred_is_head),
     .rob_head(rob_head),
     .rob_empty(rob_empty),
-    .rob_packets(rob_packets)
+    .rob_packets(rob_packets0)
 );
 
 
@@ -104,14 +106,14 @@ module rob(
 // to save on a lot of repeated / duplicated work.
 
 task compare_correct;
-    input                       clock, 
-    input [`XLEN-1:0]           PC,
-    input                       dispatch_enable,        // not only depend on rob_full, (e.g. invalid instr)
-    input                       execution_finished,     // make executed_rob_entry valid
-    input [4:0]                 dest_areg_idx,
-    input [`PRF_LEN-1:0]        prf_free_preg_idx,
-    input [`ROB_LEN-1:0]        executed_rob_entry,
-    input                       cdb_mis_pred
+    input                       clock; 
+    input [`XLEN-1:0]           PC;
+    input                       dispatch_enable;        // not only depend on rob_full, (e.g. invalid instr)
+    input                       execution_finished;     // make executed_rob_entry valid
+    input [4:0]                 dest_areg_idx;
+    input [`PRF_LEN-1:0]        prf_free_preg_idx;
+    input [`ROB_LEN-1:0]        executed_rob_entry;
+    input                       cdb_mis_pred;
     //Outputs                   cdb_mis_pred, 
     input [4:0]                 rob_commit_dest_areg_idx;
     input [`PRF_LEN-1:0]        rob_commit_dest_preg_idx;
@@ -155,19 +157,19 @@ endfunction
 
 
 task print_rob;
-    input rob_packets;
-    input rob_head;
-    input rob_tail;
-    input clock;
-    input PC;
-    input dispatch_enable;
-    input dest_areg_idx;
-    input prf_free_preg_idx;
-    input executed_rob_entry;
-    input cdb_mis_pred;
-    rob_print_input(PC, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
+    input ROB_PACKET [`ROB_SIZE-1:0] rob_packets;
+    input [`ROB_LEN-1:0]  rob_head;
+    input [`ROB_LEN-1:0]  rob_tail;
+    input 		  clock;
+    input [`XLEN-1:0]	  PC;
+    input 		  dispatch_enable;
+    input [4:0]		  dest_areg_idx;
+    input [`PRF_LEN-1:0]  prf_free_preg_idx;
+    input [`ROB_LEN-1:0]  executed_rob_entry;
+    input 		  cdb_mis_pred;
+    rob_print_input({31'h0, clock}, PC, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
                     {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
-    rob_print_header({(32-`ROB_LEN){rob_head, rob_tail);
+    rob_print_header({{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail});
     for (i = 0; i < `ROB_SIZE; i++) begin
         rob_print(i, rob_packets[i].PC, {31'h0, rob_packets[i].executed}, {{(32-`PRF_LEN){1'b0}},rob_packets[i].dest_preg_idx},
                   {27'h0, rob_packets[i].dest_areg_idx}, {31'h0, rob_packets[i].rob_mis_pred});
@@ -219,7 +221,7 @@ initial begin
     
     // Test 1
     @(negedge clock); 
-    print_rob(rob_packets,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
     reset              = 1'b0;
     PC                 = 32'h4;
     dispatch_enable    = 1'b1;
@@ -231,7 +233,7 @@ initial begin
 
     // Test 2
     @(negedge clock);
-    print_rob(rob_packets,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
     reset              = 1'b0;
     PC                 = 32'h8;
     dispatch_enable    = 1'b1;
@@ -244,7 +246,7 @@ initial begin
 
     // Test 3
     @(negedge clock);
-    print_rob(rob_packets,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
     reset              = 1'b0;
     PC                 = 32'hc;
     dispatch_enable    = 1'b1;
@@ -256,7 +258,7 @@ initial begin
 
     // Test 4
     @(negedge clock);
-    print_rob(rob_packets,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
     reset              = 1'b0;
     PC                 = 32'hf;
     dispatch_enable    = 1'b1;
@@ -267,7 +269,7 @@ initial begin
     cdb_mis_pred       = 1'b0;
     
     @(negedge clock);
-    print_rob(rob_packets,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
 
    /*
     // Random Tests
