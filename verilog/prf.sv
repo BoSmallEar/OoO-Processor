@@ -55,7 +55,7 @@ module prf(
         if (reset) begin
             prf_free              <= `SD `PRF_SIZE'b1;
             prf_valid             <= `SD `PRF_SIZE'b0;
-            free_preg_queue       <= `SD 256*8'hffffffff...; // not include 0 in free queue
+            free_preg_queue       <= `SD `INIT_FREE_PREG_QUEUE;
             free_preg_queue_head  <= `SD `PRF_LEN'b1;
             free_preg_queue_tail  <= `SD `PRF_LEN'b1; 
             prf_values[0]         <= `SD `XLEN'b0;

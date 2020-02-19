@@ -43,7 +43,7 @@ module rrat(
             rrat_packets      <= `SD '{32{`PRF_LEN'b0}};
             rrat_free_backup  <= `SD `PRF_SIZE'b1;
             rrat_valid_backup <= `SD `PRF_SIZE'b0;
-            rrat_free_preg_queue_backup       <= `SD 256*8'hffffffff...; // not include 0 in free queue
+            rrat_free_preg_queue_backup       <= `SD `INIT_FREE_PREG_QUEUE;
             rrat_free_preg_queue_head_backup  <= `SD `PRF_LEN'b1;
             rrat_free_preg_queue_tail_backup  <= `SD `PRF_LEN'b1; 
         end
