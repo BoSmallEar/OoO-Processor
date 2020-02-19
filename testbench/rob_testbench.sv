@@ -13,10 +13,11 @@
 
 `timescale 1ns/100ps
 
-extern void rob_print_header(int head, int tail);
+extern void rob_print_header(int head, int tail, int commit_valid);
 extern void rob_print_cycles();
-extern void rob_print_input(int clock, 
+extern void rob_print_input(int reset, 
                             int PC,
+                            int execution_finished,
                             int dispatch_enable,
                             int dest_areg_idx,
                             int prf_free_preg_idx,
@@ -148,14 +149,6 @@ endtask
 
 
 
-function makeup32;
-input origin, length;
-begin
-makeup32 = {{(32-length){1'b0}},origin};
-end
-endfunction
-
-
 task print_rob;
     input ROB_PACKET [`ROB_SIZE-1:0] rob_packets;
     input [`ROB_LEN-1:0]  rob_head;
@@ -167,13 +160,14 @@ task print_rob;
     input [`PRF_LEN-1:0]  prf_free_preg_idx;
     input [`ROB_LEN-1:0]  executed_rob_entry;
     input 		  cdb_mis_pred;
-    rob_print_input({31'h0, clock}, PC, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
-                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
-    rob_print_header({{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail});
+    input         commit_valid;
+    rob_print_header({{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail},{31'h0, commit_valid});
     for (i = 0; i < `ROB_SIZE; i++) begin
         rob_print(i, rob_packets[i].PC, {31'h0, rob_packets[i].executed}, {{(32-`PRF_LEN){1'b0}},rob_packets[i].dest_preg_idx},
                   {27'h0, rob_packets[i].dest_areg_idx}, {31'h0, rob_packets[i].rob_mis_pred});
     end
+    rob_print_input({31'h0, reset}, PC, {31'h0, execution_finished}, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
+                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
 endtask
 
 // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -221,7 +215,7 @@ initial begin
     
     // Test 1
     @(negedge clock); 
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'h4;
     dispatch_enable    = 1'b1;
@@ -233,20 +227,20 @@ initial begin
 
     // Test 2
     @(negedge clock);
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'h8;
     dispatch_enable    = 1'b1;
     execution_finished = 1'b1;
     dest_areg_idx      = 1'b1;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = 1'b0;
+    executed_rob_entry = 1'b1;
     cdb_mis_pred       = 1'b0;
 
 
     // Test 3
     @(negedge clock);
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'hc;
     dispatch_enable    = 1'b1;
@@ -258,7 +252,7 @@ initial begin
 
     // Test 4
     @(negedge clock);
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'hf;
     dispatch_enable    = 1'b1;
@@ -269,7 +263,7 @@ initial begin
     cdb_mis_pred       = 1'b0;
     
     @(negedge clock);
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
 
    /*
     // Random Tests
@@ -290,7 +284,6 @@ initial begin
     $finish;
 
 end
-
 
 endmodule
 

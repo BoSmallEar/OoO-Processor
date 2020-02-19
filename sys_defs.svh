@@ -305,8 +305,8 @@ typedef struct packed {
 
 `define PRF_SIZE      256	// number of entries
 `define PRF_LEN		  8		// length in bits == log(PRF_SIZE)
-`define ROB_SIZE      128	// number of entries
-`define ROB_LEN       7		// length in bits == log(ROB_SIZE)
+`define ROB_SIZE      8		// number of entries
+`define ROB_LEN       3		// length in bits == log(ROB_SIZE)
 `define RS_SIZE		  8		// number of entries
 `define RAT_SIZE      32	// number of entries == number of arch reg
 
