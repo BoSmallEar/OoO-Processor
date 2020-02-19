@@ -7,7 +7,7 @@
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+`define DEBUG
 `ifndef __ROB_V__
 `define __ROB_V__
 
@@ -30,12 +30,17 @@ module rob(
     output logic                rob_full,
     output logic                commit_valid,           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
     output logic                mis_pred_is_head
+    `ifdef DEBUG
+        , output logic [`ROB_LEN-1:0]       rob_head
+        , output logic                      rob_empty
+        , output ROB_PACKET [`ROB_SIZE-1:0] rob_packets
+    `endif
 );
-
-    logic [`ROB_LEN-1:0] rob_head;
-    logic                rob_empty;
-
-    ROB_PACKET rob_packets [`ROB_SIZE-1:0];
+    `ifndef DEBUG
+        logic [`ROB_LEN-1:0]       rob_head;
+        logic                      rob_empty;
+        ROB_PACKET [`ROB_SIZE-1:0] rob_packets ;
+    `endif
 
     assign commit_valid = (rob_packets[rob_head].executed) && (~rob_empty);
     assign rob_commit_dest_areg_idx = rob_packets[rob_head].dest_areg_idx;

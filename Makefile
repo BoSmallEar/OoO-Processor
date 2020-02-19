@@ -76,31 +76,36 @@ VISFLAGS = -lncurses
 # Modify starting here
 #####
 
+# TESTBENCH = 	sys_defs.svh	\
+# 		ISA.svh         \
+# 		testbench/mem.sv  \
+# 		testbench/testbench.sv	\
+# 		testbench/pipe_print.c	 
+# SIMFILES =	verilog/pipeline.sv	\
+# 		verilog/regfile.sv	\
+# 		verilog/if_stage.sv	\
+# 		verilog/id_stage.sv	\
+# 		verilog/ex_stage.sv	\
+# 		verilog/mem_stage.sv	\
+# 		verilog/wb_stage.sv	\
+
 TESTBENCH = 	sys_defs.svh	\
 		ISA.svh         \
-		testbench/mem.sv  \
-		testbench/testbench.sv	\
-		testbench/pipe_print.c	 
-SIMFILES =	verilog/pipeline.sv	\
-		verilog/regfile.sv	\
-		verilog/if_stage.sv	\
-		verilog/id_stage.sv	\
-		verilog/ex_stage.sv	\
-		verilog/mem_stage.sv	\
-		verilog/wb_stage.sv	\
+		testbench/rob_testbench.sv	\
+		testbench/rob_print.c	 
+SIMFILES =	verilog/rob.sv
 
-SYNFILES = synth/pipeline.vg
+SYNFILES = synth/rob.vg
 
 # Don't ask me why spell VisUal TestBenchER like this...
 VTUBER = sys_defs.svh	\
 		ISA.svh         \
-		testbench/mem.sv  \
 		testbench/visual_testbench.v \
 		testbench/visual_c_hooks.cpp \
-		testbench/pipe_print.c
+		testbench/rob_print.c
 
-synth/pipeline.vg:        $(SIMFILES) synth/pipeline.tcl
-	cd synth && dc_shell-t -f ./pipeline.tcl | tee synth.out 
+synth/rob.vg:        $(SIMFILES) synth/rob.tcl
+	cd synth && dc_shell-t -f ./rob.tcl | tee rob_synth.out 
 
 #####
 # Should be no need to modify after here
