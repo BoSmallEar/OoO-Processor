@@ -6,20 +6,32 @@
 static int cycle_count = 0;
 static FILE* ppfile = NULL;
 
+/*
+Entry|   PC      |	Executed    |   Dest.ARN    |   Dest.PRN    |	rob_mis_pred    |
+0       |   0       |      0        |       0       |       0       |       0           |
+1       |   0       |      0        |       0       |       0       |       0           |
+2       |   0       |      0        |       0       |       0       |       0           |
+3       |   0       |      0        |       0       |       0       |       0           |
+4       |   0       |      0        |       0       |       0       |       0           |
+5       |   0       |      0        |       0       |       0       |       0           |
+6       |   0       |      0        |       0       |       0       |       0           |
+7       |   0       |      0        |       0       |       0       |       0           |
+*/
 
 void rob_print_header(int head, int tail, int commit_valid)
 {
   if (ppfile == NULL)
     ppfile = fopen("rob.out", "w");
-  fprintf(ppfile, "Header:\t\t%d\nTail:\t\t%d\nCommit_valid:\t\t%d\n", head, tail, commit_valid);
-  fprintf(ppfile, "Entry\t\tPC\t\tExecuted\tDest.ARN\tDest.PRN\trob_mis_pred\n");
+  fprintf(ppfile, "Head:\t\t\t%-8d\nTail:\t\t\t%-8d\nCommit_valid:\t%-8d\n", head, tail, commit_valid);
+  fprintf(ppfile, "Entry\t\tPC\t\t\tExecuted\t\tDest.ARN\t\tDest.PRN\t\trob_mis_pred\n");
+  // fprintf(ppfile, "Entry\t|\tPC\t\t|\tExecuted\t|\tDest.ARN\t|\tDest.PRN\t|\trob_mis_pred\t|\n");
 }
 
 void rob_print_input(int reset, int PC, int execution_finished, int dispatch_enable, int dest_areg_idx, int prf_free_preg_idx, int executed_rob_entry, int cdb_mis_pred)
 {
 
   if (ppfile != NULL)
-    fprintf(ppfile, "reset:\t%d \nPC:\t%d \nexecution_finished:\t%d \ndispatch_enable:\t%d \ndest_areg_idx:\t%d \nprf_free_preg_idx:\t%d \nexecuted_rob_entry:\t%d \ncdb_mis_pred:\t%d\n\n\n\n\n", reset, PC, execution_finished, dispatch_enable, dest_areg_idx, prf_free_preg_idx, executed_rob_entry, cdb_mis_pred);
+    fprintf(ppfile, "reset:\t\t\t\t%d\nPC:\t\t\t\t\t%d\nexecution_finished:\t%d\ndispatch_enable:\t%d\ndest_areg_idx:\t\t%d\nprf_free_preg_idx:\t%d\nexecuted_rob_entry:\t%d\ncdb_mis_pred:\t\t%d\n\n\n\n\n", reset, PC, execution_finished, dispatch_enable, dest_areg_idx, prf_free_preg_idx, executed_rob_entry, cdb_mis_pred);
 }
 
 void rob_print_cycles()
@@ -37,8 +49,36 @@ void rob_print_close()
   ppfile = NULL;
 }
 
-void rob_print(int entry, int PC, int executed, int dest_areg, int dest_preg, int rob_mis_pred) 
+void rob_print(int entry, int PC, int executed, int dest_areg, int dest_preg, int rob_mis_pred, int head, int tail) 
 {
-  if (ppfile != NULL)
-    fprintf(ppfile, "%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", entry, PC, executed, dest_areg, dest_preg, rob_mis_pred);
+  // if (ppfile != NULL) {
+  //   fprintf(ppfile, "%-12d%-12d", entry, PC);
+
+  //   if (executed == 0) fprintf(ppfile, "%-12s", "-");
+  //   else fprintf(ppfile, "%-12s", executed);
+
+  //   fprintf(ppfile, "%-12s%-12s", dest_areg, dest_preg);
+
+  //   if (rob_mis_pred == 0) fprintf(ppfile, "%-12s", "-");
+  //   else fprintf(ppfile, "%-12s", rob_mis_pred);
+
+  //   if (head) fprintf(ppfile, "%-12s", "<- Head");
+  //   if (tail) fprintf(ppfile, "%-12s", "<- Tail");
+
+  if (ppfile != NULL) {
+    fprintf(ppfile, "%-8d|\t%-8d|", entry, PC);
+
+    if (executed == 0) fprintf(ppfile, "\t\t%-8s|", "-");
+    else fprintf(ppfile, "\t\t%-8d|", executed);
+
+    fprintf(ppfile, "\t\t%-8d|\t\t%-8d|", dest_areg, dest_preg);
+
+    if (rob_mis_pred == 0) fprintf(ppfile, "\t\t%-12s|\n", "-");
+    else fprintf(ppfile, "\t\t%-12d|\n", rob_mis_pred);
+
+    // if (head == 1) fprintf(ppfile, "\t%-12s", "<- Head");
+    // if (tail == ) fprintf(ppfile, "\t%-12s", "<- Tail");
+
+    // fprintf(ppfile, "%-12d%-12d%-12d%-12d\n", executed, dest_areg, dest_preg, rob_mis_pred);
+  }
 }

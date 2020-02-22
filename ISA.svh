@@ -9,7 +9,6 @@
 // Currently this contains instructions for RV32IMA and RV64IMA
 // Any extensions added in the future should be appended here
 ////////////////////////////////////////////////////////////////////////////////////////////
-
 `ifndef __ISA_SVH__
 `define __ISA_SVH__
 

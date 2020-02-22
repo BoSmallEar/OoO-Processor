@@ -1,0 +1,361 @@
+Head:			0       
+Tail:			1       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	0       |		-       |		0       |		0       |		-           |
+2       |	0       |		-       |		0       |		0       |		-           |
+3       |	0       |		-       |		0       |		0       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				1
+PC:					0
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	0
+executed_rob_entry:	0
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			2       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	0       |		-       |		0       |		0       |		-           |
+3       |	0       |		-       |		0       |		0       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					4
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	0
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			3       
+Commit_valid:	1       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		1       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	0       |		-       |		0       |		0       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					8
+execution_finished:	1
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	1
+cdb_mis_pred:		0
+
+
+
+
+Head:			2       
+Tail:			4       
+Commit_valid:	1       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		1       |		1       |		1       |		-           |
+2       |	8       |		1       |		1       |		1       |		1           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					12
+execution_finished:	1
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	2
+cdb_mis_pred:		1
+
+
+
+
+Head:			0       
+Tail:			1       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		1       |		1       |		1       |		-           |
+2       |	8       |		1       |		1       |		1       |		1           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					16
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	2
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			2       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	20      |		-       |		1       |		1       |		-           |
+2       |	8       |		1       |		1       |		1       |		1           |
+3       |	12      |		1       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					20
+execution_finished:	1
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	3
+cdb_mis_pred:		0
+
+
+
+
+Head:			0       
+Tail:			1       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	20      |		-       |		1       |		1       |		-           |
+2       |	8       |		1       |		1       |		1       |		1           |
+3       |	12      |		1       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				1
+PC:					0
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	0
+executed_rob_entry:	0
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			2       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		1       |		1       |		1       |		1           |
+3       |	12      |		1       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					4
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	0
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			3       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		1       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					8
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	1
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			4       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	0       |		-       |		0       |		0       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					12
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	2
+cdb_mis_pred:		1
+
+
+
+
+Head:			1       
+Tail:			5       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	16      |		-       |		1       |		1       |		-           |
+5       |	0       |		-       |		0       |		0       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					16
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	2
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			6       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	16      |		-       |		1       |		1       |		-           |
+5       |	20      |		-       |		1       |		1       |		-           |
+6       |	0       |		-       |		0       |		0       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					20
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	3
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			7       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	16      |		-       |		1       |		1       |		-           |
+5       |	20      |		-       |		1       |		1       |		-           |
+6       |	24      |		-       |		1       |		1       |		-           |
+7       |	0       |		-       |		0       |		0       |		-           |
+reset:				0
+PC:					24
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	3
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			1       
+Commit_valid:	0       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	4       |		-       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	16      |		-       |		1       |		1       |		-           |
+5       |	20      |		-       |		1       |		1       |		-           |
+6       |	24      |		-       |		1       |		1       |		-           |
+7       |	28      |		-       |		1       |		1       |		-           |
+reset:				0
+PC:					28
+execution_finished:	0
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	3
+cdb_mis_pred:		0
+
+
+
+
+Head:			1       
+Tail:			2       
+Commit_valid:	1       
+Entry		PC			Executed		Dest.ARN		Dest.PRN		rob_mis_pred
+0       |	0       |		-       |		0       |		0       |		-           |
+1       |	32      |		1       |		1       |		1       |		-           |
+2       |	8       |		-       |		1       |		1       |		-           |
+3       |	12      |		-       |		1       |		1       |		-           |
+4       |	16      |		-       |		1       |		1       |		-           |
+5       |	20      |		-       |		1       |		1       |		-           |
+6       |	24      |		-       |		1       |		1       |		-           |
+7       |	28      |		-       |		1       |		1       |		-           |
+reset:				0
+PC:					32
+execution_finished:	1
+dispatch_enable:	1
+dest_areg_idx:		1
+prf_free_preg_idx:	1
+executed_rob_entry:	1
+cdb_mis_pred:		0
+
+
+
+
+
