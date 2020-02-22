@@ -1,19 +1,73 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 22 15:59 2020
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 22 17:04 2020
 VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 STARTING TESTSUITE 1!
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
 FINISHING TESTSUITE 1!
 @@@
 @@@
 @@@
 STARTING TESTSUITE 2!
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
+INPUTS:
+OUTPUTS:
+ROB:
 
 ENDING TESTBENCH: SUCCESS!
 
-$finish called from file "testbench/rob_testbench.sv", line 434.
-$finish at simulation time                 1700
+$finish called from file "testbench/rob_testbench.sv", line 462.
+$finish at simulation time                 2000
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 170000 ps
-CPU Time:      0.210 seconds;       Data structure size:   0.0Mb
-Sat Feb 22 15:59:23 2020
+Time: 200000 ps
+CPU Time:      0.220 seconds;       Data structure size:   0.0Mb
+Sat Feb 22 17:04:06 2020

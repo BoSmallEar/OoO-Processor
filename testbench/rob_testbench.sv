@@ -164,15 +164,18 @@ task print_rob;
     input 		                   cdb_mis_pred;
     input                          commit_valid;
     
+    $display("INPUTS:");
+    rob_print_input({31'h0, reset}, PC, {31'h0, execution_finished}, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
+                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
+    $display("OUTPUTS:");
     rob_print_header({{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail},{31'h0, commit_valid});
+    $display("ROB:");
     for (i = 0; i < `ROB_SIZE; i++) begin
-        // rob_print(i, rob_packets[i].PC, {31'h0, rob_packets[i].executed}, {{(32-`PRF_LEN){1'b0}},rob_packets[i].dest_preg_idx},
-        //           {27'h0, rob_packets[i].dest_areg_idx}, {31'h0, rob_packets[i].rob_mis_pred});
         rob_print(i, rob_packets[i].PC, {31'h0, rob_packets[i].executed}, {{(32-`PRF_LEN){1'b0}},rob_packets[i].dest_preg_idx},
                   {27'h0, rob_packets[i].dest_areg_idx}, {31'h0, rob_packets[i].rob_mis_pred}, {{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail});
     end
-    rob_print_input({31'h0, reset}, PC, {31'h0, execution_finished}, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
-                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
+    
+
 endtask
 
 // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -195,8 +198,6 @@ initial begin
 
     // Try uncommenting this monitor once and running the testbench...
     //$monitor("Time:%4.0f clock:%b A:%h B:%h CIN:%b SUM:%h COUT:%b", $time, clock, A, B, C_IN, SUM, C_OUT);
-
-
 
     // Recall that verilog has an "unknown" state (x) which every signal
     // starts at. In practice, most internal registers will get set by a
@@ -242,7 +243,7 @@ initial begin
     execution_finished = 1'b1;
     dest_areg_idx      = 1'b1;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = `ROB_LEN'h1;
+    executed_rob_entry = `ROB_LEN'h0;
     cdb_mis_pred       = 1'b0;
 
 
@@ -255,7 +256,7 @@ initial begin
     execution_finished = 1'b1;
     dest_areg_idx      = 1'b1;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = `ROB_LEN'h2;
+    executed_rob_entry = `ROB_LEN'h1;
     cdb_mis_pred       = 1'b1;
 
     // Test 4
@@ -267,7 +268,7 @@ initial begin
     execution_finished = 1'b0;
     dest_areg_idx      = 1'b1;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = `ROB_LEN'h2;
+    executed_rob_entry = `ROB_LEN'h1;
     cdb_mis_pred       = 1'b0;
     
     // Test 5
@@ -275,6 +276,18 @@ initial begin
     print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'h14;
+    dispatch_enable    = 1'b1;
+    execution_finished = 1'b1;
+    dest_areg_idx      = 1'b1;
+    prf_free_preg_idx  = 1'b1;
+    executed_rob_entry = `ROB_LEN'h2;
+    cdb_mis_pred       = 1'b0;
+
+    // Test 6
+    @(negedge clock);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
+    reset              = 1'b0;
+    PC                 = 32'h18;
     dispatch_enable    = 1'b1;
     execution_finished = 1'b1;
     dest_areg_idx      = 1'b1;
@@ -396,10 +409,10 @@ initial begin
     reset              = 1'b0;
     PC                 = 32'h20;
     dispatch_enable    = 1'b1;
-    execution_finished = 1'b1;
+    execution_finished = 1'b0;
     dest_areg_idx      = 1'b1;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = `ROB_LEN'h1;
+    executed_rob_entry = `ROB_LEN'h0;
     cdb_mis_pred       = 1'b0;
     
         // Test 9
@@ -407,12 +420,26 @@ initial begin
     print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
     reset              = 1'b0;
     PC                 = 32'h24;
-    dispatch_enable    = 1'b1;
+    dispatch_enable    = 1'b0;
     execution_finished = 1'b1;
-    dest_areg_idx      = 1'b1;
+    dest_areg_idx      = 1'b0;
     prf_free_preg_idx  = 1'b1;
-    executed_rob_entry = `ROB_LEN'h2;
+    executed_rob_entry = `ROB_LEN'h0;
     cdb_mis_pred       = 1'b0;
+ 
+    @(negedge clock);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
+    reset              = 1'b0;
+    PC                 = 32'h24;
+    dispatch_enable    = 1'b0;
+    execution_finished = 1'b0;
+    dest_areg_idx      = 1'b0;
+    prf_free_preg_idx  = 1'b1;
+    executed_rob_entry = `ROB_LEN'h1;
+    cdb_mis_pred       = 1'b0;
+
+    @(negedge clock);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
  
 
    /*
@@ -428,6 +455,7 @@ initial begin
         end
     end
 */
+
     rob_print_close();
 // DON'T FORGET TO FINISH THE SIMULATION
     $display("\nENDING TESTBENCH: SUCCESS!\n");
