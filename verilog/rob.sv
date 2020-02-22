@@ -5,6 +5,7 @@
 //                                                                      // 
 //////////////////////////////////////////////////////////////////////////
 
+
 `define DEBUG
 `ifndef __ROB_V__
 `define __ROB_V__
@@ -39,7 +40,8 @@ module rob(
         logic                      rob_empty;
         ROB_PACKET [`ROB_SIZE-1:0] rob_packets;
     `endif
-     logic [`ROB_LEN:0]          rob_counter;
+     
+    logic [`ROB_LEN:0]          rob_counter;
 
     assign commit_valid             = (rob_packets[rob_head].executed) && (~rob_empty);
     assign rob_commit_dest_areg_idx = rob_packets[rob_head].dest_areg_idx;

@@ -7,20 +7,24 @@ static int cycle_count = 0;
 static FILE* ppfile = NULL;
 
 
-void rob_print_header(int head, int tail, int commit_valid)
+void rob_print_header(int commit_valid)
 {
   if (ppfile == NULL)
     ppfile = fopen("rob.out", "w");
-  fprintf(ppfile, "Head:\t\t\t%-8d\nTail:\t\t\t%-8d\nCommit_valid:\t%-8d\n", head, tail, commit_valid);
-  // fprintf(ppfile, "Entry\t\tPC\t\t\tExecuted\t\tDest.ARN\t\tDest.PRN\t\trob_mis_pred\n");
-  fprintf(ppfile, "Entry\t|\tPC\t\t|\tExecuted\t|\tDest.ARN\t|\tDest.PRN\t|\trob_mis_pred\t|\n");
+  fprintf(ppfile, "########## OUTPUTS ##########\n");
+  fprintf(ppfile, "Commit_valid:\t%-8d\n\n", commit_valid);
+  for (int i=0; i<109; i++) fprintf(ppfile, "-");
+  fprintf(ppfile, "\nEntry   |   PC      |   Executed    |   Dest.ARN    |   Dest.PRN    |   rob_mis_pred    |                   |\n");
 }
 
 void rob_print_input(int reset, int PC, int execution_finished, int dispatch_enable, int dest_areg_idx, int prf_free_preg_idx, int executed_rob_entry, int cdb_mis_pred)
 {
-
-  if (ppfile != NULL)
-    fprintf(ppfile, "reset:\t\t\t\t%d\nPC:\t\t\t\t\t%d\nexecution_finished:\t%d\ndispatch_enable:\t%d\ndest_areg_idx:\t\t%d\nprf_free_preg_idx:\t%d\nexecuted_rob_entry:\t%d\ncdb_mis_pred:\t\t%d\n", reset, PC, execution_finished, dispatch_enable, dest_areg_idx, prf_free_preg_idx, executed_rob_entry, cdb_mis_pred);
+  if (ppfile == NULL)
+    ppfile = fopen("rob.out", "w");
+  if (ppfile != NULL) {
+    fprintf(ppfile, "########## INPUTS ##########\n");
+    fprintf(ppfile, "reset:\t\t\t\t%d\nPC:\t\t\t\t\t%d\nexecution_finished:\t%d\ndispatch_enable:\t%d\ndest_areg_idx:\t\t%d\nprf_free_preg_idx:\t%d\nexecuted_rob_entry:\t%d\ncdb_mis_pred:\t\t%d\n\n", reset, PC, execution_finished, dispatch_enable, dest_areg_idx, prf_free_preg_idx, executed_rob_entry, cdb_mis_pred);
+  }
 }
 
 void rob_print_cycles()
@@ -55,26 +59,30 @@ void rob_print(int entry, int PC, int executed, int dest_areg, int dest_preg, in
   //   if (tail) fprintf(ppfile, "%-12s", "<- Tail");
 
   if (ppfile != NULL) {
+    fprintf(ppfile, "%-8d|   %-8d|", entry, PC);
+    /*
     fprintf(ppfile, "%-8d|\t%-8d|", entry, PC);
+    */
 
-    if (executed == 0) fprintf(ppfile, "\t\t%-8s|", "-");
-    else fprintf(ppfile, "\t\t%-8d|", executed);
+    if (executed == 0) fprintf(ppfile, "       %-8s|", "-");
+    else fprintf(ppfile, "       %-8d|", executed);
 
-    fprintf(ppfile, "\t\t%-8d|\t\t%-8d|", dest_areg, dest_preg);
+    fprintf(ppfile, "       %-8d|       %-8d|", dest_areg, dest_preg);
 
-    if (rob_mis_pred == 0) fprintf(ppfile, "\t\t%-12s|", "-");
-    else fprintf(ppfile, "\t\t%-12d|", rob_mis_pred);
+    if (rob_mis_pred == 0) fprintf(ppfile, "       %-12s|", "-");
+    else fprintf(ppfile, "       %-12d|", rob_mis_pred);
 
     if (head == entry) {
-      if (tail == entry) fprintf(ppfile, "\t<- Head & Tail\n");
-      else fprintf(ppfile, "\t<- Head\n");
+      if (tail == entry) fprintf(ppfile, "   <- Head & Tail  |\n");
+      else fprintf(ppfile, "   <- Head         |\n");
     }
     else if (tail == entry) {
-      fprintf(ppfile, "\t<- Tail\n");
+      fprintf(ppfile, "   <- Tail         |\n");
     }
-    else fprintf(ppfile, "\n");
+    else fprintf(ppfile, "         -         |\n");
 
     if (entry == 7) {
+      for (int i=0; i<109; i++) fprintf(ppfile, "-");
       fprintf(ppfile, "\n\n\n\n");
     }
     /*

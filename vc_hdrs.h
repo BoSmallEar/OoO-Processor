@@ -37,7 +37,7 @@ typedef struct VeriC_Descriptor *vc_handle;
 
 #endif /* _VC_TYPES_ */
 
-void rob_print_header(int head, int tail, int commit_valid);
+void rob_print_header(int commit_valid);
 void rob_print_cycles();
 void rob_print_input(int reset, int PC, int execution_finished, int dispatch_enable, int dest_areg_idx, int prf_free_preg_idx, int executed_rob_entry, int cdb_mis_pred);
 void rob_print(int entry, int PC, int executed, int dest_areg, int dest_preg, int rob_mis_pred, int head, int tail);

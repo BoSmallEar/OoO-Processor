@@ -1,0 +1,13 @@
+Design Module List
+
+Total Module Definition Coverage Summary 
+SCORE  LINE   TOGGLE 
+100.00 100.00 100.00 
+
+
+Total modules in report: 2
+-------------------------------------------------------------------------------
+SCORE  LINE   TOGGLE NAME          
+100.00 100.00 100.00 rob_testbench 
+100.00 100.00 100.00 rob           
+

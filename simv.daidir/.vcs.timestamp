@@ -1,5 +1,5 @@
 0 
-39
+41
 +cli+1
 +itf+/usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcsdp.tab
 +memcbk
@@ -27,6 +27,7 @@
 -V
 -Xcbug=0x1
 -Xpiyushb1=0x80
+-cm
 -debug=4
 -full64
 -gen_obj
@@ -36,6 +37,7 @@
 -sverilog
 /usr/caen/vcs-2017.12-SP2-1/linux64/bin/vcs1
 ISA.svh
+line+tgl
 sys_defs.svh
 testbench/rob_testbench.sv
 verilog/rob.sv
@@ -97,7 +99,7 @@ GNOME_SHELL_SESSION_MODE=classic
 GNOME_DESKTOP_SESSION_ID=this-is-deprecated
 GJS_DEBUG_TOPICS=JS ERROR;JS LOG
 GJS_DEBUG_OUTPUT=stderr
-GIO_LAUNCHED_DESKTOP_FILE_PID=12839
+GIO_LAUNCHED_DESKTOP_FILE_PID=6684
 GIO_LAUNCHED_DESKTOP_FILE=/usr/caen/misc/menus/applications/DEVELOPMENT-VisualStudioCode1.32.desktop
 GDM_LANG=en_US.UTF-8
 GDMSESSION=gnome-classic
@@ -106,17 +108,18 @@ DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-gZidHW8Zdx,guid=58e946001450050
 BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL=true
 0
-5
-1582408397 verilog/rob.sv
-1582409040 testbench/rob_testbench.sv
+6
+1582410567 verilog/rob.sv
+1582414351 testbench/rob_testbench.sv
 1582399316 ISA.svh
 1582235190 sys_defs.svh
+1531623946 /usr/caen/vcs-2017.12-SP2-1/include/cm_vcsd.tab
 1531624678 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcsdp.tab
 6
-1582408502 testbench/rob_print.c
+1582412552 testbench/rob_print.c
 0 
 1531625631 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so
 1531624898 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so
 1531624871 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so
 1531625298 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
-1582409045 simv.daidir
+1582414376 simv.daidir

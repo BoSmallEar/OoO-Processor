@@ -5,28 +5,28 @@
         "module",
         1
     ],
-    "std": [
-        "std",
-        "reYIK",
-        "module",
-        2
-    ],
-    "rob_testbench": [
-        "rob_testbench",
-        "hAERs",
-        "module",
-        3
-    ],
     "rob": [
         "rob",
         "vtxDx",
         "module",
         4
     ],
+    "std": [
+        "std",
+        "reYIK",
+        "module",
+        2
+    ],
     "...MASTER...": [
         "SIM",
         "amcQw",
         "module",
         5
+    ],
+    "rob_testbench": [
+        "rob_testbench",
+        "hAERs",
+        "module",
+        3
     ]
 }

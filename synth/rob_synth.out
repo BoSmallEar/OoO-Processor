@@ -1,0 +1,495 @@
+
+                           Design Compiler Graphical 
+                                 DC Ultra (TM)
+                                  DFTMAX (TM)
+                              Power Compiler (TM)
+                                 DesignWare (R)
+                                 DC Expert (TM)
+                               Design Vision (TM)
+                               HDL Compiler (TM)
+                               VHDL Compiler (TM)
+                                  DFT Compiler
+                               Design Compiler(R)
+
+                 Version O-2018.06 for linux64 - May 21, 2018 
+
+                    Copyright (c) 1988 - 2018 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+Initializing...
+#/***********************************************************/
+#/*   FILE        : tut_synth.tcl                          */
+#/*   Description : Default Synopsys Design Compiler Script */
+#/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
+#/*   You'll need to minimally set design_name & read files */
+#/***********************************************************/
+#/***********************************************************/
+#/* The following five lines must be updated for every      */
+#/* new design                                              */
+#/***********************************************************/
+analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/rob.sv"]
+Running PRESTO HDLC
+Compiling source file ../sys_defs.svh
+Compiling source file ../ISA.svh
+Compiling source file ../verilog/rob.sv
+Warning:  ../verilog/rob.sv:54: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:55: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:56: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:59: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:60: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:65: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:66: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:67: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:68: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:69: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:70: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:73: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:77: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:78: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Warning:  ../verilog/rob.sv:80: Intraassignment delays for nonblocking assignments are ignored. (VER-130)
+Presto compilation completed successfully.
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+1
+elaborate rob
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
+  Loading link library 'gtech'
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+Running PRESTO HDLC
+Warning:  ../verilog/rob.sv:70: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/rob.sv:73: signed to unsigned conversion occurs. (VER-318)
+
+Inferred memory devices in process
+	in routine rob line 52 in file
+		'../verilog/rob.sv'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|   rob_packets_reg   | Flip-flop |  376  |  Y  | N  | N  | N  | N  | N  | N  |
+|    rob_head_reg     | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+|    rob_tail_reg     | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+|   rob_counter_reg   | Flip-flop |   4   |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|      rob/45      |   8    |    2    |      3       |
+|      rob/46      |   8    |    5    |      3       |
+|      rob/47      |   8    |    8    |      3       |
+======================================================
+Presto compilation completed successfully.
+Elaborated 1 design.
+Current design is now 'rob'.
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+1
+set design_name rob
+rob
+set clock_name clock
+clock
+set reset_name reset
+reset
+set CLK_PERIOD 5
+5
+#/***********************************************************/
+#/* The rest of this file may be left alone for most small  */
+#/* to moderate sized designs.  You may need to alter it    */
+#/* when synthesizing your final project.                   */
+#/***********************************************************/
+set SYN_DIR ./
+./
+set search_path "/afs/umich.edu/class/eecs470/lib/synopsys/"
+/afs/umich.edu/class/eecs470/lib/synopsys/
+set target_library "lec25dscc25_TT.db"
+lec25dscc25_TT.db
+set link_library [concat  "*" $target_library]
+* lec25dscc25_TT.db
+#/***********************************************************/
+#/* Set some flags for optimisation */
+set compile_top_all_paths "true"
+true
+set auto_wire_load_selection "false"
+false
+#/***********************************************************/
+#/*  Clk Periods/uncertainty/transition                     */
+set CLK_TRANSITION 0.1
+0.1
+set CLK_UNCERTAINTY 0.1
+0.1
+set CLK_LATENCY 0.1
+0.1
+#/* Input/output Delay values */
+set AVG_INPUT_DELAY 0.1
+0.1
+set AVG_OUTPUT_DELAY 0.1
+0.1
+#/* Critical Range (ns) */
+set CRIT_RANGE 1.0
+1.0
+#/***********************************************************/
+#/* Design Constrains: Not all used                         */
+set MAX_TRANSITION 1.0
+1.0
+set FAST_TRANSITION 0.1
+0.1
+set MAX_FANOUT 32
+32
+set MID_FANOUT 8
+8
+set LOW_FANOUT 1
+1
+set HIGH_DRIVE 0
+0
+set HIGH_LOAD 1.0
+1.0
+set AVG_LOAD 0.1
+0.1
+set AVG_FANOUT_LOAD 10
+10
+#/***********************************************************/
+#/*BASIC_INPUT = cb18os120_tsmc_max/nd02d1/A1
+#BASIC_OUTPUT = cb18os120_tsmc_max/nd02d1/ZN*/
+set DRIVING_CELL dffacs1
+dffacs1
+#/* DONT_USE_LIST = {   } */
+#/*************operation cons**************/
+#/*OP_WCASE = WCCOM;
+#OP_BCASE = BCCOM;*/
+set WIRE_LOAD "tsmcwire"
+tsmcwire
+set LOGICLIB lec25dscc25_TT
+lec25dscc25_TT
+#/*****************************/
+#/* Sourcing the file that sets the Search path and the libraries(target,link) */
+set sys_clk $clock_name
+clock
+set netlist_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".vg"]
+./rob.vg
+set ddc_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".ddc"]
+./rob.ddc
+set rep_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".rep"]
+./rob.rep
+set dc_shell_status [ set chk_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".chk"] ]
+./rob.chk
+#/* if we didnt find errors at this point, run */
+if {  $dc_shell_status != [list] } {
+   current_design $design_name
+  link
+  set_wire_load_model -name $WIRE_LOAD -lib $LOGICLIB $design_name
+  set_wire_load_mode top
+  set_fix_multiple_port_nets -outputs -buffer_constants
+  create_clock -period $CLK_PERIOD -name $sys_clk [find port $sys_clk]
+  set_clock_uncertainty $CLK_UNCERTAINTY $sys_clk
+  set_fix_hold $sys_clk
+  group_path -from [all_inputs] -name input_grp
+  group_path -to [all_outputs] -name output_grp
+  set_driving_cell  -lib_cell $DRIVING_CELL [all_inputs]
+  remove_driving_cell [find port $sys_clk]
+  set_fanout_load $AVG_FANOUT_LOAD [all_outputs]
+  set_load $AVG_LOAD [all_outputs]
+  set_input_delay $AVG_INPUT_DELAY -clock $sys_clk [all_inputs]
+  remove_input_delay -clock $sys_clk [find port $sys_clk]
+  set_output_delay $AVG_OUTPUT_DELAY -clock $sys_clk [all_outputs]
+  set_dont_touch $reset_name
+  set_resistance 0 $reset_name
+  set_drive 0 $reset_name
+  set_critical_range $CRIT_RANGE [current_design]
+  set_max_delay $CLK_PERIOD [all_outputs]
+  set MAX_FANOUT $MAX_FANOUT
+  set MAX_TRANSITION $MAX_TRANSITION
+  uniquify
+  ungroup -all -flatten
+  redirect $chk_file { check_design }
+  compile -map_effort high
+  write -hier -format verilog -output $netlist_file $design_name
+  write -hier -format ddc -output $ddc_file $design_name
+  redirect $rep_file { report_design -nosplit }
+  redirect -append $rep_file { report_area }
+  redirect -append $rep_file { report_timing -max_paths 2 -input_pins -nets -transition_time -nosplit }
+  redirect -append $rep_file { report_constraint -max_delay -verbose -nosplit }
+  remove_design -all
+  read_file -format verilog $netlist_file
+  current_design $design_name
+  redirect -append $rep_file { report_reference -nosplit }
+  quit
+} else {
+   quit
+}
+Current design is 'rob'.
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+
+  Linking design 'rob'
+  Using the following designs and libraries:
+  --------------------------------------------------------------------------
+  rob                         /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/rob.db
+  lec25dscc25_TT (library)    /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db
+
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Current design is 'rob'.
+Warning: Design has no hierarchy.  No cells can be ungrouped. (UID-228)
+Information: Evaluating DesignWare library utilization. (UISN-27)
+
+============================================================================
+| DesignWare Building Block Library  |         Version         | Available |
+============================================================================
+| Basic DW Building Blocks           | O-2018.06-DWBB_201806.0 |     *     |
+| Licensed DW Building Blocks        |                         |           |
+============================================================================
+
+
+Information: There are 4 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
+
+
+
+  Beginning Pass 1 Mapping
+  ------------------------
+  Processing 'rob'
+
+  Updating timing information
+Information: Updating design information... (UID-85)
+
+  Beginning Implementation Selection
+  ----------------------------------
+
+  Beginning Mapping Optimizations  (High effort)
+  -------------------------------
+  Mapping Optimization (Phase 1)
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:04  111678.2      0.00       0.0      36.2                                0.00  
+    0:00:04  111678.2      0.00       0.0      36.2                                0.00  
+    0:00:04  111678.2      0.00       0.0      36.2                                0.00  
+    0:00:04  111678.2      0.00       0.0      36.2                                0.00  
+    0:00:04  111678.2      0.00       0.0      36.2                                0.00  
+    0:00:04   95232.2      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      36.0                                0.00  
+    0:00:04   95074.6      0.00       0.0      35.9                                0.00  
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+
+
+
+  Beginning Delay Optimization Phase
+  ----------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+    0:00:04   95091.2      0.00       0.0      35.9                                0.00  
+    0:00:05   87974.9      0.00       0.0     203.8                                0.00  
+
+
+  Beginning Design Rule Fixing  (max_transition)  (max_fanout)
+  ----------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:05   87974.9      0.00       0.0     203.8                                0.00  
+    0:00:05   90123.1      0.00       0.0     126.1 PC[7]                          0.00  
+    0:00:05   92039.1      0.00       0.0      95.4 rob_tail[2]                    0.00  
+    0:00:05   92669.5      0.00       0.0      87.7 rob_packets[5][dest_preg_idx][7]      0.00  
+    0:00:05   93913.6      0.00       0.0      79.2 rob_packets[7][dest_preg_idx][2]      0.00  
+    0:00:05   94610.3      0.00       0.0      70.8 rob_packets[2][dest_areg_idx][0]      0.00  
+    0:00:05   95655.4      0.00       0.0      60.3 rob_packets[4][PC][2]          0.00  
+    0:00:05   98093.9      0.00       0.0      49.8 rob_packets[5][PC][3]          0.00  
+    0:00:05  102224.5      0.00       0.0      39.3 rob_packets[0][PC][4]          0.00  
+    0:00:05  106355.1      0.00       0.0      28.8 rob_packets[1][PC][4]          0.00  
+    0:00:05  106827.9      0.00       0.0       0.0                                0.00  
+
+
+  Beginning Critical Range Optimization
+  -------------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:05  106827.9      0.00       0.0       0.0                                0.00  
+
+
+  Beginning Area-Recovery Phase  (cleanup)
+  -----------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:05  106827.9      0.00       0.0       0.0                                0.00  
+    0:00:05  106827.9      0.00       0.0       0.0                                0.00  
+    0:00:06  100665.1      0.28       0.7       0.0                                0.00  
+    0:00:06  100474.4      0.00       0.0       0.0                                0.00  
+    0:00:06  100441.2      0.00       0.0       0.0                                0.00  
+    0:00:06  100441.2      0.00       0.0       0.0                                0.00  
+    0:00:06  100441.2      0.00       0.0       0.0                                0.00  
+    0:00:06  100441.2      0.00       0.0       0.0                                0.00  
+    0:00:06  100441.2      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+
+
+  Beginning Critical Range Optimization
+  -------------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+    0:00:06  100408.0      0.00       0.0       0.0                                0.00  
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+
+
+Note: Symbol # after min delay cost means estimated hold TNS across all active scenarios 
+
+
+  Optimization Complete
+  ---------------------
+Writing verilog file '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/rob.vg'.
+Warning: Verilog 'assign' or 'tran' statements are written out. (VO-4)
+Writing ddc file './rob.ddc'.
+Removing design 'rob'
+Removing library 'gtech'
+Removing library 'lec25dscc25_TT'
+Removing library 'standard.sldb'
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
+  Loading link library 'lec25dscc25_TT'
+  Loading link library 'gtech'
+Loading verilog file '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/rob.vg'
+Detecting input file type automatically (-rtl or -netlist).
+Running DC verilog reader
+Performing 'read' command.
+Compiling source file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/rob.vg
+Reading with netlist reader (equivalent to -netlist option).
+Verilog netlist reader completed successfully.
+Current design is now '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/rob.db:rob'
+Loaded 1 design.
+Current design is 'rob'.
+Current design is 'rob'.
+
+Thank you...

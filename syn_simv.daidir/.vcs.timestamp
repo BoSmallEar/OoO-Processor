@@ -1,0 +1,127 @@
+0 
+42
++cli+1
++itf+/usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcsdp.tab
++memcbk
++vc
++vcs+vcdpluson
++vcsd
++vpi
+-Mamsrun=
+-Masflags=
+-Mcc=gcc
+-Mcfl= -pipe -fPIC -O -I/usr/caen/vcs-2017.12-SP2-1/include
+-Mcplusplus=g++
+-Mcrt0=
+-Mcrtn=
+-Mcsrc=testbench/rob_print.c
+-Mexternalobj=
+-Mldflags= -rdynamic
+-Mobjects= /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
+-Mout=syn_simv
+-Msaverestoreobj=/usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o
+-Msyslibs=-ldl
+-Mupdate
+-Mvcsaceobjs=
+-Mxcflags= -pipe -fPIC -I/usr/caen/vcs-2017.12-SP2-1/include
+-V
+-Xcbug=0x1
+-Xpiyushb1=0x80
+-cm
+-debug=4
+-full64
+-gen_obj
+-line
+-o syn_simv
+-picarchive
+-sverilog
+/afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
+/usr/caen/vcs-2017.12-SP2-1/linux64/bin/vcs1
+ISA.svh
+line+tgl
+synth/rob.vg
+sys_defs.svh
+testbench/rob_testbench.sv
+65
+sysc_uni_pwd=/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20
+_LMFILES_=/usr/caen/misc/modules/gcc/6.2.0:/usr/caen/misc/modules/spectre/17.10.307:/usr/caen/misc/modules/cadence-ic/6.1.7.500.2100:/afs/umich.edu/class/coe/modules/eecs312/f18:/usr/caen/misc/modules/vcs/2017.12-SP2-1
+XMODIFIERS=@im=ibus
+XDG_VTNR=1
+XDG_SESSION_TYPE=x11
+XDG_SESSION_ID=1
+XDG_SESSION_DESKTOP=gnome-classic
+XDG_SEAT=seat0
+XDG_RUNTIME_DIR=/run/user/114152614
+XDG_MENU_PREFIX=gnome-
+XDG_DATA_DIRS=/home/shiyuliu/.local/share/flatpak/exports/share/:/var/lib/flatpak/exports/share/:/usr/local/share/:/usr/share/:/usr/caen/misc/menus
+XDG_CURRENT_DESKTOP=GNOME-Classic:GNOME
+XAUTHORITY=/run/gdm/auth-for-shiyuliu-GYVimA/database
+WINDOWPATH=1
+VMR_MODE_FLAG=64
+VCS_MODE_FLAG=64
+VCS_HOME=/usr/caen/vcs-2017.12-SP2-1
+VCS_DEPTH=0
+VCS_ARG_ADDED_FOR_TMP=1
+VCS_ARCH=linux64
+USERNAME=shiyuliu
+UNAME=/bin/uname
+TOOL_HOME=/usr/caen/vcs-2017.12-SP2-1/linux64
+TERM_PROGRAM_VERSION=1.32.3
+TERM_PROGRAM=vscode
+SSH_AUTH_SOCK=/run/user/114152614/keyring/ssh
+SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
+SSH_AGENT_PID=3312
+SNPS_VCS_CLANG_PATH=/fs/src/interfaces/LLVM_Project/QSCM/opt/llvm-3.9.1/linux64
+SESSION_MANAGER=local/unix:@/tmp/.ICE-unix/3144,unix/unix:/tmp/.ICE-unix/3144
+SCRNAME=vcs
+SCRIPT_NAME=vcs
+QT_PLUGIN_PATH=/usr/lib64/kde4/plugins:/usr/lib/kde4/plugins
+QT_IM_MODULE=ibus
+QT_GRAPHICSSYSTEM_CHECKED=1
+OVA_UUM=0
+MSI2LMP_LIBRARY=/usr/share/lammps/frc_files
+MODULESHOME=/usr/share/Modules
+MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/caen/misc/modules:/afs/umich.edu/class/coe/modules
+MFLAGS=
+MAKELEVEL=1
+MAKEFLAGS=
+LOADEDMODULES=gcc/6.2.0:spectre/17.10.307:cadence-ic/6.1.7.500.2100:eecs312/f18:vcs/2017.12-SP2-1
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LD_RUN_PATH=/usr/um/gcc-6.2.0/lib64
+LC_ALL=C
+LAMMPS_POTENTIALS=/usr/share/lammps/potentials
+KRB5CCNAME=FILE:/tmp/krb5cc_114152614_cQ4i9I
+KDEDIRS=/usr
+IMSETTINGS_MODULE=none
+IMSETTINGS_INTEGRATE_DESKTOP=yes
+ICEAUTHORITY=/run/user/114152614/iceauthority
+HISTCONTROL=ignoredups
+GNOME_SHELL_SESSION_MODE=classic
+GNOME_DESKTOP_SESSION_ID=this-is-deprecated
+GJS_DEBUG_TOPICS=JS ERROR;JS LOG
+GJS_DEBUG_OUTPUT=stderr
+GIO_LAUNCHED_DESKTOP_FILE_PID=6684
+GIO_LAUNCHED_DESKTOP_FILE=/usr/caen/misc/menus/applications/DEVELOPMENT-VisualStudioCode1.32.desktop
+GDM_LANG=en_US.UTF-8
+GDMSESSION=gnome-classic
+DESKTOP_SESSION=gnome-classic
+DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-gZidHW8Zdx,guid=58e946001450050c234d86a25e517b98
+BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL=true
+0
+7
+1062689876 /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
+1582412828 synth/rob.vg
+1582414351 testbench/rob_testbench.sv
+1582399316 ISA.svh
+1582235190 sys_defs.svh
+1531623946 /usr/caen/vcs-2017.12-SP2-1/include/cm_vcsd.tab
+1531624678 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcsdp.tab
+6
+1582412552 testbench/rob_print.c
+0 
+1531625631 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so
+1531624898 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so
+1531624871 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so
+1531625298 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
+1582414424 syn_simv.daidir

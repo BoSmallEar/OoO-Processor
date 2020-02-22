@@ -42,7 +42,7 @@ else
 	ELF2HEX = elf2hex
 endif
 all: simv
-	./simv | tee program.out
+	./simv -cm line+tgl | tee program.out
 
 compile: $(CRT) $(LINKERS)
 	$(GCC) $(CFLAGS) $(OFLAGS) $(CRT) $(SOURCE) -T $(LINKERS) -o program.elf
@@ -65,9 +65,9 @@ debug_program:
 assembly: assemble disassemble hex
 	@:
 
-VCS = vcs -V -sverilog +vc -Mupdate -line -full64 +vcs+vcdpluson -debug_pp 
+VCS = vcs -V -sverilog +vc -cm line+tgl -Mupdate -line -full64 +vcs+vcdpluson -debug_pp 
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
-
+URG = urg -dir simv.vdb -format text
 # For visual debugger
 VISFLAGS = -lncurses
 
@@ -112,6 +112,8 @@ synth/rob.vg:        $(SIMFILES) synth/rob.tcl
 #####
 simv:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) $(TESTBENCH) $(SIMFILES)	-o simv
+	$(URG)
+
 
 dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
@@ -123,10 +125,11 @@ vis_simv:	$(SIMFILES) $(VTUBER)
 	./vis_simv
 
 syn_simv:	$(SYNFILES) $(TESTBENCH)
-	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv 
+	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
+	$(URG)
 
 syn:	syn_simv
-	./syn_simv | tee syn_program.out
+	./syn_simv -cm line+tgl | tee syn_program.out
 
 
 clean:

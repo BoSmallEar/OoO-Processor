@@ -8,7 +8,7 @@ VSRC=..
 TARGET_ARCH=
 
 # Choose name of executable 
-PRODUCTBASE=$(VSRC)/simv
+PRODUCTBASE=$(VSRC)/syn_simv
 
 PRODUCT=$(PRODUCTBASE)
 
@@ -19,7 +19,7 @@ PRODUCT_TIMESTAMP=product_timestamp
 # Path to runtime library
 DEPLIBS=
 VCSUCLI=-lvcsucli
-RUNTIME=-lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o $(DEPLIBS) 
+RUNTIME=-lvcsnew -lsimprofile -lreader_common /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libBA.a -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o $(DEPLIBS) 
 
 VCS_SAVE_RESTORE_OBJ=/usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o
 
@@ -41,7 +41,7 @@ STRIPFLAGS=
 PRE_LDFLAGS= # Loader Flags
 LDFLAGS= -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg 
 # Picarchive Flags
-PICLDFLAGS=-Wl,-rpath-link=./ -Wl,-rpath='$$ORIGIN'/simv.daidir/ -Wl,-rpath=./simv.daidir/ -Wl,-rpath='$$ORIGIN'/simv.daidir//scsim.db.dir 
+PICLDFLAGS=-Wl,-rpath-link=./ -Wl,-rpath='$$ORIGIN'/syn_simv.daidir/ -Wl,-rpath=./syn_simv.daidir/ -Wl,-rpath='$$ORIGIN'/syn_simv.daidir//scsim.db.dir 
 
 # C run time startup
 CRT0=
@@ -109,6 +109,6 @@ $(PRODUCT_TIMESTAMP) : product_clean_order
 	@touch $(PRODUCT_TIMESTAMP)
 	@-if [ -d ./objs ]; then find ./objs -type d -empty -delete; fi
 
-$(PRODUCT) :  $(LD_VERSION_CHECK)  $(OBJS) $(DOTLIBS) $(DPI_STUB_OBJS) $(PLI_STUB_OBJS) $(CMODLIB) /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvcsnew.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsimprofile.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libuclinative.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvcsucli.so  $(VCS_SAVE_RESTORE_OBJ) 
+$(PRODUCT) :  $(LD_VERSION_CHECK)  $(OBJS) $(DOTLIBS) $(DPI_STUB_OBJS) $(PLI_STUB_OBJS) $(CMODLIB) /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvcsnew.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsimprofile.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libreader_common.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libBA.a /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libuclinative.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvcsucli.so  $(VCS_SAVE_RESTORE_OBJ) 
 	@touch $(PRODUCT)
 

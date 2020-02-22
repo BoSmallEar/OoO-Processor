@@ -8,12 +8,13 @@
 //       read through and understand _what_ it is doing
 
 // The testbench itself is a module, so declare it as such
+
 `ifndef DEBUG
 `define DEBUG
 
 `timescale 1ns/100ps
 
-extern void rob_print_header(int head, int tail, int commit_valid);
+extern void rob_print_header(int commit_valid);
 extern void rob_print_cycles();
 extern void rob_print_input(int reset, 
                             int PC,
@@ -66,15 +67,11 @@ logic                       mis_pred_is_head;
 logic [`ROB_LEN-1:0]       rob_head;
 logic                      rob_empty;
 ROB_PACKET [`ROB_SIZE-1:0] rob_packets0;
-// Correct Outputs
-logic [4:0]                 correct_rob_commit_dest_areg_idx;
-logic [`PRF_LEN-1:0]        correct_rob_commit_dest_preg_idx;
-logic [`ROB_LEN-1:0]        correct_rob_tail;
-logic                       correct_rob_full;
-logic                       correct_commit_valid;           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
-logic                       correct_mis_pred_is_head;
+
 // Else
 int i;
+int j;
+logic  [`ROB_LEN-1:0]       random_rob_entry;
 // Need a number? It's a testbench, we can do that! Conceptually these are
 // much more like variables from C, and do not necessarily correlate to any
 // physical hardware (thus they can only be used in testbenches)
@@ -108,49 +105,6 @@ rob rob0(
 // "tasks" are verilog-speak for functions. These are really useful and help
 // to save on a lot of repeated / duplicated work.
 
-task compare_correct;
-    input                                clock; 
-    input [`XLEN-1:0]                    PC;
-    input                                dispatch_enable;        // not only depend on rob_full, (e.g. invalid instr)
-    input                                execution_finished;     // make executed_rob_entry valid
-    input [4:0]                          dest_areg_idx;
-    input [`PRF_LEN-1:0]                 prf_free_preg_idx;
-    input [`ROB_LEN-1:0]                 executed_rob_entry;
-    input                                cdb_mis_pred;
-    //Outputs                   
-    input [4:0]                          rob_commit_dest_areg_idx;
-    input [`PRF_LEN-1:0]                 rob_commit_dest_preg_idx;
-    input [`ROB_LEN-1:0]                 rob_tail;
-    input                                rob_full;
-    input                                commit_valid;           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
-    input                                mis_pred_is_head;
-    // Correct Outputs
-    input [4:0]                          correct_rob_commit_dest_areg_idx;
-    input [`PRF_LEN-1:0]                 correct_rob_commit_dest_preg_idx;
-    input [`ROB_LEN-1:0]                 correct_rob_tail;
-    input                                correct_rob_full;
-    input                                correct_commit_valid;           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
-    input                                correct_mis_pred_is_head;
-    begin
-            // Check the answer...
-            if(rob_commit_dest_areg_idx == correct_rob_commit_dest_areg_idx && rob_commit_dest_preg_idx == correct_rob_commit_dest_preg_idx && rob_tail == correct_rob_tail && rob_full == correct_rob_full && commit_valid == correct_commit_valid && mis_pred_is_head == correct_mis_pred_is_head)
-            begin
-                // "empty" cases are legal, since the begin/end
-                // block is consuming the true if-branch
-            end else begin
-                $display("@@@ Incorrect at time %4.0f", $time);
-                $display("@@@ Time:%4.0f clock:%b PC:%h dispatch_enable:%h execution_finished:%b dest_areg_idx:%h prf_free_preg_idx:%b executed_rob_entry:%b cdb_mis_pred:%b", $time, clock, PC, dispatch_enable, execution_finished, dest_areg_idx, prf_free_preg_idx, executed_rob_entry, cdb_mis_pred);
-                $display("@@@ user output: rob_commit_dest_areg_idx:%h rob_commit_dest_preg_idx:%h rob_tail:%b rob_full:%b commit_valid:%b mis_pred_is_head:%b",rob_commit_dest_areg_idx, rob_commit_dest_preg_idx, rob_tail, rob_full, commit_valid, mis_pred_is_head);
-                $display("@@@ correct output: rob_commit_dest_areg_idx:%h rob_commit_dest_preg_idx:%h rob_tail:%b rob_full:%b commit_valid:%b mis_pred_is_head:%b",correct_rob_commit_dest_areg_idx, correct_rob_commit_dest_preg_idx, correct_rob_tail, correct_rob_full, correct_commit_valid, correct_mis_pred_is_head);
-                $finish;
-            end
-
-            // What doesn't this function test that it probably should?
-    end
-endtask
-
-
-
 task print_rob;
     input ROB_PACKET [`ROB_SIZE-1:0] rob_packets;
     input [`ROB_LEN-1:0]           rob_head;
@@ -164,18 +118,26 @@ task print_rob;
     input 		                   cdb_mis_pred;
     input                          commit_valid;
     
-    $display("INPUTS:");
-    rob_print_input({31'h0, reset}, PC, {31'h0, execution_finished}, {31'h0, dispatch_enable}, {27'h0, dest_areg_idx}, {{(32-`PRF_LEN){1'b0}}, prf_free_preg_idx}, 
-                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry}, {31'h0, cdb_mis_pred});
-    $display("OUTPUTS:");
-    rob_print_header({{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail},{31'h0, commit_valid});
-    $display("ROB:");
+    rob_print_input({31'h0, reset},
+                    PC,
+                    {31'h0, execution_finished},
+                    {31'h0, dispatch_enable},
+                    {27'h0, dest_areg_idx},
+                    {{(32-`PRF_LEN){1'b0}},
+                    prf_free_preg_idx},
+                    {{(32-`ROB_LEN){1'b0}}, executed_rob_entry},
+                    {31'h0, cdb_mis_pred});
+    rob_print_header({31'h0, commit_valid});
     for (i = 0; i < `ROB_SIZE; i++) begin
-        rob_print(i, rob_packets[i].PC, {31'h0, rob_packets[i].executed}, {{(32-`PRF_LEN){1'b0}},rob_packets[i].dest_preg_idx},
-                  {27'h0, rob_packets[i].dest_areg_idx}, {31'h0, rob_packets[i].rob_mis_pred}, {{(32-`ROB_LEN){1'b0}}, rob_head}, {{(32-`ROB_LEN){1'b0}}, rob_tail});
+        rob_print(i,
+                  rob_packets[i].PC,
+                  {31'h0, rob_packets[i].executed},
+                  {{(32-`PRF_LEN){1'b0}}, rob_packets[i].dest_preg_idx},
+                  {27'h0, rob_packets[i].dest_areg_idx},
+                  {31'h0, rob_packets[i].rob_mis_pred},
+                  {{(32-`ROB_LEN){1'b0}}, rob_head},
+                  {{(32-`ROB_LEN){1'b0}}, rob_tail});
     end
-    
-
 endtask
 
 // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -437,24 +399,35 @@ initial begin
     prf_free_preg_idx  = 1'b1;
     executed_rob_entry = `ROB_LEN'h1;
     cdb_mis_pred       = 1'b0;
-
-    @(negedge clock);
-    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
  
 
-   /*
     // Random Tests
-    @(negedge clock);
-    for (i=0; i <= 99; i=i+1) begin
-        for (j=0; j <= 99 ; j=j+1) begin
-            A = {$random,$random}; // What's up with this syntax?
-            B = {$random,$random};
-            #1
-            compare_correct(A, B, SUM, C_IN, C_OUT);
-            @(negedge clock);
-        end
+    reset              = 1'b1;
+    PC                 = 32'h0;
+    for (j=0; j <= 1000; j++) begin
+        @(negedge clock);
+        print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
+        reset       = 1'b0;
+        PC          = $urandom;
+        if (rob_full && ~commit_valid)
+            // cannot dispatch new instruction
+            dispatch_enable = 1'b0;
+        else
+            dispatch_enable = $urandom%2;
+        
+        dest_areg_idx = $urandom%32;
+        prf_free_preg_idx = $urandom%`PRF_SIZE;
+        random_rob_entry = $urandom%`ROB_SIZE;
+        if ((random_rob_entry == rob_tail) && (~rob_full))
+            executed_rob_entry = (rob_tail == `ROB_LEN'h0) ? `ROB_SIZE-1:rob_tail-1;
+        else
+            executed_rob_entry = random_rob_entry;
+        execution_finished = ($urandom%5 !=1) | rob_packets0[executed_rob_entry].executed;
+        cdb_mis_pred = ($urandom%100 == 1);
     end
-*/
+    @(negedge clock);
+    print_rob(rob_packets0,rob_head,rob_tail,clock,PC,dispatch_enable,dest_areg_idx,prf_free_preg_idx,executed_rob_entry,cdb_mis_pred,commit_valid);
+
 
     rob_print_close();
 // DON'T FORGET TO FINISH THE SIMULATION

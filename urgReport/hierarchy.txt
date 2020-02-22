@@ -1,0 +1,11 @@
+Design Hierarchy
+
+
+----------------
+SCORE  LINE   TOGGLE               
+100.00 100.00 100.00 rob_testbench 
+  
+  ----------------
+  SCORE  LINE   TOGGLE      
+  100.00 100.00 100.00 rob0 
+
