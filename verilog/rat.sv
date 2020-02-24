@@ -16,7 +16,7 @@
 module rat(
     input                       clock,
     input                       reset,
-    input                       enable,
+    input                       rat_enable,
     input                       commit_mis_pred,
     input [4:0]                 opa_areg_idx,
     input [4:0]                 opb_areg_idx,
