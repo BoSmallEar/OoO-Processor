@@ -29,9 +29,13 @@ module rs(
     input [`XLEN-1:0]     cdb_value,
     input                 id_packet_in,      // packet from id
 
-    output ID_FU_PACKET   id_packet_out,     // overwrite opa and opb value, if needed
-    output [`ROB_LEN-1:0] rob_idx
+    output RS_FU_PACKET   rs_fu_packet,     // overwrite opa and opb value, if needed
+    output [`ROB_LEN-1:0] rob_idx,
+    output                rs_full            // sent rs_full signal to if stage
 );
+
+
+
 
 
 

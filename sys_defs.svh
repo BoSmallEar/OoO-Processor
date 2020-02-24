@@ -284,18 +284,7 @@ typedef struct packed {
 	logic       csr_op;        // is this a CSR operation? (we only used this as a cheap way to get return code)
 	logic       valid;         // is inst a valid instruction to be counted for CPI calculations?
 } ID_EX_PACKET;
-
-typedef struct packed {
-	logic [`XLEN-1:0] alu_result; // alu_result
-	logic [`XLEN-1:0] NPC; //pc + 4
-	logic             take_branch; // is this a taken branch?
-	//pass throughs from decode stage
-	logic [`XLEN-1:0] rs2_value;
-	logic             rd_mem, wr_mem;
-	logic [4:0]       dest_reg_idx;
-	logic             halt, illegal, csr_op, valid;
-	logic [2:0]       mem_size; // byte, half-word or word
-} EX_MEM_PACKET;
+ 
 
 //////////////////////////////////////////////
 //
@@ -314,6 +303,71 @@ typedef struct packed {
 
 // Python: "".join([hex(i)[2:].zfill(2) for i in range(256)])
 `define INIT_FREE_PREG_QUEUE	2048'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
+
+typedef enum logic [1:0] {
+	ALU        = 2'h0,
+	MPLIER     = 2'h1,
+	BPRED      = 2'h2
+} FU;
+
+//////////////////////////////////////////////
+//
+// ID Packets:
+// Data from ID stage to top_level
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic [`XLEN-1:0] NPC;   // PC + 4
+	logic [`XLEN-1:0] PC;    // PC
+
+	logic [4:0] opa_areg_idx;   // opcode a arch register index                                  
+	logic [4:0] opb_areg_idx;   // opcode b arch register index                       
+	                                                                                
+	ALU_OPA_SELECT opa_select;    // ALU opa mux select (ALU_OPA_xxx *)
+	ALU_OPB_SELECT opb_select;    // ALU opb mux select (ALU_OPB_xxx *)
+	INST inst;                    // instruction
+	
+	logic [4:0] dest_areg_idx;    // destination (writeback) arch register index      
+	ALU_FUNC    alu_func;         // ALU function select (ALU_xxx *)
+	logic       rd_mem;           // does inst read memory?
+	logic       wr_mem;           // does inst write memory?
+	logic       cond_branch;      // is inst a conditional branch?
+	logic       uncond_branch;    // is inst an unconditional branch?
+	logic       halt;             // is this a halt?
+	logic       illegal;          // is this instruction illegal?
+	logic       csr_op;           // is this a CSR operation? (we only used this as a cheap way to get return code)
+	logic       valid;            // is inst a valid instruction to be counted for CPI calculations?
+	logic       branch_prediction;// is the branch predict taken or not taken
+} ID_PACKET;
+
+typedef struct packed {
+	logic [`XLEN-1:0] NPC;                // NPC
+	logic [`XLEN-1:0] PC;                 // PC
+
+	logic [`XLEN-1:0] opa_value;          // reg A value                                  
+	logic [`XLEN-1:0] opb_value;          // reg B value 
+
+	logic [`ROB_LEN-1:0] rob_idx;          // the rob index of the instr that is sent to FU
+	logic [`PRF_LEN-1:0] dest_preg_idx;    // the destination preg index
+	logic                dest_preg_valid;  // does the instruction sent to FU need a destination register?                       
+	                                                                                
+	ALU_OPA_SELECT opa_select;             // ALU opa mux select (ALU_OPA_xxx *)
+	ALU_OPB_SELECT opb_select;             // ALU opb mux select (ALU_OPB_xxx *)
+	INST inst;                             // instruction
+	
+	logic [4:0] dest_reg_idx;              // destination (writeback) register index      
+	ALU_FUNC    alu_func;                  // ALU function select (ALU_xxx *)
+	logic       rd_mem;                    // does inst read memory?
+	logic       wr_mem;                    // does inst write memory?
+	logic       cond_branch;               // is inst a conditional branch?
+	logic       uncond_branch;             // is inst an unconditional branch?
+	logic       halt;             	       // is this a halt?
+	logic       illegal;                   // is this instruction illegal?
+	logic       csr_op;           		   // is this a CSR operation? (we only used this as a cheap way to get return code)
+	logic       valid;                     // is inst a valid instruction to be counted for CPI calculations?
+	logic       branch_prediction;         // is the branch predict taken or not taken
+} RS_FU_PACKET;
 
 //////////////////////////////////////////////
 //

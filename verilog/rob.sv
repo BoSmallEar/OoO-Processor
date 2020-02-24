@@ -17,7 +17,7 @@ module rob(
     input                       reset,
     input [`XLEN-1:0]           PC,
     input                       dispatch_enable,        // not only depend on rob_full, (e.g. invalid instr)
-    input                       execution_finished,     // make executed_rob_entry valid
+    input                       cdb_broadcast_valid,     // make executed_rob_entry valid
     input [4:0]                 dest_areg_idx,
     input [`PRF_LEN-1:0]        prf_free_preg_idx,
     input [`ROB_LEN-1:0]        executed_rob_entry,
@@ -73,7 +73,7 @@ module rob(
             if(commit_valid) begin
                 rob_head                            <= `SD (rob_head == `ROB_SIZE-1)? 0: rob_head + 1;
             end 
-            if (execution_finished) begin
+            if (cdb_broadcast_valid) begin
                 //execute
                 rob_packets[executed_rob_entry].executed     <= `SD 1'b1;
                 rob_packets[executed_rob_entry].rob_mis_pred <= `SD cdb_mis_pred;

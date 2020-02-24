@@ -29,7 +29,8 @@ module prf(
     input [`PRF_LEN-1:0]        rrat_free_preg_queue_tail_backup;       // rrat
     input [`XLEN-1:0]           cdb_result,
     input [`PRF_LEN-1:0]        cdb_dest_preg_idx,
-    input                       execution_finished,
+    input                       cdb_broadcast_valid,
+    input                       dest_preg_valid,                        // from id_fu_packet
 
     output logic [`PRF_LEN-1:0] prf_free_preg_idx,
     output logic                opa_ready,
@@ -45,17 +46,19 @@ module prf(
     logic [`PRF_LEN-1:0]                  free_preg_queue_head;
     logic [`PRF_LEN-1:0]                  free_preg_queue_tail;
 
-    assign opa_value = (execution_finished && opa_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opa_preg_idx];
-    assign opb_value = (execution_finished && opb_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opb_preg_idx];
-    assign opa_ready = (execution_finished && opa_preg_idx == cdb_dest_preg_idx) || prf_valid[opa_preg_idx];
-    assign opb_ready = (execution_finished && opb_preg_idx == cdb_dest_preg_idx) || prf_valid[opb_preg_idx];
+    assign opa_value = (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opa_preg_idx];
+    assign opb_value = (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opb_preg_idx];
+    assign opa_ready = (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) || prf_valid[opa_preg_idx];
+    assign opb_ready = (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) || prf_valid[opb_preg_idx];
     assign prf_free_preg_idx = free_preg_queue[free_preg_queue_head];
 
     always_ff @(posedge clock) begin
         if (reset) begin
             prf_free              <= `SD `PRF_SIZE'b1;
             prf_valid             <= `SD `PRF_SIZE'b0;
-            free_preg_queue       <= `SD `INIT_FREE_PREG_QUEUE;
+            for (int i = 0; i < `PRF_SIZE; i++) begin
+                rrat_free_preg_queue_backup[i] <= `SD i;
+            end 
             free_preg_queue_head  <= `SD `PRF_LEN'b1;
             free_preg_queue_tail  <= `SD `PRF_LEN'b1; 
             prf_values[0]         <= `SD `XLEN'b0;
@@ -82,7 +85,7 @@ module prf(
                 prf_free[prf_free_preg_idx] <= `SD 1'b0;
                 free_preg_queue_head        <= `SD free_preg_queue_head == `PRF_SIZE-1 ? 1 : free_preg_queue_head+1;
             end
-            if (execution_finished && cdb_dest_preg_idx!=`PRF_LEN'b0) begin
+            if (cdb_broadcast_valid && dest_preg_valid && cdb_dest_preg_idx!=`PRF_LEN'b0) begin
                 // execution complete
                 prf_values[cdb_dest_preg_idx] <= `SD cdb_result;
                 prf_valid[cdb_dest_preg_idx]  <= `SD 1'b1;
