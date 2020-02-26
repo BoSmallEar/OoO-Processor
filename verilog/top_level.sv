@@ -28,6 +28,7 @@ logic [`ROB_LEN-1:0]    rob_tail;                   // rob -> rs
 logic                   commit_valid;               // rob -> prf
 logic                   mis_pred_is_head;           // rob -> rs, prf, rat
 
+
 // PRF OUTPUTS
 logic [`PRF_LEN-1:0]    prf_free_preg_idx;               // prf -> rat, rob, rs
 logic                   opa_ready;                       // prf -> rs
@@ -65,36 +66,38 @@ logic [`ROB_LEN-1:0]    cdb_rob_entry;
 logic [`PRF_LEN-1:0]    cdb_dest_preg_idx;
 logic                   cdb_mis_pred;
 logic                   cdb_result;
-logic                   dest_preg_valid;     // top_level->
 logic [`FU_NUM-1:0]     fu_free_list;
 
 // ROB INPUTS
-logic                   dispatch_enable;    // also prf input
+// logic                   dispatch_enable;    // also prf input, input of top_level
 
 // PRF INPUTS
 
 // RAT INPUTS
 logic                   rat_enable;
-logic [4:0]             opa_areg_idx;
-logic [4:0]             opb_areg_idx;
-logic [4:0]             dest_areg_idx;
+assign rat_enable = (id_packet.dest_areg_idx != `ZERO_REG)&&id_packet.valid;
+
+// logic [4:0]             opa_areg_idx;       // in id_packet
+// logic [4:0]             opb_areg_idx;       // in id_packet
+// logic [4:0]             dest_areg_idx;      // in id_packet
 
 // RRAT INPUTS
 logic                   rrat_enable;
+assign rrat_enable = commit_valid;
 
 // RS INPUTS
-// logic [][] alu_free // possibly a 2D table that records the free FU
+logic [][] alu_free; // possibly a 2D table that records the free FU
 
 // ALU INPUTS
-RS_FU_PACKET            rs_fu_packet;
 logic                   alu_enable;
+
 
 rob rob0(
     //inputs
     .clock(clock),      // top level
     .reset(reset),      // top level
     .PC(id_packet.PC),            // ID packet
-    .dispatch_enable(dispatch_enable),          
+    .dispatch_enable(id_packet.valid),          
     .cdb_broadcast_valid(cdb_broadcast_valid),    // cdb
     .dest_areg_idx(id_packet.dest_reg_idx),              // ID packet
     .prf_free_preg_idx(prf_free_preg_idx),      // prf
@@ -122,7 +125,7 @@ prf prf0(
     .reset(reset),                           // top level
     .opa_preg_idx(opa_preg_idx),            // rat
     .opb_preg_idx(opb_preg_idx),            // rat
-    .dispatch_enable(dispatch_enable),      // ???
+    .dispatch_enable(rat_enable),      // ???
     .rrat_prev_reg_idx(rrat_prev_preg_idx),  // rrat
     .commit_mis_pred(mis_pred_is_head),      // rob
     .commit_valid(commit_valid),            // rob
@@ -133,8 +136,7 @@ prf prf0(
     .rrat_free_preg_queue_tail_backup(rrat_free_preg_queue_tail_backup);    // rrat
     .cdb_result(cdb_result),                    // cdb
     .cdb_dest_preg_idx(cdb_dest_preg_idx),      // cdb
-    .cdb_broadcast_valid(cdb_broadcast_valid),    // cdb
-    .dest_preg_valid(dest_preg_valid),          // cdb
+    .cdb_broadcast_valid(cdb_broadcast_valid),  // cdb -> prf, rs
     // outputs
     .prf_free_preg_idx(prf_free_preg_idx),      // to rat, rob, rs
     .opa_ready(opa_ready),                      // to rs
@@ -230,7 +232,6 @@ alu alu0{
     .alu_value(alu_value),
     .alu_valid(alu_valid),
     .alu_dest_prf_entry(alu_prf_entry),
-    .alu_dest_prf_valid(alu_dest_prf_valid),
     .alu_rob_entry(alu_rob_entry)
 }
 

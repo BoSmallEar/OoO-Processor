@@ -16,7 +16,7 @@
 module rrat(
     input                             clock,
     input                             reset,
-    input                             enable,
+    input                             rrat_enable,
     input [4:0]                       rob_commit_dest_areg_idx,
     input [`PRF_LEN-1:0]              rob_commit_dest_preg_idx,
 
@@ -41,7 +41,7 @@ module rrat(
     always_ff @(posedge clock) begin
         if (reset) begin
             rrat_packets      <= `SD '{32{`PRF_LEN'b0}};
-            rrat_free_backup  <= `SD `PRF_SIZE'b1;
+            rrat_free_backup  <= `SD ~`PRF_SIZE'b0;
             rrat_valid_backup <= `SD `PRF_SIZE'b0;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 rrat_free_preg_queue_backup[i] <= `SD i;
@@ -49,7 +49,7 @@ module rrat(
             rrat_free_preg_queue_head_backup  <= `SD `PRF_LEN'b1;
             rrat_free_preg_queue_tail_backup  <= `SD `PRF_LEN'b1; 
         end
-        else if (enable) begin
+        else if (rrat_enable) begin
             rrat_packets[rob_commit_dest_areg_idx]      <= `SD rob_commit_dest_preg_idx;
             rrat_free_backup[rrat_prev_preg_idx]        <= `SD 1'b1;
             rrat_valid_backup[rrat_prev_preg_idx]       <= `SD 1'b0;

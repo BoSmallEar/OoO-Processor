@@ -54,7 +54,7 @@ module prf(
 
     always_ff @(posedge clock) begin
         if (reset) begin
-            prf_free              <= `SD `PRF_SIZE'b1;
+            prf_free              <= `SD ~S`PRF_SIZE'b0;
             prf_valid             <= `SD `PRF_SIZE'b0;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 rrat_free_preg_queue_backup[i] <= `SD i;
@@ -85,7 +85,7 @@ module prf(
                 prf_free[prf_free_preg_idx] <= `SD 1'b0;
                 free_preg_queue_head        <= `SD free_preg_queue_head == `PRF_SIZE-1 ? 1 : free_preg_queue_head+1;
             end
-            if (cdb_broadcast_valid && dest_preg_valid && cdb_dest_preg_idx!=`PRF_LEN'b0) begin
+            if (cdb_broadcast_valid && cdb_dest_preg_idx!=`PRF_LEN'b0) begin
                 // execution complete
                 prf_values[cdb_dest_preg_idx] <= `SD cdb_result;
                 prf_valid[cdb_dest_preg_idx]  <= `SD 1'b1;

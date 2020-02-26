@@ -36,7 +36,7 @@ typedef union packed {
 // This mostly follows the RISC-V Privileged spec
 // except a few add-ons for our infrastructure
 // The majority of them won't be used, but it's
-// good to know what they are
+// good to know whatr they are
 //////////////////////////////////////////////
 
 typedef enum logic [3:0] {
@@ -297,6 +297,7 @@ typedef struct packed {
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
 `define RS_SIZE		  8		// number of entries
+`define RS_LEN		  3		// length in bits == log(RS_LEN)
 `define RAT_SIZE      32	// number of entries == number of arch reg
 
 `define XLENFU		  4		// number of function units
@@ -307,8 +308,8 @@ typedef struct packed {
 typedef enum logic [1:0] {
 	ALU        = 2'h0,
 	MPLIER     = 2'h1,
-	BPRED      = 2'h2
-} FU;
+	BR         = 2'h2
+} FU_TYPE;
 
 //////////////////////////////////////////////
 //
@@ -344,19 +345,20 @@ typedef struct packed {
 typedef struct packed {
 	logic [`XLEN-1:0] NPC;                // NPC
 	logic [`XLEN-1:0] PC;                 // PC
-
+	logic             opa_ready;
+	logic             opb_ready;
 	logic [`XLEN-1:0] opa_value;          // reg A value                                  
 	logic [`XLEN-1:0] opb_value;          // reg B value 
 
 	logic [`ROB_LEN-1:0] rob_idx;          // the rob index of the instr that is sent to FU
 	logic [`PRF_LEN-1:0] dest_preg_idx;    // the destination preg index
-	logic                dest_preg_valid;  // does the instruction sent to FU need a destination register?                       
+	// logic                dest_preg_valid;  // does the instruction sent to FU need a destination register?                       
 	                                                                                
 	ALU_OPA_SELECT opa_select;             // ALU opa mux select (ALU_OPA_xxx *)
 	ALU_OPB_SELECT opb_select;             // ALU opb mux select (ALU_OPB_xxx *)
 	INST inst;                             // instruction
-	
-	logic [4:0] dest_reg_idx;              // destination (writeback) register index      
+	FU_TYPE    fu_type;
+	  
 	ALU_FUNC    alu_func;                  // ALU function select (ALU_xxx *)
 	logic       rd_mem;                    // does inst read memory?
 	logic       wr_mem;                    // does inst write memory?
