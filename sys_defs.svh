@@ -393,16 +393,5 @@ typedef struct packed {
 //
 //////////////////////////////////////////////
 
-typedef struct packed {
-	logic [`XLENFU-1:0]  fu_type;
-	logic 				 opa_ready;
-	logic 				 opb_ready;
-	logic [`XLEN-1:0]	 opa_value;
-	logic [`XLEN-1:0] 	 opb_value;
-	logic [`PRF_LEN-1:0] dest_preg_idx;	// dest physcial reg index
-	logic [`ROB_LEN-1:0] rob_idx;
-	ID_EX_PACKET		 id_packet_in;
-} RS_PACKET;
-
 
 `endif // __SYS_DEFS_VH__

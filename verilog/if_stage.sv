@@ -23,12 +23,11 @@ module if_stage(
 	output IF_ID_PACKET if_packet_out         // Output data packet from IF going to ID, see sys_defs for signal information 
 );
 
-
 	logic    [`XLEN-1:0] PC_reg;             // PC we are currently fetching
 	
 	logic    [`XLEN-1:0] PC_plus_4;
 	logic    [`XLEN-1:0] next_PC;
-	logic           PC_enable;
+	logic                PC_enable;
 	
 	assign proc2Imem_addr = {PC_reg[`XLEN-1:3], 3'b0};
 	

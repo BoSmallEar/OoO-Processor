@@ -16,16 +16,16 @@
 
 module pipeline (
 
-	input         clock,                    // System clock
-	input         reset,                    // System reset
-	input [3:0]   mem2proc_response,        // Tag from memory about current request
-	input [63:0]  mem2proc_data,            // Data coming back from memory
+	input         clock,                     // System clock
+	input         reset,                     // System reset
+	input [3:0]   mem2proc_response,         // Tag from memory about current request
+	input [63:0]  mem2proc_data,             // Data coming back from memory
 	input [3:0]   mem2proc_tag,              // Tag from memory about current reply
 	
 	output logic [1:0]  proc2mem_command,    // command sent to memory
-	output logic [`XLEN-1:0] proc2mem_addr,      // Address sent to memory
-	output logic [63:0] proc2mem_data,      // Data sent to memory
-	output MEM_SIZE proc2mem_size,          // data size sent to memory
+	output logic [`XLEN-1:0] proc2mem_addr,  // Address sent to memory
+	output logic [63:0] proc2mem_data,       // Data sent to memory
+	output MEM_SIZE proc2mem_size,           // data size sent to memory
 
 	output logic [3:0]  pipeline_completed_insts,
 	output EXCEPTION_CODE   pipeline_error_status,
@@ -199,163 +199,27 @@ module pipeline (
 		// Outputs
 		.id_packet_out(id_packet)
 	);
-
-
-//////////////////////////////////////////////////
-//                                              //
-//            ID/EX Pipeline Register           //
-//                                              //
-//////////////////////////////////////////////////
-
-	assign id_ex_NPC        = id_ex_packet.NPC;
-	assign id_ex_IR         = id_ex_packet.inst;
-	assign id_ex_valid_inst = id_ex_packet.valid;
-
-	assign id_ex_enable = 1'b1; // always enabled
-	// synopsys sync_set_reset "reset"
-	always_ff @(posedge clock) begin
-		if (reset) begin
-			id_ex_packet <= `SD '{{`XLEN{1'b0}},
-				{`XLEN{1'b0}}, 
-				{`XLEN{1'b0}}, 
-				{`XLEN{1'b0}}, 
-				OPA_IS_RS1, 
-				OPB_IS_RS2, 
-				`NOP,
-				`ZERO_REG,
-				ALU_ADD, 
-				1'b0, //rd_mem
-				1'b0, //wr_mem
-				1'b0, //cond
-				1'b0, //uncond
-				1'b0, //halt
-				1'b0, //illegal
-				1'b0, //csr_op
-				1'b0 //valid
-			}; 
-		end else begin // if (reset)
-			if (id_ex_enable) begin
-				id_ex_packet <= `SD id_packet;
-			end // if
-		end // else: !if(reset)
-	end // always
-
-
-//////////////////////////////////////////////////
-//                                              //
-//                  EX-Stage                    //
-//                                              //
-//////////////////////////////////////////////////
-	ex_stage ex_stage_0 (
-		// Inputs
-		.clock(clock),
-		.reset(reset),
-		.id_ex_packet_in(id_ex_packet),
-		// Outputs
-		.ex_packet_out(ex_packet)
-	);
-
-
-//////////////////////////////////////////////////
-//                                              //
-//           EX/MEM Pipeline Register           //
-//                                              //
-//////////////////////////////////////////////////
-	
-	assign ex_mem_NPC        = ex_mem_packet.NPC;
-	assign ex_mem_valid_inst = ex_mem_packet.valid;
-
-	assign ex_mem_enable = 1'b1; // always enabled
-	// synopsys sync_set_reset "reset"
-	always_ff @(posedge clock) begin
-		if (reset) begin
-			ex_mem_IR     <= `SD `NOP;
-			ex_mem_packet <= `SD 0;
-		end else begin
-			if (ex_mem_enable)   begin
-				// these are forwarded directly from ID/EX registers, only for debugging purposes
-				ex_mem_IR     <= `SD id_ex_IR;
-				// EX outputs
-				ex_mem_packet <= `SD ex_packet;
-			end // if
-		end // else: !if(reset)
-	end // always
-
    
 //////////////////////////////////////////////////
 //                                              //
-//                 MEM-Stage                    //
+//                  top-level                   //
 //                                              //
 //////////////////////////////////////////////////
-	mem_stage mem_stage_0 (// Inputs
-		.clock(clock),
-		.reset(reset),
-		.ex_mem_packet_in(ex_mem_packet),
-		.Dmem2proc_data(mem2proc_data[`XLEN-1:0]),
-		
-		// Outputs
-		.mem_result_out(mem_result_out),
-		.proc2Dmem_command(proc2Dmem_command),
-		.proc2Dmem_size(proc2Dmem_size),
-		.proc2Dmem_addr(proc2Dmem_addr),
-		.proc2Dmem_data(proc2Dmem_data)
+
+	logic dispatch_enable;
+	logic rob_full;
+	logic rs_full;
+	assign dispatch_enable = ~rob_full && ~rs_full; // ???
+	top_level top_level_0 (
+		.clock(clock),        // system clock
+		.reset(reset),    
+		.id_packet(id_packet),    // signals from ID stage
+		.dispatch_enable(dispatch_enable),
+		// outputs
+		.rob_full(rob_full),     
+		.rs_full(rs_full)     
 	);
 
-
-//////////////////////////////////////////////////
-//                                              //
-//           MEM/WB Pipeline Register           //
-//                                              //
-//////////////////////////////////////////////////
-	assign mem_wb_enable = 1'b1; // always enabled
-	// synopsys sync_set_reset "reset"
-	always_ff @(posedge clock) begin
-		if (reset) begin
-			mem_wb_NPC          <= `SD 0;
-			mem_wb_IR           <= `SD `NOP;
-			mem_wb_halt         <= `SD 0;
-			mem_wb_illegal      <= `SD 0;
-			mem_wb_valid_inst   <= `SD 0;
-			mem_wb_dest_reg_idx <= `SD `ZERO_REG;
-			mem_wb_take_branch  <= `SD 0;
-			mem_wb_result       <= `SD 0;
-		end else begin
-			if (mem_wb_enable) begin
-				// these are forwarded directly from EX/MEM latches
-				mem_wb_NPC          <= `SD ex_mem_packet.NPC;
-				mem_wb_IR           <= `SD ex_mem_IR;
-				mem_wb_halt         <= `SD ex_mem_packet.halt;
-				mem_wb_illegal      <= `SD ex_mem_packet.illegal;
-				mem_wb_valid_inst   <= `SD ex_mem_packet.valid;
-				mem_wb_dest_reg_idx <= `SD ex_mem_packet.dest_reg_idx;
-				mem_wb_take_branch  <= `SD ex_mem_packet.take_branch;
-				// these are results of MEM stage
-				mem_wb_result       <= `SD mem_result_out;
-			end // if
-		end // else: !if(reset)
-	end // always
-
-
-//////////////////////////////////////////////////
-//                                              //
-//                  WB-Stage                    //
-//                                              //
-//////////////////////////////////////////////////
-	wb_stage wb_stage_0 (
-		// Inputs
-		.clock(clock),
-		.reset(reset),
-		.mem_wb_NPC(mem_wb_NPC),
-		.mem_wb_result(mem_wb_result),
-		.mem_wb_dest_reg_idx(mem_wb_dest_reg_idx),
-		.mem_wb_take_branch(mem_wb_take_branch),
-		.mem_wb_valid_inst(mem_wb_valid_inst),
-		
-		// Outputs
-		.reg_wr_data_out(wb_reg_wr_data_out),
-		.reg_wr_idx_out(wb_reg_wr_idx_out),
-		.reg_wr_en_out(wb_reg_wr_en_out)
-	);
 
 endmodule  // module verisimple
 `endif // __PIPELINE_V__

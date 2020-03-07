@@ -12,13 +12,17 @@
 `timescale 1ns/100ps
 
 module top_level (
-	input              clock,        // system clock
-	input              reset,    
-    input ID_PACKET    id_packet,    // signals from ID stage
-    input              dispatch_enable,
+	input                           clock,        // system clock
+	input                           reset,    
+    input ID_PACKET                 id_packet,    // signals from ID stage
+    input logic                     dispatch_enable,
 
-    output logic rob_full,     
-    output logic rs_full     
+    output logic                    rob_full,     
+    output logic                    rs_full,
+    output logic                    result_direction,       // branch is actually taken or not
+    output logic                    result_enable,   
+    output logic  [`XLEN-1:0]       result_PC,              // branch target address that is resolved
+    output logic  [`XLEN-1:0]       prev_branch_PC,         // PC of branch that is resolved
 );
 
 // ROB OUTPUTS
@@ -69,7 +73,6 @@ logic                   cdb_result;
 logic [`FU_NUM-1:0]     fu_free_list;
 
 // ROB INPUTS
-// logic                   dispatch_enable;    // also prf input, input of top_level
 
 // PRF INPUTS
 
@@ -207,11 +210,11 @@ rs rs0(
 	.opb_ready(opb_ready),                  // prf
 	.opa_value(opa_value),                  // prf
 	.opb_value(opb_value),                  // prf
-    .commit_mis_pred(mis_pred_is_head),      // rob
+    .commit_mis_pred(mis_pred_is_head),     // rob
     .rob_tail(rob_tail),                    // rob
     .cdb_dest_preg_idx(cdb_dest_preg_idx),  // cdb
-    .cdb_value(cdb_result),                  // cdb
-    .id_packet_in(id_packet),            // ID packet
+    .cdb_value(cdb_result),                 // cdb
+    .id_packet_in(id_packet),               // ID packet
     .alu_free(alu_free),                    // alu ???
     // outputs
     .rs_fu_packet(rs_fu_packet),     // overwrite opa and opb value, if needed
@@ -228,6 +231,7 @@ alu alu0{
     //input
     .rs_fu_packet(rs_fu_packet),
     .alu_enable(alu_enable),
+    .cdb_broadcast_alu(cdb_broadcast_alu),
     //output
     .alu_value(alu_value),
     .alu_valid(alu_valid),

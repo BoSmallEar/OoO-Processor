@@ -1,13 +1,14 @@
 module brcond(// Inputs
 	input RS_FU_PACKET rs_fu_packet,    // Value to check against condition
-	input              brcond,
+	input              brcond_enable,
 
-	output logic cond    // 0/1 condition result (False/True)
+	output logic       cond,            // 0/1 condition result (False/True)
+	output logic       brcond_valid
 );
 
 	logic signed [`XLEN-1:0] signed_rs1, signed_rs2;
-	assign signed_rs1 = rs1;
-	assign signed_rs2 = rs2;
+	assign signed_rs1 = rs_fu_packet.opa_value;
+	assign signed_rs2 = rs_fu_packet.opb_value;
 	always_comb begin
 		cond = 0;
 		case (func)

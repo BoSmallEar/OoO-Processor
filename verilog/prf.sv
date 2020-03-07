@@ -54,7 +54,7 @@ module prf(
 
     always_ff @(posedge clock) begin
         if (reset) begin
-            prf_free              <= `SD ~S`PRF_SIZE'b0;
+            prf_free              <= `SD ~`PRF_SIZE'b0;
             prf_valid             <= `SD `PRF_SIZE'b0;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 rrat_free_preg_queue_backup[i] <= `SD i;

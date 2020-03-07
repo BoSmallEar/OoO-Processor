@@ -28,22 +28,32 @@ module rs(
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,
-    input                 id_packet_in,      // packet from id
-    input [3:0]           fu_freelist,       // assume 4 FUs
+    input                 id_packet_in,     // packet from id
+    input [3:0]           fu_freelist,      // assume 4 FUs
 
     output RS_FU_PACKET   rs_fu_packet,     // overwrite opa and opb value, if needed
     output                rs_ready_out,
     output                rs_full           // sent rs_full signal to if stage
+    `ifdef DEBUG
+    , output RS_FU_PACKET [`RS_SIZE-1:0] rs_packets
+    , output logic [`RS_LEN:0] rs_counter
+    , output logic [`RS_SIZE-1:0] rs_ex
+    , output logic [`RS_SIZE-1:0] psel_gnt    
+    , output logic [`RS_SIZE-1:0] rs_free
+    , output logic [`RS_LEN-1:0] rs_free_idx
+    , output logic [`RS_LEN-1:0] rs_ex_idx
+    `endif
 );
 
-
+`ifndef DEBUG
 RS_FU_PACKET [`RS_SIZE-1:0] rs_packets;
 logic [`RS_LEN:0] rs_counter;
-logic [`RS_SIZE-1:0] rs_ex;   // goes to priority selector (data ready && FU free)
-logic [`RS_SIZE-1:0] psel_gnt; // output of the priority selector
+logic [`RS_SIZE-1:0] rs_ex;     // goes to priority selector (data ready && FU free)
+logic [`RS_SIZE-1:0] psel_gnt;  // output of the priority selector
 logic [`RS_SIZE-1:0] rs_free;
 logic [`RS_LEN-1:0] rs_free_idx; // the rs idx that is selected for the dispatched instr
 logic [`RS_LEN-1:0] rs_ex_idx;
+`endif
 
 assign rs_full = (rs_counter == `RS_SIZE);
 
@@ -95,14 +105,8 @@ always_ff @(posedge clock) begin
         rs_counter <= `SD rs_counter + id_packet_in.valid - rs_ex[rs_ex_idx];
         // dispatch 
         if (id_packet_in.valid) begin// instr can be dispatched
-            rs_packets[rs_free_idx].opa_ready <= `SD opa_ready;
-            rs_packets[rs_free_idx].opb_ready <= `SD opb_ready;
-            rs_packets[rs_free_idx].opa_value <= `SD opa_ready ? opa_value : opa_preg_idx;
-            rs_packets[rs_free_idx].opb_value <= `SD opb_ready ? opb_value : opb_preg_idx;
-            rs_packets[rs_free_idx].rob_idx <= `SD rob_tail;
-            rs_packets[rs_free_idx].dest_preg_idx <= `SD prf_free_preg_idx;
-            rs_packets[rs_free_idx].opa_select <= `SD id_packet_in.opa_select;
-            rs_packets[rs_free_idx].opb_select <= `SD id_packet_in.opb_select;
+            rs_packets[rs_free_idx].opa_ready <= `SD opa_ready || no need for opa;
+            rs_packets[rs_free_idx].opb_ready <= `SD opb_ready || ;
             rs_packets[rs_free_idx].alu_func <= `SD id_packet_in.alu_func;
             rs_packets[rs_free_idx].rd_mem <= `SD id_packet_in.rd_mem;
             rs_packets[rs_free_idx].wr_mem <= `SD id_packet_in.wr_mem;
