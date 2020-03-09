@@ -13,7 +13,7 @@
 
 `timescale 1ns/100ps
 
-module rs(
+module rs_branch(
     input clock,
     input reset,
     input [`PRF_LEN-1:0]  opa_preg_idx,
@@ -28,10 +28,12 @@ module rs(
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,
-    input                 id_packet_in,     // packet from id
-    input [3:0]           fu_freelist,      // assume 4 FUs
+    input  ALU_FUNC       alu_func,     // packet from id 
+    input                 enable, 
 
-    output RS_FU_PACKET   rs_fu_packet,     // overwrite opa and opb value, if needed
+
+
+    output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
     output                rs_ready_out,
     output                rs_full           // sent rs_full signal to if stage
     `ifdef DEBUG
@@ -46,7 +48,7 @@ module rs(
 );
 
 `ifndef DEBUG
-RS_FU_PACKET [`RS_SIZE-1:0] rs_packets;
+RS_ALU_PACKET [`RS_SIZE-1:0] rs_packets;
 logic [`RS_LEN:0] rs_counter;
 logic [`RS_SIZE-1:0] rs_ex;     // goes to priority selector (data ready && FU free)
 logic [`RS_SIZE-1:0] psel_gnt;  // output of the priority selector
@@ -83,7 +85,7 @@ genvar k;
 always_comb begin
     rs_ex = `RS_SIZE'h0;
     for (k = 0; k<`RS_SIZE; k++) begin
-        rs_ex[k] = (~rs_free[k])&&(rs_packets[k].opa_ready)&&(rs_packets[k].opb_ready)&&(fu_freelist[rs_packets[k].fu_type]);
+        rs_ex[k] = (~rs_free[k])&&(rs_packets[k].opa_ready)&&(rs_packets[k].opb_ready);
     end
 end
 
@@ -105,18 +107,15 @@ always_ff @(posedge clock) begin
         rs_counter <= `SD rs_counter + id_packet_in.valid - rs_ex[rs_ex_idx];
         // dispatch 
         if (id_packet_in.valid) begin// instr can be dispatched
-            rs_packets[rs_free_idx].opa_ready <= `SD opa_ready || no need for opa;
-            rs_packets[rs_free_idx].opb_ready <= `SD opb_ready || ;
+            rs_packets[rs_free_idx].opa_ready <= `SD opa_ready;
+            rs_packets[rs_free_idx].opb_ready <= `SD opb_ready;
+            
+            if (opa_ready)  rs_packets[rs_free_idx].opa_value <= `SD opa_value;
+            else rs_packets[rs_free_idx].opa_value <= `SD opa_preg_idx;
+            if (opb_ready)  rs_packets[rs_free_idx].opb_value <= `SD opb_value;
+            else rs_packets[rs_free_idx].opb_value <= `SD opb_preg_idx;
             rs_packets[rs_free_idx].alu_func <= `SD id_packet_in.alu_func;
-            rs_packets[rs_free_idx].rd_mem <= `SD id_packet_in.rd_mem;
-            rs_packets[rs_free_idx].wr_mem <= `SD id_packet_in.wr_mem;
-            rs_packets[rs_free_idx].cond_branch <= `SD id_packet_in.cond_branch;  
-            rs_packets[rs_free_idx].uncond_branch <= `SD id_packet_in.uncond_branch;
-            rs_packets[rs_free_idx].halt <= `SD id_packet_in.halt;
-            rs_packets[rs_free_idx].illegal <= `SD id_packet_in.illegal;
-            rs_packets[rs_free_idx].csr_op <= `SD id_packet_in.csr_op;
-            rs_packets[rs_free_idx].valid <= `SD id_packet_in.valid;
-            rs_packets[rs_free_idx].branch_prediction <= `SD id_packet_in.branch_prediction;    
+
             rs_free[rs_free_idx] <= `SD 1'b0;
         end
         

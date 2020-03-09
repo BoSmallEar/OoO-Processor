@@ -51,7 +51,6 @@ module prf(
     assign opa_ready = (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) || prf_valid[opa_preg_idx];
     assign opb_ready = (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) || prf_valid[opb_preg_idx];
     assign prf_free_preg_idx = free_preg_queue[free_preg_queue_head];
-
     always_ff @(posedge clock) begin
         if (reset) begin
             prf_free              <= `SD ~`PRF_SIZE'b0;

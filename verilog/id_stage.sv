@@ -29,6 +29,7 @@ module decoder(
 	output ALU_OPB_SELECT opb_select,
 	output DEST_REG_SEL   dest_reg, // mux selects
 	output ALU_FUNC       alu_func,
+	output FU_TYPE		  fu_type,
 	output logic rd_mem, wr_mem, cond_branch, uncond_branch,
 	output logic csr_op,    // used for CSR operations, we only used this as 
 	                        //a cheap way to get the return code out
@@ -67,6 +68,7 @@ module decoder(
 		uncond_branch = `FALSE;
 		halt = `FALSE;
 		illegal = `FALSE;
+		fu_type = ALU;
 		if(valid_inst_in) begin
 			casez (inst) 
 				`RV32_LUI: begin
@@ -84,28 +86,33 @@ module decoder(
 					opa_select    = OPA_IS_PC;
 					opb_select    = OPB_IS_J_IMM;
 					uncond_branch = `TRUE;
+					fu_type = BRANCH;
 				end
 				`RV32_JALR: begin
 					dest_reg      = DEST_RD;
 					opa_select    = OPA_IS_RS1;
 					opb_select    = OPB_IS_I_IMM;
 					uncond_branch = `TRUE;
+					fu_type = BRANCH;
 				end
 				`RV32_BEQ, `RV32_BNE, `RV32_BLT, `RV32_BGE,
 				`RV32_BLTU, `RV32_BGEU: begin
 					opa_select  = OPA_IS_PC;
 					opb_select  = OPB_IS_B_IMM;
 					cond_branch = `TRUE;
+					fu_type = BRANCH;
 				end
 				`RV32_LB, `RV32_LH, `RV32_LW,
 				`RV32_LBU, `RV32_LHU: begin
 					dest_reg   = DEST_RD;
 					opb_select = OPB_IS_I_IMM;
 					rd_mem     = `TRUE;
+					fu_type = MEM;
 				end
 				`RV32_SB, `RV32_SH, `RV32_SW: begin
 					opb_select = OPB_IS_S_IMM;
 					wr_mem     = `TRUE;
+					fu_type = MEM;
 				end
 				`RV32_ADDI: begin
 					dest_reg   = DEST_RD;
@@ -193,18 +200,22 @@ module decoder(
 				`RV32_MUL: begin
 					dest_reg   = DEST_RD;
 					alu_func   = ALU_MUL;
+					fu_type    = MUL;
 				end
 				`RV32_MULH: begin
 					dest_reg   = DEST_RD;
 					alu_func   = ALU_MULH;
+					fu_type    = MUL;
 				end
 				`RV32_MULHSU: begin
 					dest_reg   = DEST_RD;
 					alu_func   = ALU_MULHSU;
+					fu_type    = MUL;
 				end
 				`RV32_MULHU: begin
 					dest_reg   = DEST_RD;
 					alu_func   = ALU_MULHU;
+					fu_type    = MUL;
 				end
 				`RV32_CSRRW, `RV32_CSRRS, `RV32_CSRRC: begin
 					csr_op = `TRUE;
@@ -228,27 +239,18 @@ module id_stage(
 	input  [`XLEN-1:0] wb_reg_wr_data_out,  // Reg write data from WB Stage
 	input  IF_ID_PACKET if_id_packet_in,
 	
-	output ID_EX_PACKET id_packet_out
+	output ID_PACKET id_packet_out
 );
 
     assign id_packet_out.inst = if_id_packet_in.inst;
     assign id_packet_out.NPC  = if_id_packet_in.NPC;
-    assign id_packet_out.PC   = if_id_packet_in.PC;
+    assign id_packet_out.PC   = if_id_packet_in.PC; 
+
+	assign id_packet_out.opa_areg_idx = if_id_packet_in.inst.r.rs1;
+	assign id_packet_out.opb_areg_idx = if_id_packet_in.inst.r.rs2;
+
 	DEST_REG_SEL dest_reg_select; 
 
-	// Instantiate the register file used by this pipeline
-	regfile regf_0 (
-		.rda_idx(if_id_packet_in.inst.r.rs1),
-		.rda_out(id_packet_out.rs1_value), 
-
-		.rdb_idx(if_id_packet_in.inst.r.rs2),
-		.rdb_out(id_packet_out.rs2_value),
-
-		.wr_clk(clock),
-		.wr_en(wb_reg_wr_en_out),
-		.wr_idx(wb_reg_wr_idx_out),
-		.wr_data(wb_reg_wr_data_out)
-	);
 
 	// instantiate the instruction decoder
 	decoder decoder_0 (
@@ -257,6 +259,7 @@ module id_stage(
 		.opa_select(id_packet_out.opa_select),
 		.opb_select(id_packet_out.opb_select),
 		.alu_func(id_packet_out.alu_func),
+		.fu_type(id_packet_out.fu_type),
 		.dest_reg(dest_reg_select),
 		.rd_mem(id_packet_out.rd_mem),
 		.wr_mem(id_packet_out.wr_mem),
@@ -268,13 +271,13 @@ module id_stage(
 		.valid_inst(id_packet_out.valid)
 	);
 
-	// mux to generate dest_reg_idx based on
+	// mux to generate dest_areg_idx based on
 	// the dest_reg_select output from decoder
 	always_comb begin
 		case (dest_reg_select)
-			DEST_RD:    id_packet_out.dest_reg_idx = if_id_packet_in.inst.r.rd;
-			DEST_NONE:  id_packet_out.dest_reg_idx = `ZERO_REG;
-			default:    id_packet_out.dest_reg_idx = `ZERO_REG; 
+			DEST_RD:    id_packet_out.dest_areg_idx = if_id_packet_in.inst.r.rd;
+			DEST_NONE:  id_packet_out.dest_areg_idx = `ZERO_REG;
+			default:    id_packet_out.dest_areg_idx = `ZERO_REG; 
 		endcase
 	end
    

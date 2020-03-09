@@ -267,8 +267,7 @@ typedef struct packed {
 	logic [`XLEN-1:0] PC;    // PC
 
 	logic [`XLEN-1:0] rs1_value;    // reg A value                                  
-	logic [`XLEN-1:0] rs2_value;    // reg B value                                  
-	                                                                                
+	logic [`XLEN-1:0] rs2_value;    // reg B value                                                                                                 
 	ALU_OPA_SELECT opa_select; // ALU opa mux select (ALU_OPA_xxx *)
 	ALU_OPB_SELECT opb_select; // ALU opb mux select (ALU_OPB_xxx *)
 	INST inst;                 // instruction
@@ -296,9 +295,17 @@ typedef struct packed {
 `define PRF_LEN		  8		// length in bits == log(PRF_SIZE)
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
-`define RS_SIZE		  8		// number of entries
-`define RS_LEN		  3		// length in bits == log(RS_LEN)
+`define RS_ALU_SIZE		  8		// number of entries: RS ALU module
+`define RS_MUL_SIZE       4     // number of entries: RS MUL module
+`define RS_MEM_SIZE       4     // number of entries: RS MEM module
+`define RS_BR_SIZE        4     	// number of entries: RS BRANCH module
+`define RS_ALU_LEN		  3		// length in bits == log(RS_LEN)
+`define RS_MUL_LEN		  2
+`define RS_MEM_LEN		  2
+`define RS_BR_LEN		  2
 `define RAT_SIZE      32	// number of entries == number of arch reg
+
+
 
 `define XLENFU		  4		// number of function units
 
@@ -307,8 +314,9 @@ typedef struct packed {
 
 typedef enum logic [1:0] {
 	ALU        = 2'h0,
-	MPLIER     = 2'h1,
-	BR         = 2'h2
+	MUL        = 2'h1,
+	MEM        = 2'h2,
+	BRANCH     = 2'h3
 } FU_TYPE;
 
 //////////////////////////////////////////////
@@ -322,9 +330,10 @@ typedef struct packed {
 	logic [`XLEN-1:0] NPC;   // PC + 4
 	logic [`XLEN-1:0] PC;    // PC
 
-	logic [4:0] opa_areg_idx;   // opcode a arch register index                                  
-	logic [4:0] opb_areg_idx;   // opcode b arch register index                       
-	                                                                                
+	FU_TYPE     fu_type;        // select function unit                      
+
+	logic [4:0]  opa_areg_idx;
+	logic [4:0]  opb_areg_idx;
 	ALU_OPA_SELECT opa_select;    // ALU opa mux select (ALU_OPA_xxx *)
 	ALU_OPB_SELECT opb_select;    // ALU opb mux select (ALU_OPB_xxx *)
 	INST inst;                    // instruction
@@ -352,12 +361,11 @@ typedef struct packed {
 
 	logic [`ROB_LEN-1:0] rob_idx;          // the rob index of the instr that is sent to FU
 	logic [`PRF_LEN-1:0] dest_preg_idx;    // the destination preg index
-	// logic                dest_preg_valid;  // does the instruction sent to FU need a destination register?                       
+	                     
 	                                                                                
 	ALU_OPA_SELECT opa_select;             // ALU opa mux select (ALU_OPA_xxx *)
 	ALU_OPB_SELECT opb_select;             // ALU opb mux select (ALU_OPB_xxx *)
 	INST inst;                             // instruction
-	FU_TYPE    fu_type;
 	  
 	ALU_FUNC    alu_func;                  // ALU function select (ALU_xxx *)
 	logic       rd_mem;                    // does inst read memory?
@@ -388,10 +396,92 @@ typedef struct packed {
 
 //////////////////////////////////////////////
 //
-// RS Packets:
-// Data stored in RS.
+// RS ALU Packets:
+// Data stored in RS for ALU instr.
 //
 //////////////////////////////////////////////
 
+typedef struct packed {
+	logic [`XLEN-1:0] 	    NPC;                // NPC
+	logic [`XLEN-1:0] 	    PC;                 // PC
+	
+	logic             	    opa_ready;
+	logic             	    opb_ready;
+	
+	logic [`XLEN-1:0] 	    opa_value;          // reg A value                                  
+	logic [`XLEN-1:0] 	    opb_value;          // reg B value
+
+	logic [`PRF_LEN-1:0]    dest_preg_idx; 
+	logic [`ROB_LEN-1:0]    rob_idx;
+
+	ALU_FUNC                alu_func;           // ALU function select (ALU_xxx *)
+	
+} RS_ALU_PACKET;
+
+//////////////////////////////////////////////
+//
+// RS Multiplier Packets:
+// Data stored in RS for multiplier instr.
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic [`XLEN-1:0]       NPC;                // NPC
+	logic [`XLEN-1:0]       PC;                 // PC
+	
+	logic                   opa_ready;
+	logic                   opb_ready;
+	
+	logic [`XLEN-1:0]       opa_value;          // reg A value                                  
+	logic [`XLEN-1:0]       opb_value;          // reg B value
+
+	logic [`PRF_LEN-1:0]    dest_preg_idx;
+	logic [`ROB_LEN-1:0]    rob_idx;
+	
+	ALU_FUNC                alu_func;
+	
+} RS_MUL_PACKET;
+
+
+//////////////////////////////////////////////
+//
+// RS Memory Packets:
+// Data stored in RS for memory instr.
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic [`XLEN-1:0]       NPC;                // NPC
+	logic [`XLEN-1:0]       PC;                 // PC
+	
+	logic 					opa_ready;
+	logic 	[`XLEN-1:0] 	opa_value;   
+	logic 					opb_ready;
+	logic 	[`XLEN-1:0] 	opb_value; 
+	 
+	logic 					offset;
+	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
+	logic 	[`ROB_LEN-1:0] 	rob_idx;
+} RS_MEM_PACKET;
+
+
+//////////////////////////////////////////////
+//
+// RS Branch Packets:
+// Data stored in RS for branch instr.
+//
+//////////////////////////////////////////////
+
+typedef struct packed {
+	logic	[`XLEN-1:0]		NPC;
+	logic	[`XLEN-1:0]		PC;
+	logic					opa_ready;		// only need for cond
+	logic	[`XLEN-1:0]		opa_value;
+	logic					opb_ready;		// only need for cond
+	logic	[`XLEN-1:0]		opb_value;
+	logic	[11:0]			offset;
+	logic	[`PRF_LEN-1:0]	dest_preg_idx;
+	logic	[`ROB_LEN-1:0]	rob_idx;
+} RS_BRANCH_PACKET;
 
 `endif // __SYS_DEFS_VH__

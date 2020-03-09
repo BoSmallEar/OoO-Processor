@@ -18,12 +18,72 @@ module top_level (
     input logic                     dispatch_enable,
 
     output logic                    rob_full,     
-    output logic                    rs_full,
+    output logic                    rs_alu_full,
+    output logic                    rs_mul_full,
+    output logic                    rs_mem_full,
+    output logic                    rs_branch_full,
     output logic                    result_direction,       // branch is actually taken or not
     output logic                    result_enable,   
     output logic  [`XLEN-1:0]       result_PC,              // branch target address that is resolved
     output logic  [`XLEN-1:0]       prev_branch_PC,         // PC of branch that is resolved
 );
+
+logic             fu_opa_ready;
+logic             fu_opb_ready;
+logic [`XLEN-1:0] fu_opa_value;
+logic [`XLEN-1:0] fu_opb_value;
+logic [`XLEN-1:0] fu_offset;
+// 
+    always_comb begin
+		fu_opa_value = `XLEN'hdeadfbac;
+        fu_opa_ready = 1'b1;
+		case (id_packet.opa_select)
+			OPA_IS_RS1: begin 
+                fu_opa_value = opa_value; 
+                fu_opa_ready = opa_ready;
+            end
+			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
+			OPA_IS_PC:  fu_opa_value = id_packet.PC;
+			OPA_IS_ZERO: fu_opa_value = 0;
+		endcase
+	end
+	 // ALU opB mux
+	 //
+	always_comb begin
+		// Default value, Set only because the case isnt full.  If you see this
+		// value on the output of the mux you have an invalid opb_select
+        fu_opb_value = `XLEN'hfacefeed;
+        fu_opb_ready = 1'b1;
+        fu_offset = 0;
+		case (id_packet.opb_select)
+			OPB_IS_RS2:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready;  
+            end
+            OPB_IS_S_IMM:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready;  
+                fu_offset = `RV32_signext_Simm(id_packet.inst);
+            end
+            OPB_IS_B_IMM:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready; 
+                fu_offset = `RV32_signext_Bimm(id_packet.inst); 
+            end
+			OPB_IS_I_IMM: begin
+                case (id_packet.fu_type) 
+                     ALU: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                     MUL: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                     MEM: fu_offset = `RV32_signext_Iimm(id_packet.inst);
+                     BRANCH: fu_offset = `RV32_signext_Iimm(id_packet.inst);
+                     default: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                endcase
+            end
+			OPB_IS_U_IMM: fu_opb_value = `RV32_signext_Uimm(id_packet.inst);
+			OPB_IS_J_IMM: fu_offset = `RV32_signext_Jimm(id_packet.inst);
+            
+		endcase 
+	end
 
 // ROB OUTPUTS
 logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
@@ -89,10 +149,14 @@ logic                   rrat_enable;
 assign rrat_enable = commit_valid;
 
 // RS INPUTS
-logic [][] alu_free; // possibly a 2D table that records the free FU
+
+.enable(id_packet.fu_type == ALU)
 
 // ALU INPUTS
 logic                   alu_enable;
+
+
+
 
 
 rob rob0(
@@ -124,16 +188,16 @@ rob rob0(
 
 prf prf0(
     // inputs
-    .clock(clock),                          // top level
+    .clock(clock),                           // top level
     .reset(reset),                           // top level
-    .opa_preg_idx(opa_preg_idx),            // rat
-    .opb_preg_idx(opb_preg_idx),            // rat
-    .dispatch_enable(rat_enable),      // ???
+    .opa_preg_idx(opa_preg_idx),             // rat
+    .opb_preg_idx(opb_preg_idx),             // rat
+    .dispatch_enable(rat_enable),            // ???
     .rrat_prev_reg_idx(rrat_prev_preg_idx),  // rrat
     .commit_mis_pred(mis_pred_is_head),      // rob
-    .commit_valid(commit_valid),            // rob
-    .rrat_free_backup(rrat_free_backup),    // rrat
-    .rrat_valid_backup(rrat_valid_backup),  // rrat
+    .commit_valid(commit_valid),             // rob
+    .rrat_free_backup(rrat_free_backup),     // rrat
+    .rrat_valid_backup(rrat_valid_backup),   // rrat
     .rrat_free_preg_queue_backup(rrat_free_preg_queue_backup);              // rrat
     .rrat_free_preg_queue_head_backup(rrat_free_preg_queue_head_backup);    // rrat
     .rrat_free_preg_queue_tail_backup(rrat_free_preg_queue_tail_backup);    // rrat
@@ -180,7 +244,7 @@ rrat rrat0(
     //inputs
     .clock(clock),
     .reset(reset),
-    .enable(rrat_enable),                                            // rob ???
+    .enable(rrat_enable),                                       // rob ???
     .rob_commit_dest_areg_idx(rob_commit_dest_areg_idx),        // rob
     .rob_commit_dest_preg_idx(rob_commit_dest_preg_idx),        // rob
     //outputs
@@ -195,30 +259,135 @@ rrat rrat0(
 
 //////////////////////////////////////////////////
 //                                              //
-//                      R S                     //
+//                   R S _ A L U                //
 //                                              //
 //////////////////////////////////////////////////
 
-rs rs0(
+rs_alu rs_alu0(
     //inputs
     .clock(clock),
     .reset(reset),
-    .opa_preg_idx(opa_preg_idx),            // rat
-    .opb_preg_idx(opb_preg_idx),            // rat
-    .prf_free_preg_idx(prf_free_preg_idx),  // prf
-	.opa_ready(opa_ready),                  // prf
-	.opb_ready(opb_ready),                  // prf
-	.opa_value(opa_value),                  // prf
-	.opb_value(opb_value),                  // prf
-    .commit_mis_pred(mis_pred_is_head),     // rob
-    .rob_tail(rob_tail),                    // rob
-    .cdb_dest_preg_idx(cdb_dest_preg_idx),  // cdb
-    .cdb_value(cdb_result),                 // cdb
-    .id_packet_in(id_packet),               // ID packet
-    .alu_free(alu_free),                    // alu ???
-    // outputs
-    .rs_fu_packet(rs_fu_packet),     // overwrite opa and opb value, if needed
-    .rs_full(rs_full)
+    .PC(id_packet.PC),
+    .enable(id_packet.fu_type == ALU),
+    .opa_ready(fu_opa_ready),
+    .opa_value(fu_opa_value),
+    .opb_ready(fu_opb_ready),
+    .opb_value(fu_opb_value),
+    .dest_preg_idx(prf_free_preg_idx),
+    .rob_idx(rob_tail),
+    .alu_func(id_packet.alu_func),
+    
+    .commit_mis_pred(mis_pred_is_head),
+    
+    .cdb_dest_preg_idx(cdb_dest_preg_idx),
+    .cdb_broadcast_valid(cdb_broadcast_valid),
+    .cdb_value(cdb_result),
+
+    //outputs
+    .rs_alu_packet(rs_alu_packet),
+    .rs_alu_out_valid(rs_alu_out_valid),
+    .rs_alu_full(rs_alu_full)
+);
+
+//////////////////////////////////////////////////
+//                                              //
+//                   R S _ M U L                //
+//                                              //
+//////////////////////////////////////////////////
+
+rs_mul rs_mul0(
+    //inputs
+    .clock(clock),
+    .reset(reset),
+    .PC(id_packet.PC),
+    .enable(id_packet.fu_type == MUL),
+    .opa_ready(fu_opa_ready),
+    .opa_value(fu_opa_value),
+    .opb_ready(fu_opb_ready),
+    .opb_value(fu_opb_value),
+    .dest_preg_idx(prf_free_preg_idx),
+    .rob_idx(rob_tail),
+    .mul_func(id_packet.alu_func),
+    
+    .commit_mis_pred(mis_pred_is_head),
+
+    .cdb_dest_preg_idx(cdb_dest_preg_idx),
+    .cdb_broadcast_valid(cdb_broadcast_valid),
+    .cdb_value(cdb_result),
+
+    //outputs
+    .rs_mul_packet(rs_mul_packet),
+    .rs_mul_out_valid(rs_mul_out_valid),
+    .rs_mul_full(rs_mul_full)
+);
+
+//////////////////////////////////////////////////
+//                                              //
+//                   R S _ M E M                //
+//                                              //
+//////////////////////////////////////////////////
+
+
+rs_mem rs_mem0(
+    //inputs
+    .clock(clock),
+    .reset(reset),
+    .PC(id_packet.PC),
+    .enable(id_packet.fu_type == MEM),
+    .opa_ready(fu_opa_ready),
+    .opa_value(fu_opa_value),
+    .opb_ready(fu_opb_ready),
+    .opb_value(fu_opb_value),
+    .offset(fu_offset),
+    .dest_preg_idx(prf_free_preg_idx),
+    .rob_idx(rob_tail),
+    .rd_mem(id_packet.rd_mem),
+    .wr_mem(id_packet.wr_mem),
+    
+    .commit_mis_pred(mis_pred_is_head),
+
+    .cdb_dest_preg_idx(cdb_dest_preg_idx),
+    .cdb_broadcast_valid(cdb_broadcast_valid),
+    .cdb_value(cdb_result),
+
+    //outputs
+    .rs_mem_packet(rs_mem_packet),
+    .rs_mem_out_valid(rs_mem_out_valid),
+    .rs_mem_full(rs_mem_full)
+);
+
+//////////////////////////////////////////////////
+//                                              //
+//                   R S _ B R                  //
+//                                              //
+//////////////////////////////////////////////////
+
+rs_branch rs_branch0(
+    //inputs
+    .clock(clock),
+    .reset(reset),
+    .PC(id_packet.PC),
+    .enable(id_packet.fu_type == BRANCH),
+    .opa_ready(fu_opa_ready),
+    .opa_value(fu_opa_value),
+    .opb_ready(fu_opb_ready),
+    .opb_value(fu_opb_value),
+    .offset(fu_offset),
+    .dest_preg_idx(prf_free_preg_idx), 
+    .rob_entry(rob_tail),
+    .cond_branch(id_packet.cond_branch),
+    .uncond_branch(id_packet.uncond_branch),
+    
+    .commit_mis_pred(mis_pred_is_head),
+
+    .cdb_dest_preg_idx(cdb_dest_preg_idx),
+    .cdb_broadcast_valid(cdb_broadcast_valid),
+    .cdb_value(cdb_result),
+
+    //outputs
+    .rs_branch_packet(rs_branch_packet),
+    .rs_branch_out_valid(rs_branch_out_valid),
+    .rs_branch_full(rs_branch_full)
 );
 
 //////////////////////////////////////////////////
