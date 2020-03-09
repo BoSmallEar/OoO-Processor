@@ -107,12 +107,12 @@ module decoder(
 					dest_reg   = DEST_RD;
 					opb_select = OPB_IS_I_IMM;
 					rd_mem     = `TRUE;
-					fu_type = MEM;
+					fu_type    = MEM;
 				end
 				`RV32_SB, `RV32_SH, `RV32_SW: begin
 					opb_select = OPB_IS_S_IMM;
 					wr_mem     = `TRUE;
-					fu_type = MEM;
+					fu_type    = MEM;
 				end
 				`RV32_ADDI: begin
 					dest_reg   = DEST_RD;

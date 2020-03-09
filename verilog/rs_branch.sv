@@ -18,13 +18,13 @@ module rs_branch(
     input reset,
     input [`PRF_LEN-1:0]  opa_preg_idx,
     input [`PRF_LEN-1:0]  opb_preg_idx,
-    input [`PRF_LEN-1:0]  prf_free_preg_idx,
+    input [`PRF_LEN-1:0]  dest_preg_idx,
 	input 				  opa_ready,
 	input 				  opb_ready,
 	input [`XLEN-1:0]	  opa_value,
 	input [`XLEN-1:0] 	  opb_value,
     input                 commit_mis_pred,
-    input [`ROB_LEN-1:0]  rob_tail,
+    input [`ROB_LEN-1:0]  rob_idx,
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,
@@ -33,49 +33,49 @@ module rs_branch(
 
 
 
-    output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
-    output                rs_ready_out,
-    output                rs_full           // sent rs_full signal to if stage
+    output RS_BRANCH_PACKET  rs_branch_packet,     // overwrite opa and opb value, if needed
+    output                rs_branch_ready_out,
+    output                rs_branch_full           // sent rs_full signal to if stage
     `ifdef DEBUG
-    , output RS_FU_PACKET [`RS_SIZE-1:0] rs_packets
-    , output logic [`RS_LEN:0] rs_counter
-    , output logic [`RS_SIZE-1:0] rs_ex
-    , output logic [`RS_SIZE-1:0] psel_gnt    
-    , output logic [`RS_SIZE-1:0] rs_free
-    , output logic [`RS_LEN-1:0] rs_free_idx
-    , output logic [`RS_LEN-1:0] rs_ex_idx
+    , output RS_FU_PACKET [`RS_BR_SIZE-1:0] rs_packets
+    , output logic [`RS_BR_LEN:0] rs_counter
+    , output logic [`RS_BR_SIZE-1:0] rs_ex
+    , output logic [`RS_BR_SIZE-1:0] psel_gnt    
+    , output logic [`RS_BR_SIZE-1:0] rs_free
+    , output logic [`RS_BR_LEN-1:0] rs_free_idx
+    , output logic [`RS_BR_LEN-1:0] rs_ex_idx
     `endif
 );
 
 `ifndef DEBUG
-RS_ALU_PACKET [`RS_SIZE-1:0] rs_packets;
-logic [`RS_LEN:0] rs_counter;
-logic [`RS_SIZE-1:0] rs_ex;     // goes to priority selector (data ready && FU free)
-logic [`RS_SIZE-1:0] psel_gnt;  // output of the priority selector
-logic [`RS_SIZE-1:0] rs_free;
-logic [`RS_LEN-1:0] rs_free_idx; // the rs idx that is selected for the dispatched instr
-logic [`RS_LEN-1:0] rs_ex_idx;
+RS_ALU_PACKET [`RS_BR_SIZE-1:0] rs_packets;
+logic [`RS_BR_LEN:0] rs_counter;
+logic [`RS_BR_SIZE-1:0] rs_ex;     // goes to priority selector (data ready && FU free)
+logic [`RS_BR_SIZE-1:0] psel_gnt;  // output of the priority selector
+logic [`RS_BR_SIZE-1:0] rs_free;
+logic [`RS_BR_LEN-1:0] rs_free_idx; // the rs idx that is selected for the dispatched instr
+logic [`RS_BR_LEN-1:0] rs_ex_idx;
 `endif
 
-assign rs_full = (rs_counter == `RS_SIZE);
+assign rs_full = (rs_counter == `RS_BR_SIZE);
 
-wan_sel psel(parameter = `RS_SIZE;)(
+wan_sel psel(parameter = `RS_BR_SIZE;)(
     .req(rs_ex);
     .gnt(psel_gnt);
 ) 
 
 genvar i;
 always_comb begin
-    rs_free_idx = `RS_LEN'h0; // avoid additional latch, not very important
-    for (i=`RS_SIZE-1; i>=0; i--) begin
+    rs_free_idx = `RS_BR_LEN'h0; // avoid additional latch, not very important
+    for (i=`RS_BR_SIZE-1; i>=0; i--) begin
         if (rs_free[i]) rs_free_idx = i;
     end
 end
 
 genvar j;
 always_comb begin
-    rs_ex_idx = `RS_LEN'h0; // avoid additional latching
-    for (j=0; j<`RS_SIZE; j++) begin
+    rs_ex_idx = `RS_BR_LEN'h0; // avoid additional latching
+    for (j=0; j<`RS_BR_SIZE; j++) begin
         if (psel_gnt[j]) rs_ex_idx = j; 
     end
 end
@@ -83,8 +83,8 @@ end
 // rs_ex
 genvar k;
 always_comb begin
-    rs_ex = `RS_SIZE'h0;
-    for (k = 0; k<`RS_SIZE; k++) begin
+    rs_ex = `RS_BR_SIZE'h0;
+    for (k = 0; k<`RS_BR_SIZE; k++) begin
         rs_ex[k] = (~rs_free[k])&&(rs_packets[k].opa_ready)&&(rs_packets[k].opb_ready);
     end
 end
@@ -92,15 +92,15 @@ end
 genvar t;
 always_ff @(posedge clock) begin
     if (reset) begin
-        rs_free      <= `SD ~`RS_SIZE'h0;
-        // rs_ex        <= `SD `RS_SIZE'h0;
-        rs_counter   <= `SD `RS_LEN'h0;
+        rs_free      <= `SD ~`RS_BR_SIZE'h0;
+        // rs_ex        <= `SD `RS_BR_SIZE'h0;
+        rs_counter   <= `SD `RS_BR_LEN'h0;
         rs_ready_out <= `SD 1'b0;
     end 
     else if (commit_mis_pred) begin
-        rs_free      <= `SD ~`RS_SIZE'h0;
-        // rs_ex        <= `SD `RS_SIZE'h0;
-        rs_counter   <= `SD `RS_LEN'h0;
+        rs_free      <= `SD ~`RS_BR_SIZE'h0;
+        // rs_ex        <= `SD `RS_BR_SIZE'h0;
+        rs_counter   <= `SD `RS_BR_LEN'h0;
         rs_ready_out <= `SD 1'b0;
     end  
     else begin
@@ -130,7 +130,7 @@ always_ff @(posedge clock) begin
         
         // cdb broadcast
         if (cdb_broadcast_valid) begin
-            for (t=0; t<`RS_SIZE; t++) begin
+            for (t=0; t<`RS_BR_SIZE; t++) begin
                 if (~rs_packets[t].opa_ready && (rs_packets[t].opa_value==cdb_dest_preg_idx)) begin
                     rs_packets[t].opa_ready <= `SD 1'b1;
                     rs_packets[t].opa_value <= `SD cdb_value;
