@@ -1,14 +1,13 @@
 module brcond(// Inputs
-	input RS_FU_PACKET rs_fu_packet,    // Value to check against condition
-	input              brcond_enable,
+	input [`XLEN-1:0]  rs1,    // Value to check against condition
+	input [`XLEN-1:0]  rs2,
 
 	output logic       cond,            // 0/1 condition result (False/True)
-	output logic       brcond_valid
 );
 
 	logic signed [`XLEN-1:0] signed_rs1, signed_rs2;
-	assign signed_rs1 = rs_fu_packet.opa_value;
-	assign signed_rs2 = rs_fu_packet.opb_value;
+	assign signed_rs1 = rs_branch_packet.opa_value;
+	assign signed_rs2 = rs_branch_packet.opb_value;
 	always_comb begin
 		cond = 0;
 		case (func)
@@ -22,3 +21,42 @@ module brcond(// Inputs
 	end
 	
 endmodule // brcond
+
+module branch(
+	input                        clock,
+	input                        reset,
+	input                        branch_enable,
+	input  RS_BRANCH_PACKET      rs_branch_packet,
+	input                        cdb_broadcast_alu,
+	input  []                     
+
+	output logic                 br_direction, // branch direction 0 NT 1 T
+	output logic [`XLEN-1:0]     br_target_PC, // branch target PC = PC+offset
+    output logic                 br_valid,
+    output logic [`PRF_LEN-1:0]  br_prf_entry,
+    output logic [`ROB_LEN-1:0]  br_rob_entry
+)
+
+	logic br_cond;
+
+	brcond brcond0(
+		.rs1(rs_branch_packet.opa_value),
+		.rs2(rs_branch_packet.opb_value),
+		.cond(br_cond)
+	)
+	assign br_target_PC = rs_branch_packet.PC + rs_branch_packet.offset;
+	assign br_prf_entry = rs_branch_packet.dest_preg_idx; 
+	assign br_rob_entry = rs_branch_packet.rob_idx;
+	assign br_direction = rs_branch_packet.cond_branch ? br_cond : 1;
+
+	always_ff @(posedge clock) begin
+		if (reset)
+			br_valid <= `SD 1'b0;
+		else if (branch_enable)
+			br_valid <= `SD 1'b1;
+		else if (cdb_broadcast_alu)
+			br_valid <= `SD 1'b0;
+	end
+
+endmodule
+

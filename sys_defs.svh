@@ -482,6 +482,8 @@ typedef struct packed {
 	logic	[11:0]			offset;
 	logic	[`PRF_LEN-1:0]	dest_preg_idx;
 	logic	[`ROB_LEN-1:0]	rob_idx;
+	logic                   cond_branch;
+	logic                   uncond_branch;
 } RS_BRANCH_PACKET;
 
 `endif // __SYS_DEFS_VH__
