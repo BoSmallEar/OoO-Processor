@@ -61,10 +61,16 @@ module rs_mul(
     assign rs_full = (rs_mul_counter == `RS_MUL_SIZE);
 
     // priority selector
-    wan_sel #(.WIDTH(`RS_ALU_SIZE)) psel (
-        .req(rs_mul_ex);
-        .gnt(psel_gnt);
-    ) 
+
+    logic empty;
+    logic [`RS_MUL_SIZE-1:0] gnt_bus;
+
+    psel_gen #(.WIDTH(`RS_MUL_SIZE), .REQS(1)) psel (
+        .req(rs_mul_ex),
+        .gnt(psel_gnt),
+        .gnt_bus(gnt_bus),
+        .empty(empty)
+    );
 
     // find out the smallest index that corresponds to a free rob entry
     genvar i;
@@ -147,3 +153,4 @@ module rs_mul(
             end  
         end    
     end
+endmodule

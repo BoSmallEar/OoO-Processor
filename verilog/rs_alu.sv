@@ -32,8 +32,6 @@ module rs_alu(
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,
-     
-
 
     output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
     output                rs_alu_out_valid,
@@ -48,21 +46,28 @@ module rs_alu(
         , output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx
     `endif
 );
- 
-    RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
-    logic [`RS_ALU_LEN:0] rs_alu_counter;
-    logic [`RS_ALU_SIZE-1:0] rs_alu_ex;     // goes to priority selector (data ready && FU free)
-    logic [`RS_ALU_SIZE-1:0] psel_gnt;  // output of the priority selector
-    logic [`RS_ALU_SIZE-1:0] rs_alu_free;
-    logic [`RS_ALU_LEN-1:0] rs_alu_free_idx; // the rs idx that is selected for the dispatched instr
-    logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
+
+    `ifdef DEBUG
+        RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
+        logic [`RS_ALU_LEN:0] rs_alu_counter;
+        logic [`RS_ALU_SIZE-1:0] rs_alu_ex;     // goes to priority selector (data ready && FU free)
+        logic [`RS_ALU_SIZE-1:0] psel_gnt;  // output of the priority selector
+        logic [`RS_ALU_SIZE-1:0] rs_alu_free;
+        logic [`RS_ALU_LEN-1:0] rs_alu_free_idx; // the rs idx that is selected for the dispatched instr
+        logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
+    `endif
 
     assign rs_full = (rs_alu_counter == `RS_ALU_SIZE);
 
-    wan_sel #(.WIDTH(`RS_ALU_SIZE)) psel (
-        .req(rs_alu_ex);
-        .gnt(psel_gnt);
-    ) 
+    logic empty;
+    logic [`RS_ALU_SIZE-1:0] gnt_bus;
+
+    psel_gen #(.WIDTH(`RS_ALU_SIZE), .REQS(1)) psel (
+        .req(rs_alu_ex),
+        .gnt(psel_gnt),
+        .gnt_bus(gnt_bus),
+        .empty(empty)
+    );
 
     genvar i;
     always_comb begin

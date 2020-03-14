@@ -120,32 +120,37 @@ module top_level (
     // ALU OUTPUTS
     logic [`XLEN-1:0]       alu_value;                  // broadcasting to top_level
     logic                   alu_valid;                  // broadcasting to top_level
-    logic [`PRF_LEN-1:0]    alu_prf_entry;              // alu->prf
+    logic [`PRF_LEN-1:0]    alu_prf_idx;                // alu->prf
     logic                   alu_dest_prf_valid;         // alu->rs
-    logic [`ROB_LEN-1:0]    alu_rob_entry;              // alu->rob
+    logic [`ROB_LEN-1:0]    alu_rob_idx;                // alu->rob
 
     // MUL OUTPUTS
     logic [`XLEN-1:0]            mul_value;
     logic                        mul_valid;
-    logic [`PRF_LEN-1:0]         mul_prf_entry;
-    logic [`ROB_LEN-1:0]         mul_rob_entry;
+    logic [`PRF_LEN-1:0]         mul_prf_idx;
+    logic [`ROB_LEN-1:0]         mul_rob_idx;
     RS_MUL_PACKET                rs_mul_packet;
+
+    // MEM OUTPUTS
+
 
     // BRANCH OUTPUTS
 	logic                        br_direction;      // branch direction 0 NT 1 T
 	logic [`XLEN-1:0]            br_target_PC;      // branch target PC = PC+offset
     logic                        br_valid;
-    logic [`PRF_LEN-1:0]         br_prf_entry;
-    logic [`ROB_LEN-1:0]         br_rob_entry;
+    logic [`PRF_LEN-1:0]         br_prf_idx;
+    logic [`ROB_LEN-1:0]         br_rob_idx;
     RS_BRANCH_PACKET             rs_branch_packet;
 
     // CDB OUTPUTS
-    logic                   cdb_broadcast_valid;  //
-    logic [`ROB_LEN-1:0]    cdb_rob_entry;
-    logic [`PRF_LEN-1:0]    cdb_dest_preg_idx;
-    logic                   cdb_mis_pred;
-    logic                   cdb_result;
-    logic [`FU_NUM-1:0]     fu_free_list;
+    logic                cdb_broadcast_valid;
+    logic [3:0]          module_select;
+    logic [`PRF_LEN-1:0] cdb_dest_preg_idx;
+    logic [`ROB_LEN-1:0] cdb_rob_idx;
+    logic [`XLEN-1:0]    cdb_broadcast_value;
+    logic                cdb_br_direction;
+    logic [`XLEN-1:0]    cdb_br_target_PC;
+    logic                cdb_mis_pred;
 
     // ROB INPUTS
 
@@ -233,7 +238,7 @@ module top_level (
         .cdb_broadcast_valid(cdb_broadcast_valid),    // cdb
         .dest_areg_idx(id_packet.dest_reg_idx),              // ID packet
         .prf_free_preg_idx(prf_free_preg_idx),      // prf
-        .executed_rob_entry(cdb_rob_entry),    // cdb ???
+        .executed_rob_idx(cdb_rob_idx),    // cdb ???
         .cdb_mis_pred(cdb_mis_pred),                // cdb ???
         //Outputs
         .rob_commit_dest_areg_idx(rob_commit_dest_areg_idx),    // to rrat
@@ -319,14 +324,14 @@ module top_level (
     alu alu0(
         //input
         .rs_alu_packet(rs_alu_packet),
-        .alu_enable(alu_enable),
+        .alu_enable(alu_enable&&module_select==4'b1000),
         .cdb_broadcast_alu(cdb_broadcast_alu),
         //output
         .alu_value(alu_value),
         .alu_valid(alu_valid),
-        .alu_dest_prf_entry(alu_prf_entry),
-        .alu_rob_entry(alu_rob_entry)
-    )
+        .alu_dest_prf_idx(alu_prf_idx),
+        .alu_rob_idx(alu_rob_idx)
+    );
 
     //////////////////////////////////////////////////
     //                                              //
@@ -364,7 +369,7 @@ module top_level (
 
     //////////////////////////////////////////////////
     //                                              //
-    //                      M U L                    //
+    //                      M U L                   //
     //                                              //
     //////////////////////////////////////////////////
 
@@ -373,14 +378,14 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .rs_mul_packet(rs_mul_packet),
-        .mul_enable(mul_enable),
+        .mul_enable(mul_enable&&module_select==4'b0100),
         .cdb_broadcast_mul(cdb_broadcast_alu),
         //output
         .mul_value(mul_value),
         .mul_valid(mul_valid),
-        .mul_prf_entry(mul_prf_entry),
-        .mul_rob_entry(mul_rob_entry)
-    )
+        .mul_prf_idx(mul_prf_idx),
+        .mul_rob_idx(mul_rob_idx)
+    );
 
     //////////////////////////////////////////////////
     //                                              //
@@ -418,6 +423,12 @@ module top_level (
 
     //////////////////////////////////////////////////
     //                                              //
+    //                   M E M - FU                 //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////
+    //                                              //
     //                   R S _ B R                  //
     //                                              //
     //////////////////////////////////////////////////
@@ -437,7 +448,10 @@ module top_level (
         .rob_idx(rob_tail),
         .cond_branch(id_packet.cond_branch),
         .uncond_branch(id_packet.uncond_branch),
-        
+        .local_pred_direction(local_pred_direction),
+        .global_pred_direction(global_pred_direction),
+        .br_pred_direction(br_pred_direction),
+        .br_pred_target_PC(br_pred_target_PC),
         .commit_mis_pred(mis_pred_is_head),
 
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
@@ -452,22 +466,66 @@ module top_level (
 
     //////////////////////////////////////////////////
     //                                              //
-    //                      BRCOND                  //
+    //                      BRANCH                  //
     //                                              //
     //////////////////////////////////////////////////
 
     branch branch0(
-	.clock(clock),
-    .reset(reset),
-    .branch_enable(branch_enable),
-	.rs_branch_packet(rs_branch_packet),
-	.cdb_broadcast_alu(cdb_broadcast_alu),
+        .clock(clock),
+        .reset(reset),
+        .branch_enable(branch_enable&&module_select==4'b0001),
+        .rs_branch_packet(rs_branch_packet),
+        .cdb_broadcast_alu(cdb_broadcast_alu),
 
-	.br_cond(br_cond),      // branch direction 0 NT 1 T
-	.br_target_PC(br_target_PC), // branch target PC = PC+offset
-    .br_valid(br_valid),
-    .br_prf_entry(br_prf_entry),
-    .br_rob_entry(br_rob_entry)
-)
+        .br_direction(br_direction),           // branch direction 0 NT 1 T
+        .br_target_PC(br_target_PC), // branch target PC = PC+offset
+        .br_valid(br_valid),
+        .br_prf_idx(br_prf_idx),
+        .br_rob_idx(br_rob_idx),
+        .br_mis_pred(br_mis_pred)
+    );
 
+    //////////////////////////////////////////////////
+    //                                              //
+    //                     C D B                    //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    cdb cdb0(
+        .clock(clock),
+        .reset(reset),
+        .alu_valid(alu_valid),
+        .alu_value(alu_value),
+        .alu_prf_idx(alu_prf_idx),
+        .alu_rob_idx(alu_rob_idx),
+        .mul_valid(mul_valid),
+        .mul_value(mul_value),
+        .mul_prf_idx(mul_prf_idx),
+        .mul_rob_idx(mul_rob_idx),
+        .mem_valid(),
+        .mem_value(),
+        .mem_prf_idx(),
+        .mem_rob_idx(),
+        .br_valid(br_valid),
+        .br_direction(br_direction),
+        .br_target_PC(br_target_PC),
+        .br_mis_pred(br_mis_pred),
+        .br_prf_idx(br_prf_idx),
+        .br_rob_idx(br_rob_idx),
+        .br_local_pred_direction(br_local_pred_direction),
+        .br_global_pred_direction(br_global_pred_direction),
+
+        // output
+        .cdb_broadcast_valid(cdb_broadcast_valid),
+        .module_select(module_select),
+        .cdb_dest_preg_idx(cdb_dest_preg_idx),
+        .cdb_rob_idx(cdb_rob_idx),
+        .cdb_broadcast_value(cdb_result),
+        .cdb_br_direction(cdb_br_direction),
+        .cdb_br_target_PC(cdb_br_target_PC),
+        .cdb_mis_pred(cdb_mis_pred),
+        .cdb_local_pred_direction(cdb_local_pred_direction),
+        .cdb_global_pred_direction(cdb_global_pred_direction)
+    );
+    
 endmodule
