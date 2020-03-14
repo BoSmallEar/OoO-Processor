@@ -292,7 +292,7 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.fu_type == ALU),
+        .enable(id_packet.valid&&id_packet.fu_type == ALU),
         .opa_preg_idx(opa_preg_idx),
         .opb_preg_idx(opb_preg_idx),
         .opa_ready(fu_opa_ready),
@@ -356,10 +356,12 @@ module top_level (
         .mul_func(id_packet.alu_func),
         
         .commit_mis_pred(mis_pred_is_head),
-
+        .cdb_broadcast_is_mul(module_select==4'b0100),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
-        .cdb_broadcast_valid(cdb_broadcast_valid),
+        .cdb_broadcast_valid(cdb_broadcast_valid),  // calculated operand
         .cdb_value(cdb_result),
+        // TODO:
+        // CDB has broadcast a multiply result
 
         //outputs
         .rs_mul_packet(rs_mul_packet),
@@ -378,8 +380,8 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .rs_mul_packet(rs_mul_packet),
-        .mul_enable(mul_enable&&module_select==4'b0100),
-        .cdb_broadcast_mul(cdb_broadcast_alu),
+        .mul_enable(rs_mul_out_valid),
+        .cdb_broadcast_is_mul(module_select==4'b0100),
         //output
         .mul_value(mul_value),
         .mul_valid(mul_valid),
@@ -398,7 +400,7 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.fu_type == MEM),
+        .enable(id_packet.valid&&id_packet.fu_type == MEM),
         .opa_ready(fu_opa_ready),
         .opa_value(fu_opa_value),
         .opb_ready(fu_opb_ready),
@@ -438,7 +440,7 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.fu_type == BRANCH),
+        .enable(id_packet.valid&&id_packet.fu_type == BRANCH),
         .opa_ready(fu_opa_ready),
         .opa_value(fu_opa_value),
         .opb_ready(fu_opb_ready),

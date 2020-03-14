@@ -32,13 +32,15 @@ module rs_mul(
     input                   cdb_broadcast_valid,
     input [`XLEN-1:0]       cdb_value,
 
+    input                   cdb_broadcast_is_mul;
+
     output RS_MUL_PACKET    rs_mul_packet,     // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
     output logic            rs_mul_full,           // sent rs_full signal to if stage                
     
 
     `ifdef DEBUG
-        , output RS_FU_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
+        , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
         , output logic [`RS_MUL_LEN:0] rs_mul_counter
         , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex
         , output logic [`RS_MUL_SIZE-1:0] psel_gnt    
@@ -49,43 +51,29 @@ module rs_mul(
 );
 
     `ifndef DEBUG
-        RS_ALU_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
+        RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
         logic [`RS_MUL_LEN:0] rs_mul_counter;
         logic [`RS_MUL_SIZE-1:0] rs_mul_ex;     // goes to priority selector (data ready && FU free)
         logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
         logic [`RS_MUL_SIZE-1:0] rs_mul_free;
         logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
         logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
+        logic issue;        // whether rs can issue packet
+        logic is_issued_before;
     `endif
 
-    assign rs_full = (rs_mul_counter == `RS_MUL_SIZE);
+    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
+    //           or CDB has broadcast a Mul result such that a new packet can be issued
+    assign issue = ~is_issued_before | cdb_broadcast_is_mul;
 
-    // priority selector
+    assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
 
-    logic empty;
-    logic [`RS_MUL_SIZE-1:0] gnt_bus;
-
-    psel_gen #(.WIDTH(`RS_MUL_SIZE), .REQS(1)) psel (
-        .req(rs_mul_ex),
-        .gnt(psel_gnt),
-        .gnt_bus(gnt_bus),
-        .empty(empty)
-    );
-
-    // find out the smallest index that corresponds to a free rob entry
+    // find out the smallest index that corresponds to a free rs entry
     genvar i;
     always_comb begin
         rs_mul_free_idx = `RS_MUL_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_MUL_SIZE-1; i>=0; i--) begin
             if (rs_mul_free[i]) rs_mul_free_idx = i;
-        end
-    end
-    // find out the rs entry that is selected to execute
-    genvar j;
-    always_comb begin
-        rs_mul_ex_idx = `RS_MUL_LEN'h0; // avoid additional latching
-        for (j=0; j<`RS_MUL_SIZE; j++) begin
-            if (psel_gnt[j]) rs_mul_ex_idx = j; 
         end
     end
 
@@ -98,24 +86,37 @@ module rs_mul(
         end
     end
 
+    // priority selector
+    logic no_rs_selected;
+    logic [`RS_MUL_SIZE-1:0] gnt_bus;
+    psel_gen #(.WIDTH(`RS_MUL_SIZE), .REQS(1)) psel (
+        .req(rs_mul_ex),
+        .gnt(psel_gnt),
+        .gnt_bus(gnt_bus),
+        .empty(no_rs_selected)
+    );
+
+    // find out the rs entry that is selected to execute
+    genvar j;
+    always_comb begin
+        rs_mul_ex_idx = `RS_MUL_LEN'h0; // avoid additional latching
+        for (j=0; j<`RS_MUL_SIZE; j++) begin
+            if (psel_gnt[j]) rs_mul_ex_idx = j; 
+        end
+    end
+
     genvar t;
     always_ff @(posedge clock) begin
-        if (reset) begin
+        if (reset || commit_mis_pred) begin
             rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;
-            // rs_mul_ex        <= `SD `RS_MUL_SIZE'h0;
             rs_mul_counter   <= `SD `RS_MUL_LEN'h0;
             rs_mul_out_valid <= `SD 1'b0;
+            is_issued_before <= `SD 1'b0;
         end 
-        else if (commit_mis_pred) begin
-            rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;
-            // rs_mul_ex        <= `SD `RS_MUL_SIZE'h0;
-            rs_mul_counter   <= `SD `RS_MUL_LEN'h0;
-            rs_mul_out_valid <= `SD 1'b0;
-        end  
         else begin
-            rs_mul_counter <= `SD rs_mul_counter + id_packet_in.valid - rs_mul_ex[rs_mul_ex_idx];
+            rs_mul_counter <= `SD rs_mul_counter + enable - ~no_rs_selected;
             // dispatch 
-            if (id_packet_in.valid) begin// instr can be dispatched
+            if (enable) begin// instr can be dispatched
                 rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
                 rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
                 
@@ -129,10 +130,11 @@ module rs_mul(
             end
             
             // issue
-            if (rs_mul_ex[rs_mul_ex_idx]) begin
-                rs_fu_packet <= `SD rs_mul_packets[rs_mul_ex_idx];
+            if (~no_rs_selected && issue) begin
+                rs_mul_packet <= `SD rs_mul_packets[rs_mul_ex_idx];
                 rs_mul_out_valid <= `SD 1'b1;
                 rs_mul_free[rs_mul_ex_idx] <= `SD 1'b1;
+                is_issued_before <= `SD 1'b1;
             end
             else
                 rs_mul_out_valid <= `SD 1'b0;

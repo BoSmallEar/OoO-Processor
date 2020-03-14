@@ -109,9 +109,9 @@ module rs_alu(
             rs_alu_out_valid <= `SD 1'b0;
         end  
         else begin
-            rs_alu_counter <= `SD rs_alu_counter + id_packet_in.valid - rs_alu_ex[rs_alu_ex_idx];
+            rs_alu_counter <= `SD rs_alu_counter + enable - rs_alu_ex[rs_alu_ex_idx];
             // dispatch 
-            if (id_packet_in.valid) begin// instr can be dispatched
+            if (enable) begin// instr can be dispatched
                 rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
                 rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD opb_ready;
                 

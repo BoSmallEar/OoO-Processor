@@ -112,9 +112,9 @@ module rs_branch(
             rs_ready_out <= `SD 1'b0;
         end  
         else begin
-            rs_branch_counter <= `SD rs_branch_counter + id_packet_in.valid - rs_branch_ex[rs_branch_ex_idx];
+            rs_branch_counter <= `SD rs_branch_counter + enable - rs_branch_ex[rs_branch_ex_idx];
             // dispatch 
-            if (id_packet_in.valid) begin// instr can be dispatched
+            if (enable) begin// instr can be dispatched
                 rs_branch_packets[rs_branch_free_idx].opa_ready <= `SD opa_ready;
                 rs_branch_packets[rs_branch_free_idx].opb_ready <= `SD opb_ready;
                 
