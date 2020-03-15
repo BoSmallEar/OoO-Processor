@@ -77,7 +77,8 @@ module mult2cdb(
 	output logic [`XLEN-1:0]     mul_value,
     output logic                 mul_valid,
     output logic [`PRF_LEN-1:0]  mul_prf_idx,
-    output logic [`ROB_LEN-1:0]  mul_rob_idx
+    output logic [`ROB_LEN-1:0]  mul_rob_idx,
+	output logic [`XLEN-1:0]     mul_PC
 );
 	/*
 	MUL performs an XLEN-bit×XLEN-bit multiplication and places the lower XLEN bits in the destination register. 
@@ -107,6 +108,7 @@ module mult2cdb(
 
     assign mul_prf_idx = rs_mul_packet.dest_preg_idx;
 	assign mul_rob_idx = rs_mul_packet.rob_idx;
+	assign mul_PC	   = rs_mul_packet.PC;
 	
 	logic [`DOUBLE_XLEN-1:0] product;
 	logic done;

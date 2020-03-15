@@ -17,6 +17,7 @@ module rs_mul(
     input                   clock,
     input                   reset,
     input [`XLEN-1:0]       PC,
+    input [`XLEN-1:0]       NPC,
     input                   enable,
     input [`PRF_LEN-1:0]    opa_preg_idx,
     input [`PRF_LEN-1:0]    opb_preg_idx,
@@ -117,6 +118,8 @@ module rs_mul(
             rs_mul_counter <= `SD rs_mul_counter + enable - ~no_rs_selected;
             // dispatch 
             if (enable) begin// instr can be dispatched
+                rs_mul_packets[rs_mul_free_idx].PC <= `SD PC;
+                rs_mul_packets[rs_mul_free_idx].NPC <= `SD NPC;
                 rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
                 rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
                 

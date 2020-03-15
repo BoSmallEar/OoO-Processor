@@ -11,13 +11,15 @@ module alu(
 	output logic [`XLEN-1:0]     alu_value,
     output logic                 alu_valid,
     output logic [`PRF_LEN-1:0]  alu_prf_idx,
-    output logic [`ROB_LEN-1:0]  alu_rob_idx
+    output logic [`ROB_LEN-1:0]  alu_rob_idx,
+	output logic [`XLEN-1:0]     alu_PC,
 );
 	wire signed [`XLEN-1:0] signed_opa, signed_opb;
 	assign signed_opa = rs_alu_packet.opa;
 	assign signed_opb = rs_alu_packet.opb;
 	assign alu_prf_idx = rs_alu_packet.dest_preg_idx;
 	assign alu_rob_idx = rs_alu_packet.rob_idx;
+	assign alu_PC	   = rs_alu_packet.PC;
 	
 	always_comb begin
 		case (rs_fu_packet.alu_func)

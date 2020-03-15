@@ -14,8 +14,7 @@
 module top_level (
 	input                           clock,        
 	input                           reset,    
-    input ID_PACKET                 id_packet,    // Output of ID stage - decoded
-    
+    input ID_PACKET                 id_packet,              // Output of ID stage - decoded
     input logic                     dispatch_enable,        // allow to handle the input decoded packet
     // Outputs
     output logic                    rob_full,     
@@ -26,7 +25,7 @@ module top_level (
     output logic                    result_direction,       // branch is actually taken or not
     output logic                    result_enable,   
     output logic  [`XLEN-1:0]       result_PC,              // branch target address that is resolved
-    output logic  [`XLEN-1:0]       prev_branch_PC,         // PC of branch that is resolved
+    output logic  [`XLEN-1:0]       prev_branch_PC          // PC of branch that is resolved
 );
 
     logic                           fu_opa_ready;
@@ -86,12 +85,9 @@ module top_level (
 		endcase 
 	end
 
-    // ROB OUTPUTS
-    logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
-    logic [`PRF_LEN-1:0]    rob_commit_dest_preg_idx;   // rob -> rrat
-    logic [`ROB_LEN-1:0]    rob_tail;                   // rob -> rs
-    logic                   commit_valid;               // rob -> prf
-    logic                   mis_pred_is_head;           // rob -> rs, prf, rat
+    // RAT OUTPUTS
+    logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
+    logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
 
     // PRF OUTPUTS
     logic [`PRF_LEN-1:0]    prf_free_preg_idx;               // prf -> rat, rob, rs
@@ -100,9 +96,12 @@ module top_level (
     logic                   opb_ready;                       // prf -> rs
     logic [`XLEN-1:0]       opb_value;                       // prf -> rs
 
-    // RAT OUTPUTS
-    logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
-    logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
+    // ROB OUTPUTS
+    logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
+    logic [`PRF_LEN-1:0]    rob_commit_dest_preg_idx;   // rob -> rrat
+    logic [`ROB_LEN-1:0]    rob_tail;                   // rob -> rs
+    logic                   commit_valid;               // rob -> prf
+    logic                   mis_pred_is_head;           // rob -> rs, prf, rat
 
     // RRAT OUTPUTS
     logic [31:0][`PRF_LEN-1:0]              rat_packets_backup;                  // rat
@@ -113,44 +112,63 @@ module top_level (
     logic [`PRF_LEN-1:0]                    rrat_free_preg_queue_head_backup;    // to prf
     logic [`PRF_LEN-1:0]                    rrat_free_preg_queue_tail_backup;    // to prf
 
-    // RS OUTPUTS
-    RS_ALU_PACKET            rs_alu_packet;       // rs -> alu
-    logic [`ROB_LEN-1:0]     rob_idx;            // rs -> alu
+    // RS_ALU OUTPUTS            
+    RS_ALU_PACKET            rs_alu_packet;            // rs_alu->alu
+    logic                    rs_alu_out_valid;         // rs_alu->alu
+    logic                    rs_alu_full;              // rs_alu->top_level (struct hazard logic)
 
     // ALU OUTPUTS
-    logic [`XLEN-1:0]       alu_value;                  // broadcasting to top_level
-    logic                   alu_valid;                  // broadcasting to top_level
-    logic [`PRF_LEN-1:0]    alu_prf_idx;                // alu->prf
-    logic                   alu_dest_prf_valid;         // alu->rs
-    logic [`ROB_LEN-1:0]    alu_rob_idx;                // alu->rob
+    logic [`XLEN-1:0]        alu_value;                // alu->cdb
+    logic                    alu_valid;                // alu->cdb
+    logic [`PRF_LEN-1:0]     alu_prf_idx;              // alu->prf
+    logic [`ROB_LEN-1:0]     alu_rob_idx;              // alu->cdb
+    logic [`XLEN-1:0]        alu_PC;                   // alu->cdb
 
+    // RS_MUL OUTPUTS
+    RS_MUL_PACKET            rs_mul_packet;            // rs_mul->mult2cdb
+    logic                    rs_mul_out_valid;         // rs_mul->mult2cdb
+    logic                    rs_mul_full;              // rs_mul->toplevel   
+              
     // MUL OUTPUTS
-    logic [`XLEN-1:0]            mul_value;
-    logic                        mul_valid;
-    logic [`PRF_LEN-1:0]         mul_prf_idx;
-    logic [`ROB_LEN-1:0]         mul_rob_idx;
-    RS_MUL_PACKET                rs_mul_packet;
+    logic [`XLEN-1:0]         mul_value;               // mul->cdb
+    logic                     mul_valid;               // mul->cdb
+    logic [`PRF_LEN-1:0]      mul_prf_idx;             // mul->prf
+    logic [`ROB_LEN-1:0]      mul_rob_idx;             // mul->cdb
+    logic [`XLEN-1:0]         mul_PC;                  // alu->cdb
 
-    // MEM OUTPUTS
+    // RS_MEM OUTPUTS
 
+    // // MEM OUTPUTS
+  
+    //RS_BRANCH OUTPUTS
+    RS_BRANCH_PACKET          rs_branch_packet;         // rs_branch->branch
+    logic                     rs_branch_out_valid;      // rs_branch->cdb
+    logic                     rs_branch_full;           // rs_branch->toplevel
 
     // BRANCH OUTPUTS
-	logic                        br_direction;      // branch direction 0 NT 1 T
-	logic [`XLEN-1:0]            br_target_PC;      // branch target PC = PC+offset
-    logic                        br_valid;
-    logic [`PRF_LEN-1:0]         br_prf_idx;
-    logic [`ROB_LEN-1:0]         br_rob_idx;
-    RS_BRANCH_PACKET             rs_branch_packet;
+	logic                     br_direction;             // br->bp,btb
+	logic [`XLEN-1:0]         br_target_PC;             // br->bp.brb
+    logic                     br_valid;                 // br->cdb
+    logic [`PRF_LEN-1:0]      br_prf_idx;               // legacy output, have no meaning for BR inst
+    logic [`ROB_LEN-1:0]      br_rob_idx;               // br->cdb
+    logic                     br_mis_pred;              // br->cdb
+    logic                     br_local_pred_direction;  // br->cdb
+    logic                     br_global_pred_direction; // br->cdb
+    logic [`XLEN-1:0]         br_PC;                    // br->cdb
 
     // CDB OUTPUTS
-    logic                cdb_broadcast_valid;
-    logic [3:0]          module_select;
-    logic [`PRF_LEN-1:0] cdb_dest_preg_idx;
-    logic [`ROB_LEN-1:0] cdb_rob_idx;
-    logic [`XLEN-1:0]    cdb_broadcast_value;
-    logic                cdb_br_direction;
-    logic [`XLEN-1:0]    cdb_br_target_PC;
-    logic                cdb_mis_pred;
+    logic [3:0]               module_select;            // cdb->all FUs, all RSs
+    logic                     cdb_broadcast_valid;      // cdb->rs (newly dispatched inst+current entries)
+    logic [`XLEN-1:0]         cdb_broadcast_value;      // cdb->rs (newly dispatched inst+current entries)
+    logic [`PRF_LEN-1:0]      cdb_dest_preg_idx;        // cdb->rob
+    logic [`ROB_LEN-1:0]      cdb_rob_idx;              // cdb->rob
+    logic [`XLEN-1:0]         cdb_broadcast_inst_PC;    // cdb->bp, btb/lsq
+    // CDB OUTPUTS for branch
+    logic                     cdb_br_direction;         // cdb->rob
+    logic [`XLEN-1:0]         cdb_br_target_PC;         // cdb->??
+    logic                     cdb_mis_pred;             // cdb->rob
+    logic [`XLEN-1:0]         cdb_local_pred_direction; // cdb->bp
+    logic [`XLEN-1:0]         cdb_global_pred_direction;// cdb->bp
 
     // ROB INPUTS
 
@@ -167,15 +185,9 @@ module top_level (
 
     // RS INPUTS
 
-    .enable(id_packet.fu_type == ALU)
-
     // Execution units input
     logic                        alu_enable, mul_enable, branch_enable;
-    
 	logic                        cdb_broadcast_alu, cdb_broadcast_mul;
-   
-  
-  
 
 
     //////////////////////////////////////////////////
@@ -292,7 +304,8 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.valid&&id_packet.fu_type == ALU),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == ALU),
         .opa_preg_idx(opa_preg_idx),
         .opb_preg_idx(opb_preg_idx),
         .opa_ready(fu_opa_ready),
@@ -308,6 +321,7 @@ module top_level (
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result),
+        .cdb_broadcast_is_alu(module_select==4'b1000),
 
         //outputs
         .rs_alu_packet(rs_alu_packet),
@@ -330,7 +344,8 @@ module top_level (
         .alu_value(alu_value),
         .alu_valid(alu_valid),
         .alu_dest_prf_idx(alu_prf_idx),
-        .alu_rob_idx(alu_rob_idx)
+        .alu_rob_idx(alu_rob_idx),
+        .alu_PC(alu_PC)
     );
 
     //////////////////////////////////////////////////
@@ -344,7 +359,8 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.fu_type == MUL),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == MUL),
         .opa_preg_idx(opa_preg_idx),
         .opb_preg_idx(opb_preg_idx),
         .opa_ready(fu_opa_ready),
@@ -360,8 +376,6 @@ module top_level (
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),  // calculated operand
         .cdb_value(cdb_result),
-        // TODO:
-        // CDB has broadcast a multiply result
 
         //outputs
         .rs_mul_packet(rs_mul_packet),
@@ -386,7 +400,8 @@ module top_level (
         .mul_value(mul_value),
         .mul_valid(mul_valid),
         .mul_prf_idx(mul_prf_idx),
-        .mul_rob_idx(mul_rob_idx)
+        .mul_rob_idx(mul_rob_idx),
+        .mul_PC(mul_PC)
     );
 
     //////////////////////////////////////////////////
@@ -400,7 +415,10 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.valid&&id_packet.fu_type == MEM),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == MEM),
+        .opa_preg_idx(opa_preg_idx),
+        .opb_preg_idx(opb_preg_idx),
         .opa_ready(fu_opa_ready),
         .opa_value(fu_opa_value),
         .opb_ready(fu_opb_ready),
@@ -416,7 +434,7 @@ module top_level (
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result),
-
+        .mem_func(id_packet.alu_func),
         //outputs
         .rs_mem_packet(rs_mem_packet),
         .rs_mem_out_valid(rs_mem_out_valid),
@@ -440,7 +458,8 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .PC(id_packet.PC),
-        .enable(id_packet.valid&&id_packet.fu_type == BRANCH),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == BRANCH),
         .opa_ready(fu_opa_ready),
         .opa_value(fu_opa_value),
         .opb_ready(fu_opb_ready),
@@ -459,6 +478,7 @@ module top_level (
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result),
+        .cdb_broadcast_is_branch(module_select==4'b0001),
 
         //outputs
         .rs_branch_packet(rs_branch_packet),
@@ -484,7 +504,8 @@ module top_level (
         .br_valid(br_valid),
         .br_prf_idx(br_prf_idx),
         .br_rob_idx(br_rob_idx),
-        .br_mis_pred(br_mis_pred)
+        .br_mis_pred(br_mis_pred),
+        .br_PC(br_PC)
     );
 
     //////////////////////////////////////////////////
@@ -496,18 +517,26 @@ module top_level (
     cdb cdb0(
         .clock(clock),
         .reset(reset),
+        // ALU
+        .alu_PC(alu_PC),
         .alu_valid(alu_valid),
         .alu_value(alu_value),
         .alu_prf_idx(alu_prf_idx),
         .alu_rob_idx(alu_rob_idx),
+        // MUL
+        .mul_PC(mul_PC),
         .mul_valid(mul_valid),
         .mul_value(mul_value),
         .mul_prf_idx(mul_prf_idx),
         .mul_rob_idx(mul_rob_idx),
+        // MEM
+        .mem_PC(mem_PC),
         .mem_valid(),
         .mem_value(),
         .mem_prf_idx(),
         .mem_rob_idx(),
+        // BRANCH
+        .br_PC(br_PC),
         .br_valid(br_valid),
         .br_direction(br_direction),
         .br_target_PC(br_target_PC),
@@ -516,13 +545,14 @@ module top_level (
         .br_rob_idx(br_rob_idx),
         .br_local_pred_direction(br_local_pred_direction),
         .br_global_pred_direction(br_global_pred_direction),
-
         // output
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .module_select(module_select),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_rob_idx(cdb_rob_idx),
         .cdb_broadcast_value(cdb_result),
+        .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC),
+        // outputs for branch
         .cdb_br_direction(cdb_br_direction),
         .cdb_br_target_PC(cdb_br_target_PC),
         .cdb_mis_pred(cdb_mis_pred),

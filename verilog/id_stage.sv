@@ -234,9 +234,6 @@ endmodule // decoder
 module id_stage(         
 	input         clock,              // system clock
 	input         reset,              // system reset
-	input         wb_reg_wr_en_out,    // Reg write enable from WB Stage
-	input  [4:0] wb_reg_wr_idx_out,  // Reg write index from WB Stage
-	input  [`XLEN-1:0] wb_reg_wr_data_out,  // Reg write data from WB Stage
 	input  IF_ID_PACKET if_id_packet_in,
 	
 	output ID_PACKET id_packet_out

@@ -17,6 +17,7 @@ module rs_alu(
     input                 clock,
     input                 reset,
     input [`XLEN-1:0]     PC,
+    input [`XLEN-1:0]     NPC,
     input                 enable,
     input [`PRF_LEN-1:0]  opa_preg_idx,
     input [`PRF_LEN-1:0]  opb_preg_idx,
@@ -32,6 +33,8 @@ module rs_alu(
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,
+
+    input                 cdb_broadcast_is_alu;
 
     output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
     output                rs_alu_out_valid,
@@ -55,33 +58,21 @@ module rs_alu(
         logic [`RS_ALU_SIZE-1:0] rs_alu_free;
         logic [`RS_ALU_LEN-1:0] rs_alu_free_idx; // the rs idx that is selected for the dispatched instr
         logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
+        logic issue;        // whether rs can issue packet
+        logic is_issued_before;
     `endif
 
+    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
+    //           or CDB has broadcast a Mul result such that a new packet can be issued
+    assign issue = ~is_issued_before | cdb_broadcast_is_alu;
+
     assign rs_full = (rs_alu_counter == `RS_ALU_SIZE);
-
-    logic empty;
-    logic [`RS_ALU_SIZE-1:0] gnt_bus;
-
-    psel_gen #(.WIDTH(`RS_ALU_SIZE), .REQS(1)) psel (
-        .req(rs_alu_ex),
-        .gnt(psel_gnt),
-        .gnt_bus(gnt_bus),
-        .empty(empty)
-    );
 
     genvar i;
     always_comb begin
         rs_alu_free_idx = `RS_ALU_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_ALU_SIZE-1; i>=0; i--) begin
             if (rs_alu_free[i]) rs_alu_free_idx = i;
-        end
-    end
-
-    genvar j;
-    always_comb begin
-        rs_alu_ex_idx = `RS_ALU_LEN'h0; // avoid additional latching
-        for (j=0; j<`RS_ALU_SIZE; j++) begin
-            if (psel_gnt[j]) rs_alu_ex_idx = j; 
         end
     end
 
@@ -94,24 +85,37 @@ module rs_alu(
         end
     end
 
+    logic no_rs_selected;
+    logic [`RS_ALU_SIZE-1:0] gnt_bus;
+    psel_gen #(.WIDTH(`RS_ALU_SIZE), .REQS(1)) psel (
+        .req(rs_alu_ex),
+        .gnt(psel_gnt),
+        .gnt_bus(gnt_bus),
+        .empty(no_rs_selected)
+    );
+
+    genvar j;
+    always_comb begin
+        rs_alu_ex_idx = `RS_ALU_LEN'h0; // avoid additional latching
+        for (j=0; j<`RS_ALU_SIZE; j++) begin
+            if (psel_gnt[j]) rs_alu_ex_idx = j; 
+        end
+    end
+
     genvar t;
     always_ff @(posedge clock) begin
-        if (reset) begin
+        if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
-            // rs_alu_ex        <= `SD `RS_ALU_SIZE'h0;
             rs_alu_counter   <= `SD `RS_ALU_LEN'h0;
             rs_alu_out_valid <= `SD 1'b0;
+            is_issued_before <= `SD 1'b0;
         end 
-        else if (commit_mis_pred) begin
-            rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
-            // rs_alu_ex        <= `SD `RS_ALU_SIZE'h0;
-            rs_alu_counter   <= `SD `RS_ALU_LEN'h0;
-            rs_alu_out_valid <= `SD 1'b0;
-        end  
         else begin
-            rs_alu_counter <= `SD rs_alu_counter + enable - rs_alu_ex[rs_alu_ex_idx];
+            rs_alu_counter <= `SD rs_alu_counter + enable - ~no_rs_selected;
             // dispatch 
             if (enable) begin// instr can be dispatched
+                rs_alu_packets[rs_alu_free_idx].PC <= `SD PC;
+                rs_alu_packets[rs_alu_free_idx].NPC <= `SD NPC;
                 rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
                 rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD opb_ready;
                 
@@ -127,10 +131,11 @@ module rs_alu(
             end
             
             // issue
-            if (rs_alu_ex[rs_alu_ex_idx]) begin
+            if (~no_rs_selected && issue) begin
                 rs_alu_packet <= `SD rs_alu_packets[rs_alu_ex_idx];
                 rs_alu_out_valid <= `SD 1'b1;
                 rs_alu_free[rs_alu_ex_idx] <= `SD 1'b1;
+                is_issued_before <= `SD 1'b1;
             end
             else
                 rs_alu_out_valid <= `SD 1'b0;
