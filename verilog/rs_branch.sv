@@ -33,37 +33,28 @@ module rs_branch(
     input                    local_pred_direction,
     input                    global_pred_direction,
     input                    commit_mis_pred,
-    input [`PRF_LEN-1:0]     cdb_dest_preg_idx,
+    // cdb broadcast
     input                    cdb_broadcast_valid,
-    input [`XLEN-1]          cdb_value, 
-
+    input [`PRF_LEN-1:0]     cdb_dest_preg_idx,
+    input [`XLEN-1:0]        cdb_value,                            
     input                    cdb_broadcast_is_branch,
 
     output RS_BRANCH_PACKET  rs_branch_packet,     // overwrite opa and opb value, if needed
     output logic             rs_branch_out_valid,
     output logic             rs_branch_full           // sent rs_full signal to if stage
-    `ifdef DEBUG
-        , output RS_BR_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
-        , output logic [`RS_BR_LEN:0] rs_branch_counter
-        , output logic [`RS_BR_SIZE-1:0] rs_branch_ex
-        , output logic [`RS_BR_SIZE-1:0] psel_gnt    
-        , output logic [`RS_BR_SIZE-1:0] rs_branch_free
-        , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx
-        , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
-    `endif
+
 );
 
-    `ifndef DEBUG
-        RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets;
-        logic [`RS_BR_LEN:0] rs_branch_counter;
-        logic [`RS_BR_SIZE-1:0] rs_branch_ex;     // goes to priority selector (data ready && FU free)
-        logic [`RS_BR_SIZE-1:0] psel_gnt;  // output of the priority selector
-        logic [`RS_BR_SIZE-1:0] rs_branch_free;
-        logic [`RS_BR_LEN-1:0] rs_branch_free_idx; // the rs idx that is selected for the dispatched instr
-        logic [`RS_BR_LEN-1:0] rs_branch_ex_idx;
-        logic issue;        // whether rs can issue packet
-        logic is_issued_before;
-    `endif
+    RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets;
+    logic [`RS_BR_LEN:0] rs_branch_counter;
+    logic [`RS_BR_SIZE-1:0] rs_branch_ex;     // goes to priority selector (data ready && FU free)
+    logic [`RS_BR_SIZE-1:0] psel_gnt;         // output of the priority selector
+    logic [`RS_BR_SIZE-1:0] rs_branch_free;
+    logic [`RS_BR_LEN-1:0] rs_branch_free_idx; // the rs idx that is selected for the dispatched instr
+    logic [`RS_BR_LEN-1:0] rs_branch_ex_idx;
+    logic issue;                               // whether rs can issue packet
+    logic is_issued_before;
+
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued

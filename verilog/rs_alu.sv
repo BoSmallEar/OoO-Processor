@@ -29,7 +29,8 @@ module rs_alu(
     input [`ROB_LEN-1:0]  rob_idx,
     input  ALU_FUNC       alu_func,     // packet from id
     input                 commit_mis_pred,
-    
+    // cdb broadcast
+    input                 cdb_broadcast_valid,
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
     input                 cdb_broadcast_valid,
     input [`XLEN-1:0]     cdb_value,

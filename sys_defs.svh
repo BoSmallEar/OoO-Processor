@@ -344,11 +344,15 @@ typedef struct packed {
 	logic       wr_mem;           // does inst write memory?
 	logic       cond_branch;      // is inst a conditional branch?
 	logic       uncond_branch;    // is inst an unconditional branch?
+
 	logic       halt;             // is this a halt?
 	logic       illegal;          // is this instruction illegal?
 	logic       csr_op;           // is this a CSR operation? (we only used this as a cheap way to get return code)
 	logic       valid;            // is inst a valid instruction to be counted for CPI calculations?
-	logic       branch_prediction;// is the branch predict taken or not taken
+	logic       branch_prediction;// is the branch predict taken or not taken 
+	logic		local_taken;
+	logic		global_taken;
+
 } ID_PACKET;
 
 typedef struct packed {
@@ -392,6 +396,13 @@ typedef struct packed {
 	logic [`PRF_LEN-1:0] dest_preg_idx;	// dest physcial reg index
 	logic [4:0]          dest_areg_idx;	// dest arch reg index
 	logic                rob_mis_pred;  // whether this is a mispredicted branch
+	logic                cond_branch;
+	logic                uncond_branch;
+	logic [`XLEN-1:0]    target_PC;     // branch target PC
+	logic                local_pred_direction;
+	logic                global_pred_direction;
+	logic                branch_direction;
+	logic                branch_mis_pred;
 } ROB_PACKET;
 
 //////////////////////////////////////////////
@@ -486,7 +497,7 @@ typedef struct packed {
 	logic                   uncond_branch;
 	logic                   br_pred_direction;
 	logic                   br_pred_target_PC;
-	logic                   local_pred_direction,
+	logic                   local_pred_direction,   
 	logic                   global_pred_direction,
 
 } RS_BRANCH_PACKET;

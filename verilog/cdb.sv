@@ -30,7 +30,9 @@ module cdb(
     input [`XLEN-1:0]     br_target_PC,
     input [`PRF_LEN-1:0]  br_prf_idx,
     input [`ROB_LEN-1:0]  br_rob_idx,
-    input                 br_mis_pred,              
+    input                 br_mis_pred, 
+    input                 br_cond_branch,
+    input                 br_uncond_branch,             
     input                 br_local_pred_direction,  // predicted by local predictor
     input                 br_global_pred_direction, // predicted by global predictor
     input [`XLEN-1:0]     br_PC,

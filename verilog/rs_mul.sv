@@ -29,39 +29,28 @@ module rs_mul(
     input [`ROB_LEN-1:0]    rob_idx,
     input ALU_FUNC          mul_func,
     input                   commit_mis_pred,
-    input [`PRF_LEN-1:0]    cdb_dest_preg_idx,
+    // cdb broadcast
     input                   cdb_broadcast_valid,
+    input [`PRF_LEN-1:0]    cdb_dest_preg_idx,
     input [`XLEN-1:0]       cdb_value,
-
+    // issue
     input                   cdb_broadcast_is_mul;
-
-    output RS_MUL_PACKET    rs_mul_packet,     // overwrite opa and opb value, if needed
+    // OUTPUTS
+    output RS_MUL_PACKET    rs_mul_packet,        // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
-    output logic            rs_mul_full,           // sent rs_full signal to if stage                
-    
-
-    `ifdef DEBUG
-        , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
-        , output logic [`RS_MUL_LEN:0] rs_mul_counter
-        , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex
-        , output logic [`RS_MUL_SIZE-1:0] psel_gnt    
-        , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
-        , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx
-        , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
-    `endif
+    output logic            rs_mul_full            // sent rs_full signal to if stage                
 );
 
-    `ifndef DEBUG
-        RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
-        logic [`RS_MUL_LEN:0] rs_mul_counter;
-        logic [`RS_MUL_SIZE-1:0] rs_mul_ex;     // goes to priority selector (data ready && FU free)
-        logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
-        logic [`RS_MUL_SIZE-1:0] rs_mul_free;
-        logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
-        logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
-        logic issue;        // whether rs can issue packet
-        logic is_issued_before;
-    `endif
+
+    RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
+    logic [`RS_MUL_LEN:0] rs_mul_counter;
+    logic [`RS_MUL_SIZE-1:0] rs_mul_ex;     // goes to priority selector (data ready && FU free)
+    logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
+    logic [`RS_MUL_SIZE-1:0] rs_mul_free;
+    logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
+    logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
+    logic issue;        // whether rs can issue packet
+    logic is_issued_before;
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued

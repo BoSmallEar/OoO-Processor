@@ -35,10 +35,12 @@ module branch(
     output logic [`PRF_LEN-1:0]  br_prf_idx,
     output logic [`ROB_LEN-1:0]  br_rob_idx,
 	output logic                 br_mis_pred,
+	output logic                 br_cond_branch,
+	output logic                 br_uncond_branch,
 	output logic                 br_local_pred_direction,     // direction predicted by local predictor
 	output logic                 br_global_pred_direction,    // direction predicted by global predictor
 	output logic [`XLEN-1:0]     br_PC
-)
+);
 
 	logic br_cond;
 
@@ -48,14 +50,16 @@ module branch(
 		.cond(br_cond)
 	);
 
-	assign br_target_PC = rs_branch_packet.PC + rs_branch_packet.offset;
-	assign br_prf_idx = rs_branch_packet.dest_preg_idx; 
-	assign br_rob_idx = rs_branch_packet.rob_idx;
-	assign br_direction = rs_branch_packet.cond_branch ? br_cond : 1;
-	assign br_mis_pred = (rs_branch_packet.br_pred_direction != br_direction) || (rs_branch_packet.cond_branch && (rs_branch_packet.br_pred_target_PC != br_target_PC));
-	assign br_local_pred_direction = rs_branch_packet.local_pred_direction;
+	assign br_target_PC             = rs_branch_packet.PC + rs_branch_packet.offset;
+	assign br_prf_idx               = rs_branch_packet.dest_preg_idx; 
+	assign br_rob_idx               = rs_branch_packet.rob_idx;
+	assign br_direction             = rs_branch_packet.cond_branch ? br_cond : 1;
+	assign br_mis_pred              = rs_branch_packet.br_pred_target_PC != br_target_PC;
+	assign br_cond_branch           = rs_branch_packet.cond_branch;
+	assign br_uncond_branch         = rs_branch_packet.uncond
+	assign br_local_pred_direction  = rs_branch_packet.local_pred_direction;
 	assign br_global_pred_direction = rs_branch_packet.global_pred_direction;
-	assign br_PC = rs_branch_packet.PC;
+	assign br_PC                    = rs_branch_packet.PC;
 
 	always_ff @(posedge clock) begin
 		if (reset)
