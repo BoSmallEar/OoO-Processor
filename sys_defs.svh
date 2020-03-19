@@ -16,8 +16,8 @@
 //
 //////////////////////////////////////////////
 
-`define NUM_MEM_TAGS           8
-`define MEM_LATENCY_IN_CYCLES  0
+`define NUM_MEM_TAGS           15
+`define MEM_LATENCY_IN_CYCLES  10
 
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
@@ -292,7 +292,7 @@ typedef struct packed {
 //////////////////////////////////////////////
 
 `define PRF_SIZE      16	// number of entries
-`define PRF_LEN		  8		// length in bits == log(PRF_SIZE)
+`define PRF_LEN		  4		// length in bits == log(PRF_SIZE)
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
 `define RS_ALU_SIZE		  8		// number of entries: RS ALU module

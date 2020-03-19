@@ -6,7 +6,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-`define DEBUG
 `ifndef __ROB_V__
 `define __ROB_V__
 
@@ -51,12 +50,17 @@ module rob(
     output logic                commit_halt,
     output logic                mis_pred_is_head
 
+`ifdef DEBUG
+    , output ROB_PACKET [`ROB_SIZE-1:0]    rob_packets
+`endif
 );
 
     logic [`ROB_LEN-1:0]          rob_head;
     logic                         rob_empty;
+`ifndef DEBUG
     ROB_PACKET [`ROB_SIZE-1:0]    rob_packets;
-     
+`endif
+
     logic [`ROB_LEN:0]            rob_counter;
 
     assign rob_empty                    = (rob_counter == 0);

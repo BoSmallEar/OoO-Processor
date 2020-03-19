@@ -63,8 +63,8 @@ module prf(
     assign prf_free_preg_idx = free_preg_queue[free_preg_queue_head];
     always_ff @(posedge clock) begin
         if (reset) begin
-            prf_free              <= `SD ~`PRF_SIZE'b0;
-            prf_valid             <= `SD `PRF_SIZE'b0;
+            prf_free              <= `SD ~`PRF_SIZE'b1;
+            prf_valid             <= `SD `PRF_SIZE'b1;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 free_preg_queue[i] <= `SD i;
             end 
@@ -81,10 +81,10 @@ module prf(
         end
         else begin 
             if (commit_valid) begin
-                // commit
-                prf_valid[rrat_prev_reg_idx]  <= `SD 1'b0;
-                prf_free[rrat_prev_reg_idx]   <= `SD 1'b1;
+                // commit    
                 if (rrat_prev_reg_idx != `PRF_LEN'b0) begin
+                    prf_valid[rrat_prev_reg_idx]  <= `SD 1'b0;
+                    prf_free[rrat_prev_reg_idx]   <= `SD 1'b1;
                     free_preg_queue[free_preg_queue_tail] <= `SD rrat_prev_reg_idx;
                     free_preg_queue_tail <= `SD free_preg_queue_tail == `PRF_SIZE-1 ? 1 : free_preg_queue_tail+1;
                 end

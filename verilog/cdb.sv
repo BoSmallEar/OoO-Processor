@@ -18,11 +18,11 @@ module cdb(
     input [`XLEN-1:0]     mul_PC,
 
     /* Inputs from MEM */
-    input                 mem_valid,
-    input [`XLEN-1:0]     mem_value,
-    input [`PRF_LEN-1:0]  mem_prf_idx,
-    input [`ROB_LEN-1:0]  mem_rob_idx,
-    input [`XLEN-1:0]     mem_PC,
+    // input                 mem_valid,
+    // input [`XLEN-1:0]     mem_value,
+    // input [`PRF_LEN-1:0]  mem_prf_idx,
+    // input [`ROB_LEN-1:0]  mem_rob_idx,
+    // input [`XLEN-1:0]     mem_PC,
 
     /* Inputs from BRANCH */
     input                 br_valid,
@@ -57,6 +57,14 @@ module cdb(
     logic [3:0] cdb_req;
     logic broadcast_empty;
     logic [3:0] gnt_bus;
+
+    logic                 mem_valid;
+    logic [`XLEN-1:0]     mem_value;
+    logic [`PRF_LEN-1:0]  mem_prf_idx;
+    logic [`ROB_LEN-1:0]  mem_rob_idx;
+    logic [`XLEN-1:0]     mem_PC;
+    
+    assign mem_valid = 0;
     assign cdb_req = {alu_valid, mul_valid, mem_valid, br_valid};
 
     // WIDTH is # candidates to select

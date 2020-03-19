@@ -37,28 +37,28 @@ module rs_mem(
     output RS_MEM_PACKET  rs_mem_packet,     // overwrite opa and opb value, if needed
     output                rs_mem_out_valid,
     output                rs_mem_full           // sent rs_mem_full signal to if stage
-    `ifdef DEBUG
-        , output RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
-        , output logic [`RS_MEM_LEN:0] rs_mem_counter
-        , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex
-        , output logic [`RS_MEM_SIZE-1:0] psel_gnt    
-        , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
-        , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
-        , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
-    `endif
+`ifdef DEBUG
+    , output RS_MEM_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
+    , output logic [`RS_MEM_LEN:0] rs_mem_counter
+    , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex     // goes to priority selector (data ready && FU free)
+    , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
+    , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
+`endif
 );
 
     `ifndef DEBUG
-        RS_ALU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets;
+        RS_MEM_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets;
         logic [`RS_MEM_LEN:0] rs_mem_counter;
         logic [`RS_MEM_SIZE-1:0] rs_mem_ex;     // goes to priority selector (data ready && FU free)
-        logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector
         logic [`RS_MEM_SIZE-1:0] rs_mem_free;
         logic [`RS_MEM_LEN-1:0] rs_mem_free_idx; // the rs idx that is selected for the dispatched instr
         logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx;
+    `endif
+    
+        logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector
         logic issue;        // whether rs can issue packet
         logic is_issued_before;
-    `endif
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued
@@ -109,7 +109,7 @@ module rs_mem(
             is_issued_before <= `SD 1'b0;
         end 
         else begin
-            rs_mem_counter <= `SD rs_mem_counter + enable - ~no_rs_selected;
+            rs_mem_counter <= `SD rs_mem_counter + enable - (!no_rs_selected);
             // dispatch 
             if (enable) begin// instr can be dispatched
                 rs_mem_packets[rs_mem_free_idx].PC <= `SD PC;
@@ -130,7 +130,7 @@ module rs_mem(
             end
             
             // issue
-            if (~no_rs_selected && issue) begin
+            if ((!no_rs_selected) && issue) begin
                 rs_fu_packet <= `SD rs_mem_packets[rs_mem_ex_idx];
                 rs_mem_out_valid <= `SD 1'b1;
                 rs_mem_free[rs_mem_ex_idx] <= `SD 1'b1;

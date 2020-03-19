@@ -41,22 +41,32 @@ module rs_alu(
     output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
     output logic          rs_alu_out_valid,
     output logic          rs_alu_full           // sent rs_full signal to if stage
+`ifdef DEBUG
+    , output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
+    , output logic [`RS_ALU_LEN:0] rs_alu_counter
+    , output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
+    , output logic [`RS_ALU_SIZE-1:0] rs_alu_free
+    , output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
+`endif
 );
 
-
-        RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
-        logic [`RS_ALU_LEN:0] rs_alu_counter;
-        logic [`RS_ALU_SIZE-1:0] rs_alu_ex;     // goes to priority selector (data ready && FU free)
-        logic [`RS_ALU_SIZE-1:0] psel_gnt;  // output of the priority selector
-        logic [`RS_ALU_SIZE-1:0] rs_alu_free;
-        logic [`RS_ALU_LEN-1:0] rs_alu_free_idx; // the rs idx that is selected for the dispatched instr
-        logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
-        logic issue;        // whether rs can issue packet
-        logic is_issued_before;
+`ifndef DEBUG
+    RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
+    logic [`RS_ALU_LEN:0] rs_alu_counter;
+    logic [`RS_ALU_SIZE-1:0] rs_alu_ex;     // goes to priority selector (data ready && FU free)
+    logic [`RS_ALU_SIZE-1:0] rs_alu_free;
+    logic [`RS_ALU_LEN-1:0] rs_alu_free_idx; // the rs idx that is selected for the dispatched instr
+    logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
+`endif
+    
+    logic issue;        // whether rs can issue packet 
+    logic alu_free;
+    logic [`RS_ALU_SIZE-1:0] psel_gnt;  // output of the priority selector
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued
-    assign issue = ~is_issued_before | cdb_broadcast_is_alu;
+    assign issue = cdb_broadcast_is_alu | alu_free;
 
     assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
 
@@ -100,10 +110,10 @@ module rs_alu(
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
             rs_alu_counter   <= `SD `RS_ALU_LEN'h0;
             rs_alu_out_valid <= `SD 1'b0;
-            is_issued_before <= `SD 1'b0;
+            alu_free <= `SD 1'b1;
         end 
         else begin
-            rs_alu_counter <= `SD rs_alu_counter + (enable&&!halt&&!illegal) - ~no_rs_selected;
+            rs_alu_counter <= `SD rs_alu_counter + (enable&&!halt&&!illegal) - (!no_rs_selected);
             // dispatch 
             if (enable && !halt &&!illegal) begin// instr can be dispatched
                 rs_alu_packets[rs_alu_free_idx].PC <= `SD PC;
@@ -123,7 +133,7 @@ module rs_alu(
             end
             
             // issue
-            if (~no_rs_selected && issue) begin
+            if ((!no_rs_selected) && issue) begin
                 rs_alu_packet <= `SD rs_alu_packets[rs_alu_ex_idx];
                 rs_alu_out_valid <= `SD 1'b1;
                 rs_alu_free[rs_alu_ex_idx] <= `SD 1'b1;

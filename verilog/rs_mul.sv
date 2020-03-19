@@ -38,17 +38,28 @@ module rs_mul(
     // OUTPUTS
     output RS_MUL_PACKET    rs_mul_packet,        // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
-    output logic            rs_mul_full            // sent rs_full signal to if stage                
+    output logic            rs_mul_full            // sent rs_full signal to if stage     
+`ifdef DEBUG
+    , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
+    , output logic [`RS_MUL_LEN:0] rs_mul_counter
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex     // goes to priority selector (data ready && FU free)
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+`endif           
 );
 
-
+    `ifndef DEBUG
     RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
     logic [`RS_MUL_LEN:0] rs_mul_counter;
     logic [`RS_MUL_SIZE-1:0] rs_mul_ex;     // goes to priority selector (data ready && FU free)
-    logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
     logic [`RS_MUL_SIZE-1:0] rs_mul_free;
     logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
     logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
+    `endif
+
+    
+    logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
     logic issue;        // whether rs can issue packet
     logic is_issued_before;
 
@@ -104,7 +115,7 @@ module rs_mul(
             is_issued_before <= `SD 1'b0;
         end 
         else begin
-            rs_mul_counter <= `SD rs_mul_counter + enable - ~no_rs_selected;
+            rs_mul_counter <= `SD rs_mul_counter + enable - (!no_rs_selected);
             // dispatch 
             if (enable) begin// instr can be dispatched
                 rs_mul_packets[rs_mul_free_idx].PC <= `SD PC;
@@ -122,7 +133,7 @@ module rs_mul(
             end
             
             // issue
-            if (~no_rs_selected && issue) begin
+            if ((!no_rs_selected) && issue) begin
                 rs_mul_packet <= `SD rs_mul_packets[rs_mul_ex_idx];
                 rs_mul_out_valid <= `SD 1'b1;
                 rs_mul_free[rs_mul_ex_idx] <= `SD 1'b1;

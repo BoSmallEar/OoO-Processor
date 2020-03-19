@@ -27,9 +27,14 @@ module rrat(
     output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0] rrat_free_preg_queue_backup,        // rrat
     output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_head_backup,   // rrat
     output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_tail_backup   // rrat
+`ifdef DEBUG
+    , output logic [31:0] [`PRF_LEN-1:0]     rrat_packets 
+`endif
 );
 
+`ifndef DEBUG
     logic [31:0] [`PRF_LEN-1:0] rrat_packets;
+`endif
 
     logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue;
     logic [`PRF_LEN-1:0]                  free_preg_queue_head;
@@ -41,8 +46,8 @@ module rrat(
     always_ff @(posedge clock) begin
         if (reset) begin
             rrat_packets      <= `SD '{32{`PRF_LEN'b0}};
-            rrat_free_backup  <= `SD ~`PRF_SIZE'b0;
-            rrat_valid_backup <= `SD `PRF_SIZE'b0;
+            rrat_free_backup  <= `SD ~`PRF_SIZE'b1;
+            rrat_valid_backup <= `SD `PRF_SIZE'b1;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 rrat_free_preg_queue_backup[i] <= `SD i;
             end 

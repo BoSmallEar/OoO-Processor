@@ -39,6 +39,38 @@ module top_level (
     , output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_head
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_tail
+    , output ROB_PACKET [`ROB_SIZE-1:0]            rob_packets
+    , output logic [31:0] [`PRF_LEN-1:0]           rat_packets 
+    , output logic [31:0] [`PRF_LEN-1:0]           rrat_packets 
+    
+    ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
+    ,output logic [`RS_ALU_LEN:0] rs_alu_counter
+    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
+    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_free
+    ,output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
+    ,output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
+
+    , output RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
+    , output logic [`RS_BR_LEN:0] rs_branch_counter
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_ex     // goes to priority selector (data ready && FU free) 
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_free
+    , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
+
+    // , output RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
+    // , output logic [`RS_MEM_LEN:0] rs_mem_counter
+    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex 
+    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
+    // , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
+    // , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
+
+    , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
+    , output logic [`RS_MUL_LEN:0] rs_mul_counter
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex     // goes to priority selector (data ready && FU free)
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+  
 `endif
 );
 
@@ -134,11 +166,11 @@ module top_level (
     logic                     cdb_local_pred_direction; // cdb->bp
     logic                     cdb_global_pred_direction;// cdb->bp
     // CDB OUTPUTS for mem
-    logic [`XLEN-1:0]         mem_PC;
-    logic                     mem_valid;
-    logic [`XLEN-1:0]         mem_value;
-    logic [`PRF_LEN-1:0]      mem_prf_idx;
-    logic [`ROB_LEN-1:0]      mem_rob_idx;
+    // logic [`XLEN-1:0]         mem_PC;
+    // logic                     mem_valid;
+    // logic [`XLEN-1:0]         mem_value;
+    // logic [`PRF_LEN-1:0]      mem_prf_idx;
+    // logic [`ROB_LEN-1:0]      mem_rob_idx;
 
     // ROB INPUTS
 
@@ -230,6 +262,9 @@ module top_level (
         // outputs
         .opa_preg_idx(opa_preg_idx),                // to prf
         .opb_preg_idx(opb_preg_idx)                 // to prf
+         `ifdef DEBUG
+        , .rat_packets(rat_packets)
+        `endif
     );
 
     //////////////////////////////////////////////////
@@ -253,6 +288,9 @@ module top_level (
         .rrat_free_preg_queue_backup(rrat_free_preg_queue_backup),              // to prf 
         .rrat_free_preg_queue_head_backup(rrat_free_preg_queue_head_backup),    // to prf
         .rrat_free_preg_queue_tail_backup(rrat_free_preg_queue_tail_backup)     // to prf
+         `ifdef DEBUG
+        , .rrat_packets(rrat_packets)
+        `endif
     );
 
     //////////////////////////////////////////////////
@@ -299,6 +337,10 @@ module top_level (
         .commit_illegal(commit_illegal),
         .commit_halt(commit_halt),
         .mis_pred_is_head(mis_pred_is_head)
+
+    `ifdef DEBUG
+        , .rob_packets(rob_packets)
+    `endif
     );
 
 
@@ -380,6 +422,15 @@ module top_level (
         .rs_alu_packet(rs_alu_packet),
         .rs_alu_out_valid(rs_alu_out_valid),
         .rs_alu_full(rs_alu_full)
+
+    `ifdef DEBUG
+        , .rs_alu_packets(rs_alu_packets)
+        , .rs_alu_counter(rs_alu_counter)
+        , .rs_alu_ex(rs_alu_ex)    // goes to priority selector (data ready && FU free) 
+        , .rs_alu_free(rs_alu_free)
+        , .rs_alu_free_idx(rs_alu_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_alu_ex_idx(rs_alu_ex_idx) 
+    `endif
     );
 
     //////////////////////////////////////////////////
@@ -438,6 +489,15 @@ module top_level (
         .rs_mul_packet(rs_mul_packet),
         .rs_mul_out_valid(rs_mul_out_valid),
         .rs_mul_full(rs_mul_full)
+
+    `ifdef DEBUG
+        , .rs_mul_packets(rs_mul_packets)
+        , .rs_mul_counter(rs_mul_counter)
+        , .rs_mul_ex(rs_mul_ex) 
+        , .rs_mul_free(rs_mul_free)
+        , .rs_mul_free_idx(rs_mul_free_idx)
+        , .rs_mul_ex_idx(rs_mul_ex_idx)
+    `endif
     );
 
     //////////////////////////////////////////////////
@@ -546,6 +606,15 @@ module top_level (
         .rs_branch_packet(rs_branch_packet),
         .rs_branch_out_valid(rs_branch_out_valid),
         .rs_branch_full(rs_branch_full)
+
+    `ifdef DEBUG
+        , .rs_branch_packets(rs_branch_packets)
+        , .rs_branch_counter(rs_branch_counter)
+        , .rs_branch_ex(rs_branch_ex)    // goes to priority selector (data ready && FU free) 
+        , .rs_branch_free(rs_branch_free)
+        , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_branch_ex_idx(rs_branch_ex_idx) 
+    `endif
     );
 
     //////////////////////////////////////////////////
@@ -596,11 +665,11 @@ module top_level (
         .mul_prf_idx(mul_prf_idx),
         .mul_rob_idx(mul_rob_idx),
         // MEM
-        .mem_PC(mem_PC),
-        .mem_valid(mem_valid),
-        .mem_value(mem_value),
-        .mem_prf_idx(mem_prf_idx),
-        .mem_rob_idx(mem_rob_idx),
+        // .mem_PC(mem_PC),
+        // .mem_valid(mem_valid),
+        // .mem_value(mem_value),
+        // .mem_prf_idx(mem_prf_idx),
+        // .mem_rob_idx(mem_rob_idx),
         // BRANCH
         .br_PC(br_PC),
         .br_valid(br_valid),

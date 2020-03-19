@@ -79,7 +79,7 @@ module icache(
     wire unanswered_miss = changed_addr ? !Icache2proc_valid :
                             miss_outstanding & (mem2Icache_response==0);
 
-    assign data_write_enable = (curr_mem_tag == mem2Icache_tag);
+    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0);
     wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable;
                             
     assign {current_tag, current_index} = proc2Icache_addr[31:3];
@@ -93,7 +93,11 @@ module icache(
             for (i=0; i<32; i++) begin
                 icache_blocks[i].valid <= `SD 1'b0;
             end
-        end
+            miss_outstanding <= `SD 1'b0;
+            last_index       <= `SD 5'b1;// arbitrary except 0
+            last_tag         <= `SD 8'b1;//arbitrary except 0
+            curr_mem_tag     <= `SD 4'b0;
+        end 
         else begin
             miss_outstanding <= `SD unanswered_miss;
             last_index       <= `SD current_index;

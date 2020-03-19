@@ -43,17 +43,28 @@ module rs_branch(
     output RS_BRANCH_PACKET  rs_branch_packet,     // overwrite opa and opb value, if needed
     output logic             rs_branch_out_valid,
     output logic             rs_branch_full           // sent rs_full signal to if stage
+`ifdef DEBUG
+    , output RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
+    , output logic [`RS_BR_LEN:0] rs_branch_counter
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_ex     // goes to priority selector (data ready && FU free) 
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_free
+    , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
+`endif
 
 );
 
+    `ifndef DEBUG
     RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets;
     logic [`RS_BR_LEN:0] rs_branch_counter;
-    logic [`RS_BR_SIZE-1:0] rs_branch_ex;     // goes to priority selector (data ready && FU free)
-    logic [`RS_BR_SIZE-1:0] psel_gnt;         // output of the priority selector
+    logic [`RS_BR_SIZE-1:0] rs_branch_ex;     // goes to priority selector (data ready && FU free) 
     logic [`RS_BR_SIZE-1:0] rs_branch_free;
     logic [`RS_BR_LEN-1:0] rs_branch_free_idx; // the rs idx that is selected for the dispatched instr
-    logic [`RS_BR_LEN-1:0] rs_branch_ex_idx;
-    logic issue;                               // whether rs can issue packet
+    logic [`RS_BR_LEN-1:0] rs_branch_ex_idx; 
+    `endif
+
+    logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector
+    logic issue;        // whether rs can issue packet
     logic is_issued_before;
 
 
@@ -106,7 +117,7 @@ module rs_branch(
             rs_branch_out_valid <= `SD 1'b0;
         end 
         else begin
-            rs_branch_counter <= `SD rs_branch_counter + enable - ~no_rs_selected;
+            rs_branch_counter <= `SD rs_branch_counter + enable - (!no_rs_selected);
             // dispatch 
             if (enable) begin// instr can be dispatched
                 rs_branch_packets[rs_branch_free_idx].PC <= `SD PC;
@@ -130,7 +141,7 @@ module rs_branch(
             end
             
             // issue
-            if (~no_rs_selected && issue) begin
+            if ((!no_rs_selected) && issue) begin
                 rs_branch_packet <= `SD rs_branch_packets[rs_branch_ex_idx];
                 rs_branch_out_valid <= `SD 1'b1;
                 rs_branch_free[rs_branch_ex_idx] <= `SD 1'b1;
@@ -156,4 +167,4 @@ module rs_branch(
     end
 
 endmodule
-`endif // __RS_BRANCH_V__
+`endif // __RS_BRANCH_V__ 

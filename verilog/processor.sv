@@ -37,6 +37,37 @@ module processor (
     , output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_head
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_tail
+    , output ROB_PACKET [`ROB_SIZE-1:0]            rob_packets 
+    , output logic [31:0] [`PRF_LEN-1:0]     rat_packets 
+    , output logic [31:0] [`PRF_LEN-1:0]     rrat_packets 
+
+    ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
+    ,output logic [`RS_ALU_LEN:0] rs_alu_counter
+    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
+    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_free
+    ,output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
+    ,output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
+
+    , output RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
+    , output logic [`RS_BR_LEN:0] rs_branch_counter
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_ex     // goes to priority selector (data ready && FU free) 
+    , output logic [`RS_BR_SIZE-1:0] rs_branch_free
+    , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
+
+    // , output RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
+    // , output logic [`RS_MEM_LEN:0] rs_mem_counter
+    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex 
+    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
+    // , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
+    // , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
+
+    , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
+    , output logic [`RS_MUL_LEN:0] rs_mul_counter
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex     // goes to priority selector (data ready && FU free)
+    , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
 `endif
 );
 
@@ -142,7 +173,7 @@ module processor (
 //                   top level                  //
 //                                              //
 //////////////////////////////////////////////////
-    assign rs_full = {rs_alu_full,rs_mul_full,rs_mem_full,rs_branch_full}; // ???
+    assign rs_full = {rs_branch_full,rs_mem_full,rs_mul_full,rs_alu_full}; // ???
     
     top_level top_level0(
         //inputs
@@ -174,6 +205,30 @@ module processor (
         , .free_preg_queue(free_preg_queue)
         , .free_preg_queue_head(free_preg_queue_head)
         , .free_preg_queue_tail(free_preg_queue_tail)
+        , .rob_packets(rob_packets)
+        , .rat_packets(rat_packets)
+        , .rrat_packets(rrat_packets)
+
+        , .rs_alu_packets(rs_alu_packets)
+        , .rs_alu_counter(rs_alu_counter)
+        , .rs_alu_ex(rs_alu_ex)    // goes to priority selector (data ready && FU free) 
+        , .rs_alu_free(rs_alu_free)
+        , .rs_alu_free_idx(rs_alu_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_alu_ex_idx(rs_alu_ex_idx) 
+
+        , .rs_mul_packets(rs_mul_packets)
+        , .rs_mul_counter(rs_mul_counter)
+        , .rs_mul_ex(rs_mul_ex) 
+        , .rs_mul_free(rs_mul_free)
+        , .rs_mul_free_idx(rs_mul_free_idx)
+        , .rs_mul_ex_idx(rs_mul_ex_idx)
+
+        , .rs_branch_packets(rs_branch_packets)
+        , .rs_branch_counter(rs_branch_counter)
+        , .rs_branch_ex(rs_branch_ex)    // goes to priority selector (data ready && FU free) 
+        , .rs_branch_free(rs_branch_free)
+        , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_branch_ex_idx(rs_branch_ex_idx)
     `endif
     );
 

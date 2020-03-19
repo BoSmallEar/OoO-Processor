@@ -26,9 +26,14 @@ module rat(
 
     output logic [`PRF_LEN-1:0] opa_preg_idx,
     output logic [`PRF_LEN-1:0] opb_preg_idx
+    `ifdef DEBUG
+    , output logic [31:0] [`PRF_LEN-1:0]     rat_packets 
+    `endif
 );
 
+    `ifndef DEBUG
     logic [31:0] [`PRF_LEN-1:0] rat_packets;
+    `endif
 
     assign opa_preg_idx = rat_packets[opa_areg_idx];
     assign opb_preg_idx = rat_packets[opb_areg_idx];
