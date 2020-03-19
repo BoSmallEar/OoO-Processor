@@ -72,7 +72,7 @@ module cdb(
     always_ff @(posedge clock) begin
         if (reset || broadcast_empty) begin
             cdb_broadcast_valid       <= `SD 1'b0;
-            cdb_broadcast_inst_PC     <= `SD XLEN'hfacebeec;
+            cdb_broadcast_inst_PC     <= `SD `XLEN'hfacebeec;
             cdb_mis_pred              <= `SD 1'b0;
             cdb_br_target_PC          <= `SD `XLEN'hfacebeec;
             cdb_local_pred_direction  <= `SD 1'b0;
@@ -80,28 +80,28 @@ module cdb(
         end
         else begin
             cdb_broadcast_valid <= `SD 1'b1;
-            
             case(module_select)
                 4'b1000: begin
-                    cdb_dest_preg_idx       <= `SD alu_prf_entry;
+                    cdb_dest_preg_idx       <= `SD alu_prf_idx;
                     cdb_broadcast_value     <= `SD alu_value;
                     cdb_rob_idx             <= `SD alu_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD alu_PC;
                 end
                 4'b0100: begin
-                    cdb_dest_preg_idx       <= `SD mul_prf_entry;
+                    cdb_dest_preg_idx       <= `SD mul_prf_idx;
                     cdb_broadcast_value     <= `SD mul_value;
                     cdb_rob_idx             <= `SD mul_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD mul_PC;
                 end
                 4'b0010: begin 
-                    cdb_dest_preg_idx       <= `SD mem_prf_entry;
+                    cdb_dest_preg_idx       <= `SD mem_prf_idx;
                     cdb_broadcast_value     <= `SD mem_value;
                     cdb_rob_idx             <= `SD mem_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD mem_PC;
                 end
                 4'b0001: begin 
-                    cdb_dest_preg_idx       <= `SD br_prf_entry;
+                    cdb_broadcast_valid     <= `SD 1'b0;
+                    cdb_dest_preg_idx       <= `SD br_prf_idx;
                     cdb_broadcast_value     <= `SD 0;
                     cdb_rob_idx             <= `SD br_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD br_PC;
@@ -112,7 +112,7 @@ module cdb(
                     cdb_global_pred_direction <= `SD br_global_pred_direction;
                 end
                 default: begin 
-                    cdb_broadcast_inst_PC   <= `SD XLEN'hfacebeec;
+                    cdb_broadcast_inst_PC   <= `SD `XLEN'hfacebeec;
                     cdb_dest_preg_idx       <= `SD 0;
                     cdb_broadcast_value     <= `SD 0;
                     cdb_rob_idx             <= `SD 0;

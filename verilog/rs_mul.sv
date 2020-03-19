@@ -34,7 +34,7 @@ module rs_mul(
     input [`PRF_LEN-1:0]    cdb_dest_preg_idx,
     input [`XLEN-1:0]       cdb_value,
     // issue
-    input                   cdb_broadcast_is_mul;
+    input                   cdb_broadcast_is_mul,
     // OUTPUTS
     output RS_MUL_PACKET    rs_mul_packet,        // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
@@ -59,7 +59,7 @@ module rs_mul(
     assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
 
     // find out the smallest index that corresponds to a free rs entry
-    genvar i;
+    int i;
     always_comb begin
         rs_mul_free_idx = `RS_MUL_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_MUL_SIZE-1; i>=0; i--) begin
@@ -68,7 +68,7 @@ module rs_mul(
     end
 
     // generate the status of each rs entry, find out those that are waken up
-    genvar k;
+    int k;
     always_comb begin
         rs_mul_ex = `RS_MUL_SIZE'h0;
         for (k = 0; k<`RS_MUL_SIZE; k++) begin
@@ -87,7 +87,7 @@ module rs_mul(
     );
 
     // find out the rs entry that is selected to execute
-    genvar j;
+    int j;
     always_comb begin
         rs_mul_ex_idx = `RS_MUL_LEN'h0; // avoid additional latching
         for (j=0; j<`RS_MUL_SIZE; j++) begin
@@ -95,7 +95,7 @@ module rs_mul(
         end
     end
 
-    genvar t;
+    int t;
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;
@@ -148,3 +148,4 @@ module rs_mul(
         end    
     end
 endmodule
+`endif

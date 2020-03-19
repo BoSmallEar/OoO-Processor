@@ -1,16 +1,17 @@
 module brcond(// Inputs
 	input [`XLEN-1:0]  rs1,    // Value to check against condition
 	input [`XLEN-1:0]  rs2,
+	input [2:0]        branch_func,
 
-	output logic       cond,            // 0/1 condition result (False/True)
+	output logic       cond            // 0/1 condition result (False/True)
 );
 
 	logic signed [`XLEN-1:0] signed_rs1, signed_rs2;
-	assign signed_rs1 = rs_branch_packet.opa_value;
-	assign signed_rs2 = rs_branch_packet.opb_value;
+	assign signed_rs1 = rs1;
+	assign signed_rs2 = rs2;
 	always_comb begin
 		cond = 0;
-		case (func)
+		case (branch_func)
 			3'b000: cond = signed_rs1 == signed_rs2;  // BEQ
 			3'b001: cond = signed_rs1 != signed_rs2;  // BNE
 			3'b100: cond = signed_rs1 < signed_rs2;   // BLT
@@ -27,7 +28,7 @@ module branch(
 	input                        reset,
 	input                        branch_enable,
 	input  RS_BRANCH_PACKET      rs_branch_packet,
-	input                        cdb_broadcast_alu,
+	input                        cdb_broadcast_is_branch,
 
 	output logic                 br_direction, // branch direction 0 NT 1 T
 	output logic [`XLEN-1:0]     br_target_PC, // branch target PC = PC+offset
@@ -47,6 +48,7 @@ module branch(
 	brcond brcond0(
 		.rs1(rs_branch_packet.opa_value),
 		.rs2(rs_branch_packet.opb_value),
+		.branch_func(rs_branch_packet.branch_func),
 		.cond(br_cond)
 	);
 
@@ -56,7 +58,7 @@ module branch(
 	assign br_direction             = rs_branch_packet.cond_branch ? br_cond : 1;
 	assign br_mis_pred              = rs_branch_packet.br_pred_target_PC != br_target_PC;
 	assign br_cond_branch           = rs_branch_packet.cond_branch;
-	assign br_uncond_branch         = rs_branch_packet.uncond
+	assign br_uncond_branch         = rs_branch_packet.uncond_branch;
 	assign br_local_pred_direction  = rs_branch_packet.local_pred_direction;
 	assign br_global_pred_direction = rs_branch_packet.global_pred_direction;
 	assign br_PC                    = rs_branch_packet.PC;
@@ -66,7 +68,7 @@ module branch(
 			br_valid <= `SD 1'b0;
 		else if (branch_enable)
 			br_valid <= `SD 1'b1;
-		else if (cdb_broadcast_alu)
+		else if (cdb_broadcast_is_branch)
 			br_valid <= `SD 1'b0;
 	end
 

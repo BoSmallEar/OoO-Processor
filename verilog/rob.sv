@@ -17,7 +17,10 @@ module rob(
     input                       reset,
     input [`XLEN-1:0]           PC,
     // dispatch
-    input                       dispatch_enable,         // not only depend on rob_full, (e.g. invalid instr)
+    input                       dispatch_enable,
+    input                       illegal,         // not only depend on rob_full, (e.g. invalid instr)
+    input                       halt,
+
     input [4:0]                 dest_areg_idx,
     input [`PRF_LEN-1:0]        prf_free_preg_idx,
     input                       cond_branch,
@@ -28,7 +31,7 @@ module rob(
     input                       cdb_broadcast_valid,     // make executed_rob_idx valid
     input [`ROB_LEN-1:0]        executed_rob_idx,                      
     input                       cdb_br_prediction,
-    input                       cdb_br_target_PC,
+    input [`XLEN-1:0]           cdb_br_target_PC,
     input                       cdb_mis_pred,
 
     //Outputs
@@ -44,7 +47,10 @@ module rob(
     output logic                result_local_pred_direction,
     output logic                result_global_pred_direction,
     output logic                result_branch_direction,
+    output logic                commit_illegal,
+    output logic                commit_halt,
     output logic                mis_pred_is_head
+
 );
 
     logic [`ROB_LEN-1:0]          rob_head;
@@ -53,6 +59,7 @@ module rob(
      
     logic [`ROB_LEN:0]            rob_counter;
 
+    assign rob_empty                    = (rob_counter == 0);
     assign commit_valid                 = (rob_packets[rob_head].executed) && (~rob_empty);
     assign rob_commit_dest_areg_idx     = rob_packets[rob_head].dest_areg_idx;
     assign rob_commit_dest_preg_idx     = rob_packets[rob_head].dest_preg_idx;
@@ -65,7 +72,10 @@ module rob(
     assign result_global_pred_direction = rob_packets[rob_head].global_pred_direction;
     assign result_branch_direction      = rob_packets[rob_head].branch_direction;
     assign mis_pred_is_head             = rob_packets[rob_head].rob_mis_pred && commit_valid;
-    assign rob_empty                    = (rob_counter == 0);
+
+    assign commit_illegal               = rob_packets[rob_head].illegal && commit_valid;
+    assign commit_halt                  = rob_packets[rob_head].halt && commit_valid;
+    
 
     always_ff @(posedge clock) begin
         if (reset) begin
@@ -81,13 +91,15 @@ module rob(
             if (dispatch_enable) begin
                 // dispatch
                 rob_packets[rob_tail].PC                    <= `SD PC;
-                rob_packets[rob_tail].executed              <= `SD 1'b0;
+                rob_packets[rob_tail].executed              <= `SD (illegal||halt) ? 1'b1 : 1'b0;
                 rob_packets[rob_tail].dest_preg_idx         <= `SD prf_free_preg_idx;
                 rob_packets[rob_tail].dest_areg_idx         <= `SD dest_areg_idx;
+                rob_packets[rob_tail].halt                  <= `SD halt;
+                rob_packets[rob_tail].illegal               <= `SD illegal;
                 rob_packets[rob_tail].rob_mis_pred          <= `SD 1'b0; 
                 rob_packets[rob_tail].cond_branch           <= `SD cond_branch;
                 rob_packets[rob_tail].uncond_branch         <= `SD uncond_branch;
-                rob_packets[rob_tail].target_PC             <= `SD `XLEN'hfacebeec 
+                rob_packets[rob_tail].target_PC             <= `SD `XLEN'hfacefeed; //come from cdb broadcast, no meaning at initialization
                 rob_packets[rob_tail].local_pred_direction  <= `SD local_pred_direction;
                 rob_packets[rob_tail].global_pred_direction <= `SD global_pred_direction;
                 rob_packets[rob_tail].branch_direction      <= `SD 1'b0;
@@ -101,7 +113,7 @@ module rob(
                 //execute
                 rob_packets[executed_rob_idx].executed         <= `SD 1'b1;
                 rob_packets[executed_rob_idx].branch_direction <= `SD cdb_br_prediction;
-                rob_packets[executed_rob_idx].target_PC        <= `Sd cdb_br_target_PC;
+                rob_packets[executed_rob_idx].target_PC        <= `SD cdb_br_target_PC;
                 rob_packets[executed_rob_idx].branch_mis_pred  <= `SD cdb_mis_pred;
             end
             rob_counter <= `SD (dispatch_enable && ~commit_valid) ? rob_counter+1 :

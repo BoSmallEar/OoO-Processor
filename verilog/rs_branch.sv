@@ -26,10 +26,11 @@ module rs_branch(
     input [`XLEN-1:0]        offset,
     input [`PRF_LEN-1:0]     dest_preg_idx,
     input [`ROB_LEN-1:0]     rob_idx,
+    input [2:0]              branch_func,
     input                    cond_branch,
     input                    uncond_branch,
     input                    br_pred_direction,
-    input                    br_pred_target_PC,
+    input [`XLEN-1:0]        br_pred_target_PC,
     input                    local_pred_direction,
     input                    global_pred_direction,
     input                    commit_mis_pred,
@@ -60,9 +61,9 @@ module rs_branch(
     //           or CDB has broadcast a Mul result such that a new packet can be issued
     assign issue = ~is_issued_before | cdb_broadcast_is_branch;
 
-    assign rs_full = (rs_branch_counter == `RS_BR_SIZE);
+    assign rs_branch_full = (rs_branch_counter == `RS_BR_SIZE);
 
-    genvar i;
+    int i;
     always_comb begin
         rs_branch_free_idx = `RS_BR_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_BR_SIZE-1; i>=0; i--) begin
@@ -71,7 +72,7 @@ module rs_branch(
     end
 
     // rs_branch_ex
-    genvar k;
+    int k;
     always_comb begin
         rs_branch_ex = `RS_BR_SIZE'h0;
         for (k = 0; k<`RS_BR_SIZE; k++) begin
@@ -89,7 +90,7 @@ module rs_branch(
         .empty(no_rs_selected)
     );
 
-    genvar j;
+    int j;
     always_comb begin
         rs_branch_ex_idx = `RS_BR_LEN'h0; // avoid additional latching
         for (j=0; j<`RS_BR_SIZE; j++) begin
@@ -97,7 +98,7 @@ module rs_branch(
         end
     end
 
-    genvar t;
+    int t;
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_branch_free      <= `SD ~`RS_BR_SIZE'h0;
@@ -117,14 +118,15 @@ module rs_branch(
                 else rs_branch_packets[rs_branch_free_idx].opa_value <= `SD opa_preg_idx;
                 if (opb_ready)  rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_value;
                 else rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_branch_packets[rs_branch_free_idx].offset <= `SD id_packet_in.offset;
+                rs_branch_packets[rs_branch_free_idx].offset <= `SD offset;
+                rs_branch_packets[rs_branch_free_idx].branch_func <= `SD branch_func;
                 rs_branch_packets[rs_branch_free_idx].cond_branch <= `SD cond_branch;
                 rs_branch_packets[rs_branch_free_idx].uncond_branch <= `SD uncond_branch;
                 rs_branch_packets[rs_branch_free_idx].br_pred_direction <= `SD br_pred_direction;
                 rs_branch_packets[rs_branch_free_idx].br_pred_target_PC <= `SD br_pred_target_PC;
                 rs_branch_packets[rs_branch_free_idx].local_pred_direction <= `SD local_pred_direction;
-                rs_branch_packets[rs_branch_free_idx].global_pred_direction <= `SD global_pred_direction;
-                rs_branch_free[rs_branch_free_idx] <= `SD 1'b0;
+                rs_branch_packets[rs_branch_free_idx].global_pred_direction <= `SD global_pred_direction;   
+                
             end
             
             // issue

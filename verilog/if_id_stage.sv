@@ -14,6 +14,8 @@
 module if_id_stage(
 	input         			 clock,                  // system clock
 	input         			 reset,                  // system reset
+	input					 rob_full,
+	input	[3:0]			 rs_full,
 	input  	[`XLEN-1:0] 	 Icache2proc_data,       // Data coming back from instruction-memory
 	input					 Icache2proc_valid,
 	input	[`XLEN-1:0]	  	 result_PC,
@@ -29,11 +31,21 @@ module if_id_stage(
 	output ID_PACKET         id_packet_out         // Output data packet from IF going to ID, see sys_defs for signal information 
 );
 
+	logic    [`XLEN-1:0] PC_reg;               // PC we are currently fetching
+	logic    [`XLEN-1:0] PC_plus_4;
+	logic    [`XLEN-1:0] btb_target_PC;
+	logic    [`XLEN-1:0] next_PC;  
+	 
+	logic			     btb_taken;
+	logic                tournament_taken;
+	logic				 decoder_valid;
+	DEST_REG_SEL 		 dest_reg_select; 
+
+
 	predictor predictor0(
 		// current instruction
 		.clock(clock),                  // system clock
-		.reset(reset),                  // system reset
-		.cond_branch(cond_branch),      // if the branch is a conditional branch to store the tounament history
+		.reset(reset),                  // system reset 
 		.PC(PC_reg),                    // PC of branch to be predicted
 		
 		// resolved branch: updates on history tables
@@ -44,9 +56,9 @@ module if_id_stage(
 		.result_cond_branch(result_cond_branch),        // if the result instr is a cond branch for updating the history table
 		
 		// output 
-		.tournament_taken(tournament_taken)              // result of the predictor : whether taken or not 
+		.tournament_taken(tournament_taken),              // result of the predictor : whether taken or not 
 		.local_taken(id_packet_out.local_taken),
-    	.global_taken(global_taid_packet_out.global_taken)
+    	.global_taken(id_packet_out.global_taken)
 	);  
 
 	btb btb0(
@@ -66,8 +78,7 @@ module if_id_stage(
 	);
 
 	decoder decoder_0 (  
-		.inst(id_packet_out.inst),
-		.valid_inst_in(id_packet_out.valid),
+		.inst(id_packet_out.inst), 
 		// Outputs
 		.opa_select(id_packet_out.opa_select),
 		.opb_select(id_packet_out.opb_select),
@@ -81,17 +92,8 @@ module if_id_stage(
 		.csr_op(id_packet_out.csr_op),
 		.halt(id_packet_out.halt),
 		.illegal(id_packet_out.illegal),
-		.valid_inst(id_packet_out.valid)
+		.valid_inst(decoder_valid)
 	);
-
-	logic    [`XLEN-1:0] PC_reg;               // PC we are currently fetching
-	logic    [`XLEN-1:0] PC_plus_4;
-	logic    [`XLEN-1:0] btb_target_PC;
-	logic    [`XLEN-1:0] next_PC; 
-	 
-	logic			     btb_taken;
-	logic                tournament_taken;
-	DEST_REG_SEL 		 dest_reg_select; 
 
 	assign next_PC =  ((id_packet_out.cond_branch && tournament_taken) || id_packet_out.uncond_branch) ? btb_target_PC : PC_plus_4;
 
@@ -99,7 +101,7 @@ module if_id_stage(
 	
 	// this mux is because the Imem gives us 64 bits not 32 bits
 	assign id_packet_out.inst = Icache2proc_data;
-	assign id_packet_out.valid = Icache2proc_valid && !result_mis_pred; 
+	assign id_packet_out.valid = Icache2proc_valid && !result_mis_pred && !rob_full && !rs_full[id_packet_out.fu_type]; 
 
 	assign id_packet_out.NPC = next_PC;
 	assign id_packet_out.PC  = PC_reg;
@@ -107,8 +109,7 @@ module if_id_stage(
 	assign id_packet_out.opa_areg_idx =  id_packet_out.inst.r.rs1;
 	assign id_packet_out.opb_areg_idx =  id_packet_out.inst.r.rs2;
 
-	assign id_packet_out.branch_prediction =  btb_taken & tournament_taken;// is the branch predict taken or not taken 
-
+	assign id_packet_out.branch_prediction =  btb_taken & tournament_taken;// is the branch predict taken or not taken  
 	always_comb begin
 		case (dest_reg_select)
 			DEST_RD:    id_packet_out.dest_areg_idx =  id_packet_out.inst.r.rd;

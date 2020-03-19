@@ -31,27 +31,19 @@ module rs_alu(
     input                 commit_mis_pred,
     // cdb broadcast
     input                 cdb_broadcast_valid,
-    input [`PRF_LEN-1:0]  cdb_dest_preg_idx,
-    input                 cdb_broadcast_valid,
+    input [`PRF_LEN-1:0]  cdb_dest_preg_idx, 
     input [`XLEN-1:0]     cdb_value,
 
-    input                 cdb_broadcast_is_alu;
+    input                 cdb_broadcast_is_alu,
+    input                 halt,
+    input                 illegal,
 
     output RS_ALU_PACKET  rs_alu_packet,     // overwrite opa and opb value, if needed
-    output                rs_alu_out_valid,
-    output                rs_alu_full           // sent rs_full signal to if stage
-    `ifdef DEBUG
-        , output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
-        , output logic [`RS_ALU_LEN:0] rs_alu_counter
-        , output logic [`RS_ALU_SIZE-1:0] rs_alu_ex
-        , output logic [`RS_ALU_SIZE-1:0] psel_gnt    
-        , output logic [`RS_ALU_SIZE-1:0] rs_alu_free
-        , output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx
-        , output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx
-    `endif
+    output logic          rs_alu_out_valid,
+    output logic          rs_alu_full           // sent rs_full signal to if stage
 );
 
-    `ifdef DEBUG
+
         RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
         logic [`RS_ALU_LEN:0] rs_alu_counter;
         logic [`RS_ALU_SIZE-1:0] rs_alu_ex;     // goes to priority selector (data ready && FU free)
@@ -61,15 +53,14 @@ module rs_alu(
         logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
         logic issue;        // whether rs can issue packet
         logic is_issued_before;
-    `endif
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued
     assign issue = ~is_issued_before | cdb_broadcast_is_alu;
 
-    assign rs_full = (rs_alu_counter == `RS_ALU_SIZE);
+    assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
 
-    genvar i;
+    int i;
     always_comb begin
         rs_alu_free_idx = `RS_ALU_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_ALU_SIZE-1; i>=0; i--) begin
@@ -78,7 +69,7 @@ module rs_alu(
     end
 
     // rs_alu_ex
-    genvar k;
+    int k;
     always_comb begin
         rs_alu_ex = `RS_ALU_SIZE'h0;
         for (k = 0; k<`RS_ALU_SIZE; k++) begin
@@ -95,7 +86,7 @@ module rs_alu(
         .empty(no_rs_selected)
     );
 
-    genvar j;
+    int j;
     always_comb begin
         rs_alu_ex_idx = `RS_ALU_LEN'h0; // avoid additional latching
         for (j=0; j<`RS_ALU_SIZE; j++) begin
@@ -103,7 +94,7 @@ module rs_alu(
         end
     end
 
-    genvar t;
+    int t;
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
@@ -112,9 +103,9 @@ module rs_alu(
             is_issued_before <= `SD 1'b0;
         end 
         else begin
-            rs_alu_counter <= `SD rs_alu_counter + enable - ~no_rs_selected;
+            rs_alu_counter <= `SD rs_alu_counter + (enable&&!halt&&!illegal) - ~no_rs_selected;
             // dispatch 
-            if (enable) begin// instr can be dispatched
+            if (enable && !halt &&!illegal) begin// instr can be dispatched
                 rs_alu_packets[rs_alu_free_idx].PC <= `SD PC;
                 rs_alu_packets[rs_alu_free_idx].NPC <= `SD NPC;
                 rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
@@ -124,9 +115,9 @@ module rs_alu(
                 else rs_alu_packets[rs_alu_free_idx].opa_value <= `SD opa_preg_idx;
                 if (opb_ready)  rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_value;
                 else rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_alu_packets[rs_alu_free_idx].alu_func <= `SD id_packet_in.alu_func;
-                rs_alu_packets[rs_alu_free_idx].dest_preg_idx < = `SD dest_preg_idx;
-                rs_alu_packets[rs_alu_free_idx].rob_idx < = `SD rob_idx;
+                rs_alu_packets[rs_alu_free_idx].alu_func <= `SD alu_func;
+                rs_alu_packets[rs_alu_free_idx].dest_preg_idx <= `SD dest_preg_idx;
+                rs_alu_packets[rs_alu_free_idx].rob_idx <= `SD rob_idx;
 
                 rs_alu_free[rs_alu_free_idx] <= `SD 1'b0;
             end

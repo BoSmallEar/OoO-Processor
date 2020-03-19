@@ -24,27 +24,37 @@ module prf(
     input                       commit_valid,
     input [`PRF_SIZE-1:0]       rrat_free_backup,                       // rrat
     input [`PRF_SIZE-1:0]       rrat_valid_backup,                      // rrat
-    input [`PRF_SIZE-1:0] [`PRF_LEN-1:0] rrat_free_preg_queue_backup;   // rrat
-    input [`PRF_LEN-1:0]        rrat_free_preg_queue_head_backup;       // rrat
-    input [`PRF_LEN-1:0]        rrat_free_preg_queue_tail_backup;       // rrat
+    input [`PRF_SIZE-1:0] [`PRF_LEN-1:0] rrat_free_preg_queue_backup,   // rrat
+    input [`PRF_LEN-1:0]        rrat_free_preg_queue_head_backup,       // rrat
+    input [`PRF_LEN-1:0]        rrat_free_preg_queue_tail_backup,       // rrat
     input [`XLEN-1:0]           cdb_result,
     input [`PRF_LEN-1:0]        cdb_dest_preg_idx,
-    input                       cdb_broadcast_valid,
-    input                       dest_preg_valid,                        // from id_fu_packet
+    input                       cdb_broadcast_valid, 
 
     output logic [`PRF_LEN-1:0] prf_free_preg_idx,
     output logic                opa_ready,
     output logic [`XLEN-1:0]    opa_value,
     output logic                opb_ready,
     output logic [`XLEN-1:0]    opb_value
+
+`ifdef DEBUG
+    , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values
+    , output logic [`PRF_SIZE-1:0]                 prf_free
+    , output logic [`PRF_SIZE-1:0]                 prf_valid
+    , output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue
+    , output logic [`PRF_LEN-1:0]                  free_preg_queue_head
+    , output logic [`PRF_LEN-1:0]                  free_preg_queue_tail
+`endif
 );
 
-    logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values;
-    logic [`PRF_SIZE-1:0]                 prf_free;
-    logic [`PRF_SIZE-1:0]                 prf_valid;
-    logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue;
-    logic [`PRF_LEN-1:0]                  free_preg_queue_head;
-    logic [`PRF_LEN-1:0]                  free_preg_queue_tail;
+    `ifndef DEBUG
+        logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values;
+        logic [`PRF_SIZE-1:0]                 prf_free;
+        logic [`PRF_SIZE-1:0]                 prf_valid;
+        logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue;
+        logic [`PRF_LEN-1:0]                  free_preg_queue_head;
+        logic [`PRF_LEN-1:0]                  free_preg_queue_tail;
+    `endif
 
     assign opa_value = (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opa_preg_idx];
     assign opb_value = (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) ? cdb_result : prf_values[opb_preg_idx];
@@ -56,7 +66,7 @@ module prf(
             prf_free              <= `SD ~`PRF_SIZE'b0;
             prf_valid             <= `SD `PRF_SIZE'b0;
             for (int i = 0; i < `PRF_SIZE; i++) begin
-                rrat_free_preg_queue_backup[i] <= `SD i;
+                free_preg_queue[i] <= `SD i;
             end 
             free_preg_queue_head  <= `SD `PRF_LEN'b1;
             free_preg_queue_tail  <= `SD `PRF_LEN'b1; 

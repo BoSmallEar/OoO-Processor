@@ -13,7 +13,7 @@
 #
 #
 
-SOURCE = test_progs/sampler.s
+SOURCE = test_progs/rv32_simple.s
 
 CRT = crt.s
 LINKERS = linker.lds
@@ -67,7 +67,7 @@ assembly: assemble disassemble hex
 
 VCS = vcs -V -sverilog +vc -cm line+tgl -Mupdate -line -full64 +vcs+vcdpluson -debug_pp 
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
-URG = urg -dir simv.vdb -format text
+#URG = urg -dir simv.vdb -format text
 # For visual debugger
 VISFLAGS = -lncurses
 
@@ -91,11 +91,30 @@ VISFLAGS = -lncurses
 
 TESTBENCH = 	sys_defs.svh	\
 		ISA.svh         \
-		testbench/rob_testbench.sv	\
-		testbench/rob_print.c	 
-SIMFILES =	verilog/rob.sv
+		testbench/mem.sv  \
+		testbench/proc_testbench.sv
+SIMFILES =	verilog/alu.sv	\
+		verilog/branch.sv	\
+		verilog/btb.sv	\
+		verilog/cdb.sv	\
+		verilog/decoder.sv	\
+		verilog/icache.sv	\
+		verilog/if_id_stage.sv	\
+		verilog/predictor.sv	\
+		verilog/prf.sv	\
+		verilog/processor.sv	\
+		verilog/psel_gen.sv	\
+		verilog/rat.sv	\
+		verilog/rob.sv	\
+		verilog/rrat.sv	\
+		verilog/rs_alu.sv	\
+		verilog/rs_branch.sv	\
+		verilog/rs_mul.sv	\
+		verilog/top_level.sv	\
+		verilog/wand_sel.sv	\
+		verilog/mul/pipe_mul.v
 
-SYNFILES = synth/rob.vg
+SYNFILES = synth/processor.vg
 
 # Don't ask me why spell VisUal TestBenchER like this...
 VTUBER = sys_defs.svh	\
@@ -104,8 +123,8 @@ VTUBER = sys_defs.svh	\
 		testbench/visual_c_hooks.cpp \
 		testbench/rob_print.c
 
-synth/rob.vg:        $(SIMFILES) synth/rob.tcl
-	cd synth && dc_shell-t -f ./rob.tcl | tee rob_synth.out 
+synth/processor.vg:        $(SIMFILES) synth/processor.tcl
+	cd synth && dc_shell-t -f ./processor.tcl | tee processor_synth.out 
 
 #####
 # Should be no need to modify after here

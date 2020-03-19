@@ -2,9 +2,9 @@ module predictor(
     // current instruction
 	input                   clock,                  // system clock
 	input                   reset,                  // system reset 
-	input   [`XLEN-1:0]     PC,                     // PC of branch to be predicted
-    
+	input   [`XLEN-1:0]     PC,                     // PC of branch to be predicted 
     // resolved branch: updates on history tables
+
     input                   result_taken,       // branch is actually taken or not 
     input                   result_local_taken,
     input                   result_global_taken,
@@ -59,10 +59,13 @@ module predictor(
         .PC(PC),                     // PC of branch to be predicted 
         .local_taken(local_taken),
         .global_taken(global_taken), 
+    
         .result_taken(result_taken),       // branch is actually taken or not 
         .result_PC(result_PC),              // resolved branch target address
         .result_cond_branch(result_cond_branch),
-        
+        .result_local_taken(result_local_taken),
+        .result_global_taken(result_global_taken),
+    
         .taken(tournament_taken)
     ); 
 
@@ -81,7 +84,7 @@ module tournament_selector(
     input                   result_global_taken,
     input   [`XLEN-1:0]     result_PC,              // resolved branch target address
     
-    output                  taken;
+    output                  taken
 );
     parameter tournament_offset_length = 8;
     parameter tournament_offset_pow = 256;
@@ -90,9 +93,9 @@ module tournament_selector(
  
     assign taken = tournament_prediction_table[PC[tournament_offset_length+1:2]] > 2'b01 ? local_taken : global_taken;
 
-    always_ff (@posedge clock) begin
+    always_ff @(posedge clock) begin
         if (reset) begin
-            genvar i;
+            int i;
             for (i=0; i<tournament_offset_pow; i++) begin
                 tournament_prediction_table[i] <= `SD 2'b10; // initialize history as weakly favors local history 
             end
@@ -103,7 +106,7 @@ module tournament_selector(
                     if (result_taken == result_local_taken && tournament_prediction_table[result_PC[tournament_offset_length+1:2]] != 2'b11) begin
                         tournament_prediction_table[result_PC[tournament_offset_length+1:2]] <= `SD tournament_prediction_table[result_PC[tournament_offset_length+1:2]] + 1'b1;
                     end 
-                    else if (result_taken == result_global_taken && tournament_prediction_table[result_PC[tournament_offset_length+1:2] != 2'b00) begin
+                    else if (result_taken == result_global_taken && tournament_prediction_table[result_PC[tournament_offset_length+1:2]] != 2'b00) begin
                         tournament_prediction_table[result_PC[tournament_offset_length+1:2]] <= `SD tournament_prediction_table[result_PC[tournament_offset_length+1:2]] - 1'b1;
                     end
                 end
@@ -136,13 +139,12 @@ module local_predictor(
 
     assign taken = local_prediction_table[local_history_table[PC[local_offset_length+1:2]]] > 2'b01;
 
-    always_ff (@posedge clock) begin
+    always_ff @(posedge clock) begin
         if (reset) begin
-            genvar i;
+            int i,j;
             for (i=0; i<local_offset_pow; i++) begin
-                local_history_table[i] <= `SD local_offset_length'b0; // initialize history as all not taken
-            end
-            genvar j;
+                local_history_table[i] <= `SD {local_offset_length{1'b0}}; // initialize history as all not taken
+            end 
             for (j=0; j<local_history_pow; j++) begin
                 local_prediction_table[j] <= `SD 2'b10; //initialize as weakly taken
             end
@@ -184,10 +186,10 @@ module global_predictor(
     assign index_xor = global_history ^ PC[`XLEN-1:`XLEN-global_history_length];
     assign taken     = global_prediction_table[index_xor] > 2'b01;
 
-    always_ff (@posedge clock) begin
+    always_ff @(posedge clock) begin
         if (reset) begin
-            global_history = <= `SD global_history_length'b0;
-            genvar i;
+            int i;
+            global_history <= `SD {global_history_length{1'b0}};
             for (i=0; i<global_history_pow; i++) begin
                 global_prediction_table[i] <= `SD 2'b10;
             end

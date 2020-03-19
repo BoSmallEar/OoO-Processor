@@ -66,7 +66,7 @@ module rs_mem(
 
     assign rs_mem_full = (rs_mem_counter == `RS_MEM_SIZE);
 
-    genvar i;
+    int i;
     always_comb begin
         rs_mem_free_idx = `RS_MEM_LEN'h0; // avoid additional latch, not very important
         for (i=`RS_MEM_SIZE-1; i>=0; i--) begin
@@ -75,7 +75,7 @@ module rs_mem(
     end
 
     // rs_mem_ex
-    genvar k;
+    int k;
     always_comb begin
         rs_mem_ex = `RS_MEM_SIZE'h0;
         for (k = 0; k<`RS_MEM_SIZE; k++) begin
@@ -92,7 +92,7 @@ module rs_mem(
         .empty(no_rs_selected)
     );
 
-    genvar j;
+    int j;
     always_comb begin
         rs_mem_ex_idx = `RS_MEM_LEN'h0; // avoid additional latching
         for (j=0; j<`RS_MEM_SIZE; j++) begin
@@ -100,7 +100,7 @@ module rs_mem(
         end
     end
 
-    genvar t;
+    int t;
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mem_free      <= `SD ~`RS_MEM_SIZE'h0;

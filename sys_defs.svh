@@ -291,7 +291,7 @@ typedef struct packed {
 //
 //////////////////////////////////////////////
 
-`define PRF_SIZE      256	// number of entries
+`define PRF_SIZE      16	// number of entries
 `define PRF_LEN		  8		// length in bits == log(PRF_SIZE)
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
@@ -327,7 +327,7 @@ typedef enum logic [1:0] {
 //////////////////////////////////////////////
 
 typedef struct packed {
-	logic [`XLEN-1:0] NPC;   // PC + 4
+	logic [`XLEN-1:0] NPC;  
 	logic [`XLEN-1:0] PC;    // PC
 
 	FU_TYPE     fu_type;        // select function unit                      
@@ -349,7 +349,7 @@ typedef struct packed {
 	logic       illegal;          // is this instruction illegal?
 	logic       csr_op;           // is this a CSR operation? (we only used this as a cheap way to get return code)
 	logic       valid;            // is inst a valid instruction to be counted for CPI calculations?
-	logic       branch_prediction;// is the branch predict taken or not taken 
+	logic       branch_prediction;// is the branch predict taken or not taken  
 	logic		local_taken;
 	logic		global_taken;
 
@@ -403,6 +403,8 @@ typedef struct packed {
 	logic                global_pred_direction;
 	logic                branch_direction;
 	logic                branch_mis_pred;
+	logic				 halt;
+	logic				 illegal;
 } ROB_PACKET;
 
 //////////////////////////////////////////////
@@ -449,7 +451,7 @@ typedef struct packed {
 	logic [`PRF_LEN-1:0]    dest_preg_idx;
 	logic [`ROB_LEN-1:0]    rob_idx;
 	
-	ALU_FUNC                alu_func;
+	ALU_FUNC                mul_func;
 	
 } RS_MUL_PACKET;
 
@@ -493,12 +495,13 @@ typedef struct packed {
 	logic	[11:0]			offset;
 	logic	[`PRF_LEN-1:0]	dest_preg_idx;
 	logic	[`ROB_LEN-1:0]	rob_idx;
+	logic   [2:0]           branch_func;
 	logic                   cond_branch;
 	logic                   uncond_branch;
 	logic                   br_pred_direction;
 	logic                   br_pred_target_PC;
-	logic                   local_pred_direction,   
-	logic                   global_pred_direction,
+	logic                   local_pred_direction;   
+	logic                   global_pred_direction;
 
 } RS_BRANCH_PACKET;
 

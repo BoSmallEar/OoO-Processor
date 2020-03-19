@@ -1,5 +1,5 @@
 `define STAGE 8
-`define DOUBLE_XLEN 2*`DOUBLE_XLEN
+`define DOUBLE_XLEN 2*`XLEN
 // Negative numbers are represented in 2's complement form
 
 module mult_stage(
@@ -55,7 +55,7 @@ module mult(
 	mult_stage mstage [(`STAGE-1):0] (
 		.clock(clock),
 		.reset(reset),
-		.product_in({internal_products,`DOUBLE_XLEN'h0}),
+		.product_in({internal_products,{`DOUBLE_XLEN{1'b0}}}),
 		.mplier_in({internal_mpliers,mplier}),
 		.mcand_in({internal_mcands,mcand}),
 		.start({internal_dones,start}),
@@ -124,7 +124,7 @@ module mult2cdb(
     );
 
 	always_comb begin
-		case (rs_fu_packet.alu_func)
+		case (rs_mul_packet.mul_func)
 			ALU_MUL:	mul_value = (a_sign==b_sign) ? product[`XLEN-1:0] : 1 + ~product[`XLEN-1:0];
 			ALU_MULH:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`XLEN-1:0];
 			ALU_MULHSU:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`DOUBLE_XLEN-1:`XLEN];
