@@ -65,6 +65,8 @@ module bit_plru(
     end
 endmodule
 
+parameter SQ_IDX_LEN = 3;
+
 module dcache(
     input                           clock,
     input                           reset,
@@ -73,13 +75,20 @@ module dcache(
 	input           [63:0]          mem2Dcache_data,         // Data coming back from memory
 	input           [3:0]           mem2Dcache_tag,          
 
+    // If SQ head entry is ready and Store at Rob head, retire SQ head
+    input  logic [`XLEN-1:0]           SQ_head_address,
+    input  logic [`XLEN-1:0]           SQ_head_source_data,
+    input                              SQ_head_resolved,
+    input                              store_at_rob_head,
     // Outputs to processor
     output logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
     output logic                    Dcache2proc_valid,    
 
     // Outputs to main memory
     output logic    [1:0]           Dcache2mem_command,    // Issue a bus load
-	output logic    [`XLEN-1:0]     Dcache2mem_addr        // Address sent to memory
+	output logic    [`XLEN-1:0]     Dcache2mem_addr,        // Address sent to memory
+    // To SQ
+    output [SQ_IDX_LEN-1:0]         Dcache2SQ_response
 );
 
     // I have 16 blocks in Dcache

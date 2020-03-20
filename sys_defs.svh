@@ -328,7 +328,7 @@ typedef enum logic [1:0] {
 
 typedef struct packed {
 	logic [`XLEN-1:0] NPC;  
-	logic [`XLEN-1:0] PC;    // PC
+	logic [`XLEN-1:0] PC;    	// PC
 
 	FU_TYPE     fu_type;        // select function unit                      
 
