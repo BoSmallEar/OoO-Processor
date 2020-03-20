@@ -38,20 +38,6 @@ typedef struct packed {
  - One victim cache of two 8-byte blocks (16 bytes of data)
         - Does not include whatever metadata you need for each block    */
 
-
-module load_queue( // may be out of order
-    input                       ,
-
-    output                           
-);
-module store_queue( // may be out of order
-    input                       ,
-
-    output                           
-);
-
-endmodule
-
 parameter WAY_WIDTH=4;
 parameter DCACHE_CAPACITY=16;
 parameter NUM_SETS=2;
@@ -117,119 +103,13 @@ module dcache(
     logic       miss_outstanding;
     logic       data_write_enable;
 
-t logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
+    logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
     output logic                    Dcache2proc_valid,    
 
     // Outputs to main memory
     output logic    [1:0]           Dcache2mem_command,    // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr        // Address sent to memory
-);
+endmodule
 
-    // I have 16 blocks in Dcache
-    DCACHE_BLOCK [3:0] dcache_blocks;  
 
-    // Extract the tag and index of the requested block
-    logic [7:0] current_tag;                            // Unique identifier of a specific block
-    logic [4:0] current_index;                          // Decides the position in the cache
-    assign { current_tag, current_index } = proc2Dcache_addr[31:3];
-    // Check whether inputed a new block address
-    logic [7:0] last_tag;
-    logic [4:0] last_index;
-    logic changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
-    // Read the information from the requested block -- data/valid
-    DCACHE_BLOCK  current_block = dcache_blocks[current_index];
-    assign Dcache2proc_data = proc2Dcache_addr[2]? current_block.data[63:32]:current_block.data[31:0];
-    assign Dcache2proc_valid = current_block.valid && (current_block.tag == current_tag);
-
-    // Case: Hit
-    // Case: Miss
-    logic       miss_outstanding;
-    logic       data_write_enable;
-
-t logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
-    output logic                    Dcache2proc_valid,    
-
-    // Outputs to main memory
-    output logic    [1:0]           Dcache2mem_command,    // Issue a bus load
-	output logic    [`XLEN-1:0]     Dcache2mem_addr        // Address sent to memory
-);
-
-    // I have 16 blocks in Dcache
-    DCACHE_BLOCK [3:0] dcache_blocks;  
-
-    // Extract the tag and index of the requested block
-    logic [7:0] current_tag;                            // Unique identifier of a specific block
-    logic [4:0] current_index;                          // Decides the position in the cache
-    assign { current_tag, current_index } = proc2Dcache_addr[31:3];
-    // Check whether inputed a new block address
-    logic [7:0] last_tag;
-    logic [4:0] last_index;
-    logic changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
-    // Read the information from the requested block -- data/valid
-    DCACHE_BLOCK  current_block = dcache_blocks[current_index];
-    assign Dcache2proc_data = proc2Dcache_addr[2]? current_block.data[63:32]:current_block.data[31:0];
-    assign Dcache2proc_valid = current_block.valid && (current_block.tag == current_tag);
-
-    // Case: Hit
-    // Case: Miss
-    logic       miss_outstanding;
-    logic       data_write_enable;
-
-t logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
-    output logic                    Dcache2proc_valid,    
-
-    // Outputs to main memory
-    output logic    [1:0]           Dcache2mem_command,    // Issue a bus load
-	output logic    [`XLEN-1:0]     Dcache2mem_addr        // Address sent to memory
-);
-
-    // I have 16 blocks in Dcache
-    DCACHE_BLOCK [3:0] dcache_blocks;  
-
-    // Extract the tag and index of the requested block
-    logic [7:0] current_tag;                            // Unique identifier of a specific block
-    logic [4:0] current_index;                          // Decides the position in the cache
-    assign { current_tag, current_index } = proc2Dcache_addr[31:3];
-    // Check whether inputed a new block address
-    logic [7:0] last_tag;
-    logic [4:0] last_index;
-    logic changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
-    // Read the information from the requested block -- data/valid
-    DCACHE_BLOCK  current_block = dcache_blocks[current_index];
-    assign Dcache2proc_data = proc2Dcache_addr[2]? current_block.data[63:32]:current_block.data[31:0];
-    assign Dcache2proc_valid = current_block.valid && (current_block.tag == current_tag);
-
-    // Case: Hit
-    // Case: Miss
-    logic       miss_outstanding;
-    logic       data_write_enable;
-
-t logic  	[`XLEN-1:0] 	Dcache2proc_data,        // If command is LOAD
-    output logic                    Dcache2proc_valid,    
-
-    // Outputs to main memory
-    output logic    [1:0]           Dcache2mem_command,    // Issue a bus load
-	output logic    [`XLEN-1:0]     Dcache2mem_addr        // Address sent to memory
-);
-
-    // I have 16 blocks in Dcache
-    DCACHE_BLOCK [3:0] dcache_blocks;  
-
-    // Extract the tag and index of the requested block
-    logic [7:0] current_tag;                            // Unique identifier of a specific block
-    logic [4:0] current_index;                          // Decides the position in the cache
-    assign { current_tag, current_index } = proc2Dcache_addr[31:3];
-    // Check whether inputed a new block address
-    logic [7:0] last_tag;
-    logic [4:0] last_index;
-    logic changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
-    // Read the information from the requested block -- data/valid
-    DCACHE_BLOCK  current_block = dcache_blocks[current_index];
-    assign Dcache2proc_data = proc2Dcache_addr[2]? current_block.data[63:32]:current_block.data[31:0];
-    assign Dcache2proc_valid = current_block.valid && (current_block.tag == current_tag);
-
-    // Case: Hit
-    // Case: Miss
-    logic       miss_outstanding;
-    logic       data_write_enable;
-
+//  Strangely deleted

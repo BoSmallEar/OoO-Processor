@@ -150,10 +150,8 @@ module processor (
 //////////////////////////////////////////////////
 
     //icache outputs
-
-
     icache icache0(
-        //inputs
+        // inputs
         .clock(clock),
         .reset(reset),
         .proc2Icache_addr(proc2Icache_addr),
@@ -161,7 +159,7 @@ module processor (
         .mem2Icache_data(mem2proc_data),             // Data coming back from memory
         .mem2Icache_tag(mem2proc_tag),    
 
-        //outputs
+        // outputs
         .Icache2proc_data(Icache2proc_data),
         .Icache2proc_valid(Icache2proc_valid),
         .Icache2mem_command(Icache2mem_command),    // command sent to memory

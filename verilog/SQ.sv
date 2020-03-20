@@ -7,23 +7,23 @@ typedef struct packed {
 } SQ_ENTRY;
 
 typedef struct packed {
-    SQ_ENTRY    [SQ_IDX_LEN-1:0]   entries;
+    SQ_ENTRY    [SQ_CAPACITY-1:0]   entries;
     logic       [SQ_IDX_LEN-1:0]    head;
     logic       [SQ_IDX_LEN-1:0]    tail;
 } STORE_QUEUE;
 
 module store_queue (
-    input   clock,
-    input   reset,
-    input   enable,
-    input   store_address,
-    input   store_data,
-    input   load_position,
-    input   [SQ_IDX_LEN-1:0]    load_age,
+    input                       clock,
+    input                       reset,
+    input                       enable,
+    input   [`XLEN-1:0]         store_address,
+    input   [`XLEN-1:0]         store_data,
+    input   [`XLEN-1:0]         load_position,
+    input   [SQ_IDX_LEN-1:0]    load_age,       // QUESTION: how to get load age from outside of sq?
 
     input   [3:0]               mem2SQ_response,   
 
-    output logic full,
+    output  logic                       full,
     // Output to load instruction
     output  logic [`XLEN-1:0]           forward_data,
     output  logic                       address_match,
@@ -33,11 +33,11 @@ module store_queue (
     output  logic [`XLEN-1:0]           current_store_address,
     output  logic [`XLEN-1:0]           current_store_data
 );
-    STORE_QUEUE SQ;
-    logic [SQ_IDX_LEN-1:0]  counter;
-    logic full;
-    logic match;
-    logic [`XLEN-1:0]  chosen_data;
+    STORE_QUEUE             SQ;
+    logic [SQ_IDX_LEN:0]    counter;
+    logic                   full;
+    logic                   match;
+    logic [`XLEN-1:0]       chosen_data;
 
     assign full = counter==SQ_CAPACITY;
     assign current_store_address = (counter==0)? 0: SQ.entries[SQ.head].address;
@@ -56,7 +56,7 @@ module store_queue (
         end
         else if (SQ.head >= SQ.tail && !(load_age<=SQ.head&&load_age>SQ.tail)) begin
             int i;
-            i = (SQ_CAPACITY-1>load_age)?load_age:SQ_CAPACITY-1;
+            i = (SQ_CAPACITY-1>load_age)?load_age:SQ_CAPACITY-1;        // QUESTION: === "i = load_age;"?
             for (i; i>=SQ.head; i--) begin
                 if (load_position==SQ.entries[i].address) begin
                     match = 1;
@@ -88,7 +88,6 @@ module store_queue (
             SQ.tail <= `SD (SQ.tail == `SQ_CAPACITY-1)? 0: SQ.tail + 1;
         end 
         if (mem2SQ_response) begin
-            counter <= `SD counter - 1;
             SQ.head <= `SD (SQ.head == `SQ_CAPACITY-1)? 0: SQ.head + 1;
         end
         if (enable && ~ mem2SQ_response)   counter <= `SD counter + 1;

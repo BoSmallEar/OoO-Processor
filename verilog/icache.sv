@@ -25,10 +25,6 @@ typedef struct packed{
     logic           valid;
     CACHE_BLOCK    data;  
 } ICACHE_BLOCK;
-
- 
-
-
 //icahe: 256 byte: 32 lines, block size: 8 byte
         /*
         Cache Size Restriction
@@ -43,6 +39,7 @@ typedef struct packed{
         I Why? Design Compiler doesn’t punish you as much as it should
         I You will need to schedule or stall functional units
         */
+
 module icache(
     //inputs
     input                           clock,
