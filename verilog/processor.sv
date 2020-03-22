@@ -31,13 +31,16 @@ module processor (
 
     output EXCEPTION_CODE processor_error_status
 `ifdef DEBUG
+    , output logic                                 result_mis_pred
     , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values
     , output logic [`PRF_SIZE-1:0]                 prf_free
     , output logic [`PRF_SIZE-1:0]                 prf_valid
     , output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0]  free_preg_queue
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_head
     , output logic [`PRF_LEN-1:0]                  free_preg_queue_tail
-    , output ROB_PACKET [`ROB_SIZE-1:0]            rob_packets 
+    , output ROB_PACKET [`ROB_SIZE-1:0]            rob_packets
+    , output logic [`ROB_LEN-1:0]                  rob_head
+    , output logic [`ROB_LEN-1:0]                  rob_tail
     , output logic [31:0] [`PRF_LEN-1:0]     rat_packets 
     , output logic [31:0] [`PRF_LEN-1:0]     rrat_packets 
 
@@ -96,7 +99,7 @@ module processor (
     logic result_local_taken;
     logic result_global_taken;
     logic result_taken;
-    logic result_mis_pred;
+    // logic result_mis_pred;
     logic result_valid;
 
     logic commit_illegal;
@@ -206,6 +209,8 @@ module processor (
         , .free_preg_queue_head(free_preg_queue_head)
         , .free_preg_queue_tail(free_preg_queue_tail)
         , .rob_packets(rob_packets)
+        , .rob_head(rob_head)
+        , .rob_tail(rob_tail)
         , .rat_packets(rat_packets)
         , .rrat_packets(rrat_packets)
 

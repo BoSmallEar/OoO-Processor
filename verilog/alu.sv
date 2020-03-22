@@ -5,8 +5,7 @@ module alu(
 	input 						 clock,
 	input                        reset,
     input RS_ALU_PACKET          rs_alu_packet,
-    input                        alu_enable,
-	input                        cdb_broadcast_is_alu,
+    input                        alu_enable, 
 
 	output logic [`XLEN-1:0]     alu_value,
     output logic                 alu_valid,
@@ -20,6 +19,7 @@ module alu(
 	assign alu_prf_idx = rs_alu_packet.dest_preg_idx;
 	assign alu_rob_idx = rs_alu_packet.rob_idx;
 	assign alu_PC	   = rs_alu_packet.PC;
+	assign alu_valid   = alu_enable;
 	
 	always_comb begin
 		case (rs_alu_packet.alu_func)
@@ -42,12 +42,10 @@ module alu(
 		endcase
 	end
 
-	always_ff @(posedge clock) begin
-		if (reset)
-			alu_valid <= `SD 1'b0;
-		else if (alu_enable)
-			alu_valid <= `SD 1'b1;
-		else if (cdb_broadcast_is_alu)
-			alu_valid <= `SD 1'b0;
-	end
+	// always_ff @(posedge clock) begin
+	// 	if (reset)
+	// 		alu_valid <= `SD 1'b0;
+	// 	else 
+	// 		alu_valid <= `SD alu_enable; 
+	// end
 endmodule // alu

@@ -394,8 +394,7 @@ typedef struct packed {
 	logic [`XLEN-1:0]    PC;			// alu_result
 	logic                executed;		// is this ROB executed ??
 	logic [`PRF_LEN-1:0] dest_preg_idx;	// dest physcial reg index
-	logic [4:0]          dest_areg_idx;	// dest arch reg index
-	logic                rob_mis_pred;  // whether this is a mispredicted branch
+	logic [4:0]          dest_areg_idx;	// dest arch reg index 
 	logic                cond_branch;
 	logic                uncond_branch;
 	logic [`XLEN-1:0]    target_PC;     // branch target PC
@@ -475,6 +474,7 @@ typedef struct packed {
 	logic 					offset;
 	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
 	logic 	[`ROB_LEN-1:0] 	rob_idx;
+
 } RS_MEM_PACKET;
 
 
@@ -492,17 +492,77 @@ typedef struct packed {
 	logic	[`XLEN-1:0]		opa_value;
 	logic					opb_ready;		// only need for cond
 	logic	[`XLEN-1:0]		opb_value;
-	logic	[11:0]			offset;
-	logic	[`PRF_LEN-1:0]	dest_preg_idx;
+	logic	[`XLEN-1:0]		offset;
+	logic                   is_jalr;
+	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;
 	logic	[`ROB_LEN-1:0]	rob_idx;
 	logic   [2:0]           branch_func;
 	logic                   cond_branch;
 	logic                   uncond_branch;
 	logic                   br_pred_direction;
-	logic                   br_pred_target_PC;
+	logic   [`XLEN-1:0]     br_pred_target_PC;
 	logic                   local_pred_direction;   
 	logic                   global_pred_direction;
 
 } RS_BRANCH_PACKET;
+
+//////////////////////////////////////////////
+//
+// CDB FU Queue:
+// FU result stored in CDB waiting for broadcast.
+//
+//////////////////////////////////////////////
+
+`define ALU_QUEUE_SIZE 128
+`define MUL_QUEUE_SIZE 128
+`define MEM_QUEUE_SIZE 128
+`define BR_QUEUE_SIZE  128
+`define ALU_QUEUE_LEN 7
+`define MUL_QUEUE_LEN 7
+`define MEM_QUEUE_LEN 7
+`define BR_QUEUE_LEN  7
+
+
+typedef struct packed {
+	logic  [`XLEN-1:0]    alu_value;
+	logic  [`PRF_LEN-1:0] alu_prf_idx;
+	logic  [`ROB_LEN-1:0] alu_rob_idx;
+	logic  [`XLEN-1:0]    alu_PC;
+
+} CDB_ALU_PACKET;
+
+typedef struct packed {
+	logic  [`XLEN-1:0]    mul_value;
+	logic  [`PRF_LEN-1:0] mul_prf_idx;
+	logic  [`ROB_LEN-1:0] mul_rob_idx;
+    logic  [`XLEN-1:0]    mul_PC;
+
+} CDB_MUL_PACKET;
+
+typedef struct packed {
+	logic  [`XLEN-1:0]    mem_value;
+	logic                 mem_rd;
+	logic                 mem_wr;
+	logic  [`PRF_LEN-1:0] mem_prf_idx;
+	logic  [`ROB_LEN-1:0] mem_rob_idx;
+	logic  [`XLEN-1:0]    mem_PC;
+
+} CDB_MEM_PACKET; // needs to be completed
+
+typedef struct packed { 
+	logic  [`PRF_LEN-1:0] br_prf_idx;
+	logic   [`XLEN-1:0]    br_value;
+	logic  [`ROB_LEN-1:0] br_rob_idx;
+    logic  [`XLEN-1:0]    br_PC;
+	logic				  br_direction;
+	logic  [`XLEN-1:0]	  br_target_PC;
+	logic				  br_mis_pred;
+	logic				  br_cond_branch;
+	logic				  br_uncond_branch;
+	logic				  br_local_pred_direction;
+	logic				  br_global_pred_direction;
+
+} CDB_BR_PACKET;
+
 
 `endif // __SYS_DEFS_VH__

@@ -130,7 +130,7 @@ module if_id_stage(
 		else if (result_mis_pred) begin
 			PC_reg <= `SD result_target_PC; // if mispredict, jump to the target PC
 		end
-		else if (!Icache2proc_valid) begin
+		else if (!id_packet_out.valid) begin
 			PC_reg <= `SD PC_reg;           // if not valid, hold the current PC
 		end
 		else

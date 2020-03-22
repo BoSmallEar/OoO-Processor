@@ -32,9 +32,7 @@ module rs_mul(
     // cdb broadcast
     input                   cdb_broadcast_valid,
     input [`PRF_LEN-1:0]    cdb_dest_preg_idx,
-    input [`XLEN-1:0]       cdb_value,
-    // issue
-    input                   cdb_broadcast_is_mul,
+    input [`XLEN-1:0]       cdb_value, 
     // OUTPUTS
     output RS_MUL_PACKET    rs_mul_packet,        // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
@@ -59,13 +57,10 @@ module rs_mul(
     `endif
 
     
-    logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector
-    logic issue;        // whether rs can issue packet
-    logic is_issued_before;
+    logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector 
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued
-    assign issue = ~is_issued_before | cdb_broadcast_is_mul;
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
 
@@ -111,33 +106,33 @@ module rs_mul(
         if (reset || commit_mis_pred) begin
             rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;
             rs_mul_counter   <= `SD `RS_MUL_LEN'h0;
-            rs_mul_out_valid <= `SD 1'b0;
-            is_issued_before <= `SD 1'b0;
+            rs_mul_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_mul_counter <= `SD rs_mul_counter + enable - (!no_rs_selected);
             // dispatch 
             if (enable) begin// instr can be dispatched
-                rs_mul_packets[rs_mul_free_idx].PC <= `SD PC;
-                rs_mul_packets[rs_mul_free_idx].NPC <= `SD NPC;
+                rs_mul_packets[rs_mul_free_idx].PC       <= `SD PC;
+                rs_mul_packets[rs_mul_free_idx].NPC      <= `SD NPC;
                 rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
                 rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
                 
-                if (opa_ready)  rs_mul_packets[rs_mul_free_idx].opa_value <= `SD opa_value;
-                else rs_mul_packets[rs_mul_free_idx].opa_value <= `SD opa_preg_idx;
-                if (opb_ready)  rs_mul_packets[rs_mul_free_idx].opb_value <= `SD opb_value;
-                else rs_mul_packets[rs_mul_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_mul_packets[rs_mul_free_idx].mul_func <= `SD mul_func;
+                if (opa_ready)  rs_mul_packets[rs_mul_free_idx].opa_value  <= `SD opa_value;
+                else rs_mul_packets[rs_mul_free_idx].opa_value             <= `SD opa_preg_idx;
+                if (opb_ready)  rs_mul_packets[rs_mul_free_idx].opb_value  <= `SD opb_value;
+                else rs_mul_packets[rs_mul_free_idx].opb_value             <= `SD opb_preg_idx;
+                rs_mul_packets[rs_mul_free_idx].dest_preg_idx              <= `SD dest_preg_idx;
+                rs_mul_packets[rs_mul_free_idx].rob_idx                    <= `SD rob_idx;
+                rs_mul_packets[rs_mul_free_idx].mul_func                   <= `SD mul_func;
 
                 rs_mul_free[rs_mul_free_idx] <= `SD 1'b0;
             end
             
             // issue
-            if ((!no_rs_selected) && issue) begin
+            if (!no_rs_selected) begin
                 rs_mul_packet <= `SD rs_mul_packets[rs_mul_ex_idx];
                 rs_mul_out_valid <= `SD 1'b1;
-                rs_mul_free[rs_mul_ex_idx] <= `SD 1'b1;
-                is_issued_before <= `SD 1'b1;
+                rs_mul_free[rs_mul_ex_idx] <= `SD 1'b1; 
             end
             else
                 rs_mul_out_valid <= `SD 1'b0;

@@ -73,7 +73,7 @@ module mult2cdb(
 	input 						 reset,
     input RS_MUL_PACKET          rs_mul_packet,
     input                        mul_enable,
-	input 						 cdb_broadcast_is_mul,
+
 	output logic [`XLEN-1:0]     mul_value,
     output logic                 mul_valid,
     output logic [`PRF_LEN-1:0]  mul_prf_idx,
@@ -123,6 +123,8 @@ module mult2cdb(
         .done(done)
     );
 
+	assign mul_valid = done;
+
 	always_comb begin
 		case (rs_mul_packet.mul_func)
 			ALU_MUL:	mul_value = (a_sign==b_sign) ? product[`XLEN-1:0] : 1 + ~product[`XLEN-1:0];
@@ -133,14 +135,10 @@ module mult2cdb(
 		endcase
 	end
 
-	always_ff @(posedge clock) begin
-		if (reset)
-			mul_valid <= `SD 1'b0;
-		else begin
-			if (!mul_valid)
-				mul_valid <= `SD done;
-			else
-				mul_valid <= `SD ~cdb_broadcast_is_mul;
-		end 
-	end
+	// always_ff @(posedge clock) begin
+	// 	if (reset)
+	// 		mul_valid <= `SD 1'b0;
+	// 	else
+	// 		mul_valid <= `SD done;
+	// end
 endmodule

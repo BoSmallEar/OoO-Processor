@@ -3,6 +3,6 @@
 	li	x6, data1
 	li	x5, data2 
     add x4, x6, x5 # x4 = x6 + x5
-    wfi
+B0: wfi
  
 

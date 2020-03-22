@@ -24,8 +24,9 @@ module rs_branch(
     input 				     opb_ready,
     input [`XLEN-1:0]	     opb_value,
     input [`XLEN-1:0]        offset,
-    input [`PRF_LEN-1:0]     dest_preg_idx,
+    input                    is_jalr,
     input [`ROB_LEN-1:0]     rob_idx,
+    input [`PRF_LEN-1:0]     dest_preg_idx,
     input [2:0]              branch_func,
     input                    cond_branch,
     input                    uncond_branch,
@@ -37,8 +38,7 @@ module rs_branch(
     // cdb broadcast
     input                    cdb_broadcast_valid,
     input [`PRF_LEN-1:0]     cdb_dest_preg_idx,
-    input [`XLEN-1:0]        cdb_value,                            
-    input                    cdb_broadcast_is_branch,
+    input [`XLEN-1:0]        cdb_value,                  
 
     output RS_BRANCH_PACKET  rs_branch_packet,     // overwrite opa and opb value, if needed
     output logic             rs_branch_out_valid,
@@ -63,14 +63,12 @@ module rs_branch(
     logic [`RS_BR_LEN-1:0] rs_branch_ex_idx; 
     `endif
 
-    logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector
-    logic issue;        // whether rs can issue packet
-    logic is_issued_before;
+    logic [`RS_BR_SIZE-1:0] psel_gnt;  // output of the priority selector
+ 
 
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued
-    assign issue = ~is_issued_before | cdb_broadcast_is_branch;
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_branch_full = (rs_branch_counter == `RS_BR_SIZE);
 
@@ -129,23 +127,27 @@ module rs_branch(
                 else rs_branch_packets[rs_branch_free_idx].opa_value <= `SD opa_preg_idx;
                 if (opb_ready)  rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_value;
                 else rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_branch_packets[rs_branch_free_idx].offset <= `SD offset;
-                rs_branch_packets[rs_branch_free_idx].branch_func <= `SD branch_func;
-                rs_branch_packets[rs_branch_free_idx].cond_branch <= `SD cond_branch;
-                rs_branch_packets[rs_branch_free_idx].uncond_branch <= `SD uncond_branch;
-                rs_branch_packets[rs_branch_free_idx].br_pred_direction <= `SD br_pred_direction;
-                rs_branch_packets[rs_branch_free_idx].br_pred_target_PC <= `SD br_pred_target_PC;
-                rs_branch_packets[rs_branch_free_idx].local_pred_direction <= `SD local_pred_direction;
+                rs_branch_packets[rs_branch_free_idx].rob_idx               <= `SD rob_idx;
+                rs_branch_packets[rs_branch_free_idx].dest_preg_idx         <= `SD dest_preg_idx;
+                rs_branch_packets[rs_branch_free_idx].offset                <= `SD offset;
+                rs_branch_packets[rs_branch_free_idx].is_jalr               <= `SD is_jalr;
+                rs_branch_packets[rs_branch_free_idx].branch_func           <= `SD branch_func;
+                rs_branch_packets[rs_branch_free_idx].cond_branch           <= `SD cond_branch;
+                rs_branch_packets[rs_branch_free_idx].uncond_branch         <= `SD uncond_branch;
+                rs_branch_packets[rs_branch_free_idx].br_pred_direction     <= `SD br_pred_direction;
+                rs_branch_packets[rs_branch_free_idx].br_pred_target_PC     <= `SD br_pred_target_PC;
+                rs_branch_packets[rs_branch_free_idx].local_pred_direction  <= `SD local_pred_direction;
                 rs_branch_packets[rs_branch_free_idx].global_pred_direction <= `SD global_pred_direction;   
+                
+                rs_branch_free[rs_branch_free_idx] <= `SD 1'b0;
                 
             end
             
             // issue
-            if ((!no_rs_selected) && issue) begin
+            if (!no_rs_selected) begin
                 rs_branch_packet <= `SD rs_branch_packets[rs_branch_ex_idx];
                 rs_branch_out_valid <= `SD 1'b1;
-                rs_branch_free[rs_branch_ex_idx] <= `SD 1'b1;
-                is_issued_before <= `SD 1'b1;
+                rs_branch_free[rs_branch_ex_idx] <= `SD 1'b1; 
             end
             else
                 rs_branch_out_valid <= `SD 1'b0;

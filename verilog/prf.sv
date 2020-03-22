@@ -18,7 +18,7 @@ module prf(
     input                       reset,
     input [`PRF_LEN-1:0]        opa_preg_idx,
     input [`PRF_LEN-1:0]        opb_preg_idx,
-    input                       dispatch_enable,
+    input                       prf_enable,
     input [`PRF_LEN-1:0]        rrat_prev_reg_idx,
     input                       commit_mis_pred,
     input                       commit_valid,
@@ -63,8 +63,8 @@ module prf(
     assign prf_free_preg_idx = free_preg_queue[free_preg_queue_head];
     always_ff @(posedge clock) begin
         if (reset) begin
-            prf_free              <= `SD ~`PRF_SIZE'b1;
-            prf_valid             <= `SD `PRF_SIZE'b1;
+            prf_free               <= `SD ~`PRF_SIZE'b1;
+            prf_valid              <= `SD `PRF_SIZE'b1;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 free_preg_queue[i] <= `SD i;
             end 
@@ -89,7 +89,7 @@ module prf(
                     free_preg_queue_tail <= `SD free_preg_queue_tail == `PRF_SIZE-1 ? 1 : free_preg_queue_tail+1;
                 end
             end
-            if (dispatch_enable) begin
+            if (prf_enable) begin
                 // dispatch
                 prf_free[prf_free_preg_idx] <= `SD 1'b0;
                 free_preg_queue_head        <= `SD free_preg_queue_head == `PRF_SIZE-1 ? 1 : free_preg_queue_head+1;

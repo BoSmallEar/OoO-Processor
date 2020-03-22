@@ -27,6 +27,7 @@ module proc_testbench;
 	logic [63:0] proc2mem_data;       // Data sent to memory
 	MEM_SIZE proc2mem_size;          // data size sent to memory
 
+    logic                                 result_mis_pred;
     // prf outputs (debug)
     logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values;
     logic [`PRF_SIZE-1:0]                 prf_free;
@@ -38,6 +39,8 @@ module proc_testbench;
 
     // rob outputs (debug)
     ROB_PACKET [`ROB_SIZE-1:0]            rob_packets;
+    logic [`ROB_LEN-1:0]                  rob_head;
+    logic [`ROB_LEN-1:0]                  rob_tail;
     
     // rat internal reg
     logic [31:0] [`PRF_LEN-1:0]     rat_packets;
@@ -89,6 +92,7 @@ module proc_testbench;
         .proc2mem_size(proc2mem_size),           // data size sent to memory
         .processor_error_status(processor_error_status)
     `ifdef DEBUG
+        , .result_mis_pred(result_mis_pred)
         , .prf_values(prf_values)
         , .prf_free(prf_free)
         , .prf_valid(prf_valid)
@@ -96,6 +100,8 @@ module proc_testbench;
         , .free_preg_queue_head(free_preg_queue_head)
         , .free_preg_queue_tail(free_preg_queue_tail)
         , .rob_packets(rob_packets)
+        , .rob_head(rob_head)
+        , .rob_tail(rob_tail)
         , .rat_packets(rat_packets)
         , .rrat_packets(rrat_packets)
 
@@ -149,41 +155,54 @@ task print_prf;
     input [`PRF_LEN-1:0]                  free_preg_queue_head;
     input [`PRF_LEN-1:0]                  free_preg_queue_tail;
 
-    $display("================= PRF =================");
-    $display("prf_index    prf_value    valid    free");
+    $display("==================== PRF ====================");
+    $display("|prf_idx |prf_value       |valid   |free    |");
     for (int i = 0; i < `PRF_SIZE; i++) begin
-        $display("%d        %d        %d        %d", i, prf_values[i], prf_valid[i], prf_free[i]);
+        $display("|%8d|%16d|%8d|%8d|", i, prf_values[i], prf_valid[i], prf_free[i]);
     end
+    $display("=============================================");
 endtask
 
 task print_rob;
     input ROB_PACKET [`ROB_SIZE-1:0]      rob_packets;
+    input            [`ROB_LEN-1:0]       rob_head;
+    input            [`ROB_LEN-1:0]       rob_tail;
 
-    $display("================= ROB =================");
-    $display("rob_index    PC    executed    dest_preg_idx");
+    $display("=================== ROB ==================");
+    $display("|rob_idx |PC      |executed|dest_preg_idx|");
     for (int i = 0; i < `ROB_SIZE; i++) begin
-        $display("%d        %d        %d        %d", i, rob_packets[i].PC, rob_packets[i].executed, rob_packets[i].dest_preg_idx);
+        if (rob_head == i && rob_tail == i)
+            $display("|%8d|%8d|%8d|%13d| <- HEAD & TAIL", i, rob_packets[i].PC, rob_packets[i].executed, rob_packets[i].dest_preg_idx);
+        else if (rob_head == i)
+            $display("|%8d|%8d|%8d|%13d| <- HEAD", i, rob_packets[i].PC, rob_packets[i].executed, rob_packets[i].dest_preg_idx);
+        else if (rob_tail == i)
+            $display("|%8d|%8d|%8d|%13d| <- TAIL", i, rob_packets[i].PC, rob_packets[i].executed, rob_packets[i].dest_preg_idx);
+        else
+            $display("|%8d|%8d|%8d|%13d|", i, rob_packets[i].PC, rob_packets[i].executed, rob_packets[i].dest_preg_idx);
     end
+    $display("==========================================");
 endtask
 
 task print_rat;
     input logic [31:0] [`PRF_LEN-1:0]     rat_packets;
 
-    $display("================= RAT =================");
-    $display("rat_index   preg_idx");
+    $display("======= RAT =======");
+    $display("|rat_idx |preg_idx|");
     for (int i = 0; i < 32; i++) begin
-        $display("%d        %d", i, rat_packets[i]);
+        $display("|%8d|%8d|", i, rat_packets[i]);
     end
+    $display("===================");
 endtask
 
 task print_rrat;
     input logic [31:0] [`PRF_LEN-1:0]     rrat_packets;
 
-    $display("================= RRAT =================");
-    $display("rrat_index   preg_idx");
+    $display("====== RRAT =======");
+    $display("|rrat_idx|preg_idx|");
     for (int i = 0; i < 32; i++) begin
-        $display("%d        %d", i, rrat_packets[i]);
+        $display("|%8d|%8d|", i, rrat_packets[i]);
     end
+    $display("===================");
 endtask
 
 task print_rs;
@@ -191,10 +210,10 @@ task print_rs;
     input RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets;
     input RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
 
-    $display("================= RS =================");
-    $display("rs_index   PC    opa_ready    opa_value    opb_ready    opb_value    dest_preg_idx    rob_idx");
+    $display("======================================= RS-ALU ========================================");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
     for (int i = 0; i < `RS_ALU_SIZE; i++) begin
-        $display("%d    %d    %d    %d    %d    %d    %d    %d", i,
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
         rs_alu_packets[i].PC,
         rs_alu_packets[i].opa_ready,
         rs_alu_packets[i].opa_value,
@@ -203,6 +222,32 @@ task print_rs;
         rs_alu_packets[i].dest_preg_idx,
         rs_alu_packets[i].rob_idx);
     end
+    // $display("======================================= RS-MUL ========================================");
+    // $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
+    // for (int i = 0; i < `RS_ALU_SIZE; i++) begin
+    //     $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+    //     rs_mul_packets[i].PC,
+    //     rs_mul_packets[i].opa_ready,
+    //     rs_mul_packets[i].opa_value,
+    //     rs_mul_packets[i].opb_ready,
+    //     rs_mul_packets[i].opb_value,
+    //     rs_mul_packets[i].dest_preg_idx,
+    //     rs_mul_packets[i].rob_idx);
+    // end
+    $display("============================================= RS-BR ==============================================");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |");
+    for (int i = 0; i < `RS_BR_SIZE; i++) begin
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+        rs_branch_packets[i].PC,
+        rs_branch_packets[i].opa_ready,
+        rs_branch_packets[i].opa_value,
+        rs_branch_packets[i].opb_ready,
+        rs_branch_packets[i].opb_value,
+        rs_branch_packets[i].br_pred_target_PC,
+        rs_branch_packets[i].br_pred_direction,
+        rs_branch_packets[i].rob_idx);
+    end
+    $display("==================================================================================================");
 endtask
 
 
@@ -247,9 +292,12 @@ endtask
                         $realtime);
             debug_counter <= 0;
         end else begin
-            $display("///////////////////// cycle: %d", debug_counter);
+            $display("///////////////////// cycle: %d    time: %t", debug_counter, $realtime);
+            if (result_mis_pred) begin
+                $display("mis_predict!!!");
+            end
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
-            print_rob(rob_packets);
+            print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets);
             print_rrat(rrat_packets);
             print_rs(rs_alu_packets, rs_branch_packets, rs_mul_packets);
@@ -271,7 +319,7 @@ endtask
                             processor_error_status);
                 endcase
                 $display("@@@\n@@"); 
-                #100 $finish;
+                $finish;
             end
             debug_counter <= debug_counter + 1;
         end  // if(reset)   

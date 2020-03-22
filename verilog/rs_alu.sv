@@ -33,8 +33,7 @@ module rs_alu(
     input                 cdb_broadcast_valid,
     input [`PRF_LEN-1:0]  cdb_dest_preg_idx, 
     input [`XLEN-1:0]     cdb_value,
-
-    input                 cdb_broadcast_is_alu,
+ 
     input                 halt,
     input                 illegal,
 
@@ -60,13 +59,11 @@ module rs_alu(
     logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx; 
 `endif
     
-    logic issue;        // whether rs can issue packet 
-    logic alu_free;
+ 
     logic [`RS_ALU_SIZE-1:0] psel_gnt;  // output of the priority selector
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued
-    assign issue = cdb_broadcast_is_alu | alu_free;
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
 
@@ -109,8 +106,7 @@ module rs_alu(
         if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
             rs_alu_counter   <= `SD `RS_ALU_LEN'h0;
-            rs_alu_out_valid <= `SD 1'b0;
-            alu_free <= `SD 1'b1;
+            rs_alu_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_alu_counter <= `SD rs_alu_counter + (enable&&!halt&&!illegal) - (!no_rs_selected);
@@ -125,19 +121,18 @@ module rs_alu(
                 else rs_alu_packets[rs_alu_free_idx].opa_value <= `SD opa_preg_idx;
                 if (opb_ready)  rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_value;
                 else rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_alu_packets[rs_alu_free_idx].alu_func <= `SD alu_func;
+                rs_alu_packets[rs_alu_free_idx].alu_func      <= `SD alu_func;
                 rs_alu_packets[rs_alu_free_idx].dest_preg_idx <= `SD dest_preg_idx;
-                rs_alu_packets[rs_alu_free_idx].rob_idx <= `SD rob_idx;
+                rs_alu_packets[rs_alu_free_idx].rob_idx       <= `SD rob_idx;
 
                 rs_alu_free[rs_alu_free_idx] <= `SD 1'b0;
             end
             
             // issue
-            if ((!no_rs_selected) && issue) begin
+            if (!no_rs_selected) begin
                 rs_alu_packet <= `SD rs_alu_packets[rs_alu_ex_idx];
                 rs_alu_out_valid <= `SD 1'b1;
-                rs_alu_free[rs_alu_ex_idx] <= `SD 1'b1;
-                is_issued_before <= `SD 1'b1;
+                rs_alu_free[rs_alu_ex_idx] <= `SD 1'b1; 
             end
             else
                 rs_alu_out_valid <= `SD 1'b0;

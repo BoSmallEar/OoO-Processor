@@ -56,13 +56,10 @@ module rs_mem(
         logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx;
     `endif
     
-        logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector
-        logic issue;        // whether rs can issue packet
-        logic is_issued_before;
+        logic [`RS_MEM_SIZE-1:0] psel_gnt;  // output of the priority selector 
 
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued
-    assign issue = ~is_issued_before | cdb_broadcast_is_mul;
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_mem_full = (rs_mem_counter == `RS_MEM_SIZE);
 
@@ -105,8 +102,7 @@ module rs_mem(
         if (reset || commit_mis_pred) begin
             rs_mem_free      <= `SD ~`RS_MEM_SIZE'h0;
             rs_mem_counter   <= `SD `RS_MEM_LEN'h0;
-            rs_mem_out_valid <= `SD 1'b0;
-            is_issued_before <= `SD 1'b0;
+            rs_mem_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_mem_counter <= `SD rs_mem_counter + enable - (!no_rs_selected);
@@ -121,20 +117,19 @@ module rs_mem(
                 else rs_mem_packets[rs_mem_free_idx].opa_value <= `SD opa_preg_idx;
                 if (opb_ready)  rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_value;
                 else rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_preg_idx;
-                rs_mem_packets[rs_mem_free_idx].alu_func <= `SD id_packet_in.alu_func;
-                rs_mem_packets[rs_mee_free_idx].offset <= `SD id_packet_in.offset;
-                rs_mem_packets[rs_mem_free_idx].dest_preg_idx < = `SD dest_preg_idx;
-                rs_mem_packets[rs_mem_free_idx].rob_idx < = `SD rob_idx;
+                rs_mem_packets[rs_mem_free_idx].alu_func       <= `SD id_packet_in.alu_func;
+                rs_mem_packets[rs_mee_free_idx].offset         <= `SD id_packet_in.offset;
+                rs_mem_packets[rs_mem_free_idx].dest_preg_idx  <= `SD dest_preg_idx;
+                rs_mem_packets[rs_mem_free_idx].rob_idx        <= `SD rob_idx;
 
                 rs_mem_free[rs_mem_free_idx] <= `SD 1'b0;
             end
             
             // issue
-            if ((!no_rs_selected) && issue) begin
+            if (!no_rs_selected) begin
                 rs_fu_packet <= `SD rs_mem_packets[rs_mem_ex_idx];
                 rs_mem_out_valid <= `SD 1'b1;
-                rs_mem_free[rs_mem_ex_idx] <= `SD 1'b1;
-                is_issued_before <= `SD 1'b1;
+                rs_mem_free[rs_mem_ex_idx] <= `SD 1'b1; 
             end
             else
                 rs_mem_out_valid <= `SD 1'b0;
