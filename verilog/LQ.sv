@@ -4,6 +4,7 @@ parameter LQ_IDX_LEN = 3;
 typedef struct packed {
     logic [`XLEN-1:0] address;
     logic [LQ_IDX_LEN-1:0] age;
+    logic resolved;
 } LQ_ENTRY;
 
 typedef struct packed {
@@ -15,47 +16,71 @@ typedef struct packed {
 module load_queue (
     input   clock,
     input   reset,
-    input   enable,
-    input   store_position,
+    input   enable,  // Add an entry
     input   age,
-    input   sq_head,
-    input   [3:0]               mem2LQ_response,   
+    input                       base,
+    input                       no_offset,
+    input                       retire,
+    // From ALU about previously unresolved SQ entry
+    input   [`XLEN-1:0]         resolved_SQ_address,
+    input   [SQ_IDX_LEN-1:0]    resolved_SQ_index,
+    input   [SQ_IDX_LEN-1:0]    avoid_flush_gap,
+    // From ALU about resolved Load address
+    input   [`XLEN-1:0]         alu2LQ_addr,
+    input   [LQ_IDX_LEN-1:0]    alu2LQ_idx,
 
     output logic full,
     output logic flush,
  
-     output  logic [`XLEN-1:0]           current_load_address
+    output  logic [`XLEN-1:0]           head_load_address,
+    output                              head_resolved
 );
     LOAD_QUEUE LQ;
     logic [LQ_IDX_LEN-1:0]  counter;
     logic full;
-    logic younger;
-
-    for (int i=0; i < LQ_CAPACITY-1;i++) begin
-        if(LQ.entries[i].address==store_position)
+    
+    always_comb begin
+        if(LQ.entries[LQ.head].address==resolved_SQ_address) begin
+        if((LQ.entries[LQ.head].age-1)-resolved_SQ_index<avoid_flush_gap)
+            flush = 1;
+        else
+            flush = 0;
+        end
     end
+   
+
     assign full = counter==lQ_CAPACITY;
-    assign current_load_address = (counter==0)? 0: LQ.entries[LQ.head].address;
-  
+    assign head_load_address = (counter==0)? 0: LQ.entries[LQ.head].address;
+    assign head_resolved = LQ.entries[LQ.head].resolved;
+
     always_ff @(posedge clock) begin
         if (reset) begin
             LQ.head <= `SD 0;
             LQ.tail <= `SD 0;  //points to empty position
             counter <= `SD 0;
+            for(int i=0;i<LQ_CAPACITY;i++) LQ.entries[i].resolved <= `SD 0;
         end
 
-        if (enable) begin
-            LQ.entries[tail].address <= `SD load_address;
+        if (enable) begin 
             LQ.entries[tail].age <= `SD age;
             LQ.tail <= `SD (LQ.tail == `LQ_CAPACITY-1)? 0: LQ.tail + 1;
+            if (no_offset)  begin
+                LQ.entries[tail].address <=`SD base;
+                LQ.entries[tail].resolved <=`SD 1;
+            end
         end 
-        if (mem2LQ_response) begin
+
+        if (LQ.entries[alu2LQ_idx].resolved==0) begin
+            LQ.entries[alu2LQ_idx].address <= `SD alu2LQ_addr;
+            LQ.entries[alu2LQ_idx].resolved <=`SD 1;
+        end
+
+        if (retire) begin
             counter <= `SD counter - 1;
             LQ.head <= `SD (LQ.head == `LQ_CAPACITY-1)? 0: LQ.head + 1;
         end
-        if (enable && ~ mem2LQ_response)   counter <= `SD counter + 1;
-        if (~enable && mem2LQ_response)    counter <= `SD counter - 1;
-        if (younger) flush <= `SD 1;
+        if (enable && ~ retire)   counter <= `SD counter + 1;
+        if (~enable && retire)    counter <= `SD counter - 1;
     end
 
 endmodule

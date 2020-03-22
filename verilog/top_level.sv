@@ -245,8 +245,94 @@ module top_level (
 		endcase 
 	end
 
-   
-	
+   //////////////////////////////////////////////////
+    //                                              //
+    //                    Store Queue               //
+    //                                              //
+    //////////////////////////////////////////////////
+    /*  wr_mem     = `TRUE;
+	    fu_type    = MEM;
+        opa_select = OPA_IS_RS1;        Base Address - to add
+        opb_select = OPB_IS_S_IMM;      Source Data
+        alu_func = ALU_ADD;
+		dest_reg = DEST_NONE;
+		csr_op = `FALSE;
+		rd_mem = `FALSE;
+		cond_branch = `FALSE;
+		uncond_branch = `FALSE;
+		halt = `FALSE;
+		illegal = `FALSE;
+        fu_offset = `RV32_signext_Bimm(id_packet.inst); 
+    */
+	/*
+        The resolved address should be sent to Store queue, hence we provide an index
+    */
+    
+    //////////////////////////////////////////////////
+    //                                              //
+    //                    Load  Queue               //
+    //                                              //
+    //////////////////////////////////////////////////
+    /*  opa_select = OPA_IS_RS1;            BASE: fu_opa_value
+		opb_select = OPB_IS_I_IMM;          fu_offset
+		alu_func = ALU_ADD;
+		csr_op = `FALSE;
+		wr_mem = `FALSE;
+		cond_branch = `FALSE;
+		uncond_branch = `FALSE;
+		halt = `FALSE;
+		illegal = `FALSE;
+        dest_reg   = DEST_RD;		    id_packet.dest_areg_idx
+		rd_mem     = `TRUE;
+		fu_type    = MEM; 
+        
+        */
+    module load_mux(
+        input       LQ_head_ready, //address resolved
+        input       forward,
+        input       forward_data,
+        input       data_from$,
+        input       $response,
+        output      mux_data
+    );
+
+    endmodule
+    //////////////////////////////////////////////////
+    //                                              //
+    //                   R S _ M E M                //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // rs_mem rs_mem0(
+    //     //inputs
+    //     .clock(clock),
+    //     .reset(reset),
+    //     .PC(id_packet.PC),
+    //     .NPC(id_packet.NPC),
+    //     .enable(id_packet.valid && id_packet.fu_type == MEM),
+    //     .opa_preg_idx(opa_preg_idx),
+    //     .opb_preg_idx(opb_preg_idx),
+    //     .opa_ready(fu_opa_ready),
+    //     .opa_value(fu_opa_value),
+    //     .opb_ready(fu_opb_ready),
+    //     .opb_value(fu_opb_value),
+    //     .offset(fu_offset),
+    //     .dest_SQ_idx(sq_tail),
+    //     .rob_idx(rob_tail),
+    //     .rd_mem(id_packet.rd_mem),
+    //     .wr_mem(id_packet.wr_mem),
+    //     // empty on mis prediction
+    //     .commit_mis_pred(mis_pred_is_head),
+    //     // cdb broadcast
+    //     .cdb_broadcast_valid(cdb_broadcast_valid),
+    //     .cdb_dest_preg_idx(cdb_dest_preg_idx),
+    //     .cdb_value(cdb_result),
+    //     .mem_func(),
+    //     //outputs
+    //     .rs_mem_packet(rs_mem_packet),
+    //     .rs_mem_out_valid(rs_mem_out_valid),
+    //     .rs_mem_full(rs_mem_full)
+    // );
 
 
     //////////////////////////////////////////////////
@@ -524,6 +610,7 @@ module top_level (
         .mul_PC(mul_PC)
     );
 
+    
     //////////////////////////////////////////////////
     //                                              //
     //                   R S _ M E M                //
