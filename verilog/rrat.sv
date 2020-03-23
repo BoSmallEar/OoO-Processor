@@ -26,7 +26,7 @@ module rrat(
     output logic [`PRF_SIZE-1:0]      rrat_valid_backup,
     output logic [`PRF_SIZE-1:0] [`PRF_LEN-1:0] rrat_free_preg_queue_backup,        // rrat
     output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_head_backup,   // rrat
-    output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_tail_backup   // rrat
+    output logic [`PRF_LEN-1:0]                 rrat_free_preg_queue_tail_backup    // rrat
 `ifdef DEBUG
     , output logic [31:0] [`PRF_LEN-1:0]     rrat_packets 
 `endif
@@ -56,8 +56,8 @@ module rrat(
         end
         else if (rrat_enable) begin
             rrat_packets[rob_commit_dest_areg_idx]      <= `SD rob_commit_dest_preg_idx;
-            rrat_free_backup[rrat_prev_preg_idx]        <= `SD 1'b1;
-            rrat_valid_backup[rrat_prev_preg_idx]       <= `SD 1'b0;
+            rrat_free_backup[rrat_prev_preg_idx]        <= `SD (rrat_prev_preg_idx == 0) ? 1'b0 : 1'b1;
+            rrat_valid_backup[rrat_prev_preg_idx]       <= `SD (rrat_prev_preg_idx == 0) ? 1'b1 : 1'b0;
             rrat_free_backup[rob_commit_dest_preg_idx]  <= `SD 1'b0;
             rrat_valid_backup[rob_commit_dest_preg_idx] <= `SD 1'b1;
             if (rrat_prev_preg_idx != `PRF_LEN'b0) begin
