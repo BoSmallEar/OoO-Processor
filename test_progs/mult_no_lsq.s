@@ -55,4 +55,32 @@ loop:	addi	x5,	x5,	1      # 88	    58
 	srli	x14,	x2,	16     # 140	8c
 	addi	x1,	x1,	16         # 144	90
 	bne	x6,	x0,	loop           # 148	94
-	wfi                        # 152    98
+	li x15, 0x1000
+	sw x1, 0(x15)
+	li x15, 0x1010
+	sw x2, 0(x15)
+	li x15, 0x1020 	
+	sw x3, 0(x15)
+	li x15, 0x1030
+	sw x4, 0(x15)
+	li x15, 0x1040
+	sw x5, 0(x15)
+	li x15, 0x1050 
+	sw x6, 0(x15)
+	li x15, 0x1060
+	sw x7, 0(x15)
+	li x15, 0x1070
+	sw x8, 0(x15)
+	li x15, 0x1080 	
+	sw x9, 0(x15)
+	li x15, 0x1090
+	sw x10, 0(x15)
+	li x15, 0x10a0
+	sw x11, 0(x15) 
+	li x15, 0x10b0 
+	sw x12, 0(x15)
+	li x15, 0x10c0
+	sw x13, 0(x15)
+	li x15, 0x10d0 
+	sw x14, 0(x15) 
+	wfi                        # 152    98 
