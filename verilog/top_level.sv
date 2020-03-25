@@ -287,16 +287,7 @@ module top_level (
 		fu_type    = MEM; 
         
         */
-    module load_mux(
-        input       LQ_head_ready, //address resolved
-        input       forward,
-        input       forward_data,
-        input       data_from$,
-        input       $response,
-        output      mux_data
-    );
-
-    endmodule
+ 
     //////////////////////////////////////////////////
     //                                              //
     //                   R S _ M E M                //
