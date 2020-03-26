@@ -141,7 +141,7 @@ module proc_testbench;
         , .rs_alu_counter(rs_alu_counter)
         , .rs_alu_ex(rs_alu_ex)    // goes to priority selector (data ready && FU free) 
         , .rs_alu_free(rs_alu_free)
-        , .rs_alu_free_idx(rs_alur_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_alu_free_idx(rs_alu_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_alu_ex_idx(rs_alu_ex_idx) 
 
         , .rs_mul_packets(rs_mul_packets)
