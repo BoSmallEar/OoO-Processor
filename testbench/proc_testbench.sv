@@ -355,7 +355,7 @@ task print_id_packet;
     input ID_PACKET         id_packet_out;
     $display("========================= ID PACKET =========================");
     $display("PC: %d", id_packet_out.PC);
-    case(fu_type)
+    case(id_packet_out.fu_type)
         ALU:  $display("fu_type: ALU");
         MUL:  $display("fu_type: MUL");
         MEM:  $display("fu_type: MEM");
@@ -365,14 +365,14 @@ task print_id_packet;
     $display("opa_areg_idx: %d", id_packet_out.opa_areg_idx);
     $display("opb_areg_idx: %d", id_packet_out.opb_areg_idx);
     $display("dest_areg_idx: %d", id_packet_out.dest_areg_idx);
-    case(opa_select)
+    case(id_packet_out.opa_select)
 	    OPA_IS_RS1  : $display("opa_select: OPA_IS_RS1");
 	    OPA_IS_NPC  : $display("opa_select: OPA_IS_NPC");
 	    OPA_IS_PC   : $display("opa_select: OPA_IS_PC");
 	    OPA_IS_ZERO : $display("opa_select: OPA_IS_ZERO");
         default     : $display("opa_select: EMPTY!!!");
     endcase
-    case(opb_select)
+    case(id_packet_out.opb_select)
         OPB_IS_RS2   :  $display("opb_select: OPB_IS_RS2");
         OPB_IS_I_IMM :  $display("opb_select: OPB_IS_I_IMM");
         OPB_IS_S_IMM :  $display("opb_select: OPB_IS_S_IMM");

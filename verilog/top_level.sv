@@ -77,7 +77,7 @@ module top_level (
     // Outputs of cdb
     , output logic [3:0]           module_select
     , output logic                 cdb_broadcast_valid
-    , output logic [`XLEN-1:0]     cdb_resul
+    , output logic [`XLEN-1:0]     cdb_result
     , output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx
     , output logic [`ROB_LEN-1:0]  cdb_rob_idx
     , output logic [`XLEN-1:0]     cdb_broadcast_inst_PC
