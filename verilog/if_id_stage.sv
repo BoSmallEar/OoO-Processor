@@ -57,13 +57,14 @@ module if_id_stage(
 `endif
 
 	logic				 decoder_valid;
+	logic                result_mis_pred_valid;
 	DEST_REG_SEL 		 dest_reg_select; 
 
 	logic update_predictor;
 	logic update_btb;
 	assign update_predictor = result_valid? result_cond_branch : 0;
 	assign update_btb = result_valid? (result_cond_branch || result_uncond_branch) : 0;
-
+	assign result_mis_pred_valid = result_valid? result_mis_pred : 0;
 
 	predictor predictor0(
 		// current instruction
@@ -127,7 +128,7 @@ module if_id_stage(
 	
 	// this mux is because the Imem gives us 64 bits not 32 bits
 	assign id_packet_out.inst = Icache2proc_data;
-	assign id_packet_out.valid = Icache2proc_valid && !result_mis_pred && !rob_full && !rs_full[id_packet_out.fu_type]; 
+	assign id_packet_out.valid = Icache2proc_valid && !result_mis_pred_valid && !rob_full && !rs_full[id_packet_out.fu_type]; 
 
 	assign id_packet_out.NPC = next_PC;
 	assign id_packet_out.PC  = PC_reg;
