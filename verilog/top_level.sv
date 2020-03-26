@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __TOP_LEVEL_V__
 `define __TOP_LEVEL_V__
 `timescale 1ns/100ps
@@ -781,6 +782,4 @@ module top_level (
     );
     
 endmodule
-
-`endif
 `endif

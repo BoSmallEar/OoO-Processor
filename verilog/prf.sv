@@ -9,6 +9,7 @@
 //////////////////////////////////////////////////////////////////////////
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __PRF_V__
 `define __PRF_V__
 
@@ -106,5 +107,3 @@ module prf(
 
 endmodule
 `endif // __PRF_V__
-
-`endif

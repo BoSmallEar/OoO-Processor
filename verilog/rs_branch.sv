@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __RS_BRANCH_V__
 `define __RS_BRANCH_V__
 
@@ -171,5 +172,3 @@ module rs_branch(
 
 endmodule
 `endif // __RS_BRANCH_V__ 
-
-`endif

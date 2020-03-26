@@ -7,6 +7,7 @@
 
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __ROB_V__
 `define __ROB_V__
 
@@ -130,4 +131,3 @@ module rob(
 endmodule
 `endif // `__ROB_V__
 
-`endif

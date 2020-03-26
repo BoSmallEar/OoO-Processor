@@ -10,6 +10,7 @@
 
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __RRAT_V__
 `define __RRAT_V__
 
@@ -72,5 +73,3 @@ module rrat(
 
 endmodule
 `endif // __RRAT_V__
-
-`endif

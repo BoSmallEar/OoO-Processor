@@ -9,6 +9,7 @@
 //////////////////////////////////////////////////////////////////////////
 `ifndef DEBUG
 `define DEBUG
+`endif
 `ifndef __RS_MUL_V__
 `define __RS_MUL_V__
 
@@ -155,6 +156,4 @@ module rs_mul(
         end    
     end
 endmodule
-`endif
-
 `endif
