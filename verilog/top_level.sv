@@ -410,7 +410,7 @@ module top_level (
         .rob_commit_dest_preg_idx(rob_commit_dest_preg_idx),
         .rob_tail(rob_tail),
         .rob_full(rob_full),
-        .commit_valid(commit_valid),           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
+        .commit_valid(result_valid),           // tell RRAT rob_commit_dest_(p|a)reg_idx is valid
         // branch
         .result_PC(result_PC),
         .result_cond_branch(result_cond_branch),

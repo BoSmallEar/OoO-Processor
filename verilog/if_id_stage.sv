@@ -30,6 +30,7 @@ module if_id_stage(
     input         			 result_global_taken,  // result_global_taken
 	input                    result_taken,        // result_taken
 	input					 result_mis_pred,
+	input					 result_valid,
 
 	output logic [`XLEN-1:0] proc2Icache_addr,     // Address sent to Instruction memory
 	output ID_PACKET         id_packet_out         // Output data packet from IF going to ID, see sys_defs for signal information 
@@ -58,6 +59,11 @@ module if_id_stage(
 	logic				 decoder_valid;
 	DEST_REG_SEL 		 dest_reg_select; 
 
+	logic update_predictor;
+	logic update_btb;
+	assign update_predictor = result_valid? result_cond_branch : 0;
+	assign update_btb = result_valid? (result_cond_branch || result_uncond_branch) : 0;
+
 
 	predictor predictor0(
 		// current instruction
@@ -70,7 +76,7 @@ module if_id_stage(
 		.result_local_taken(result_local_taken),
     	.result_global_taken(result_global_taken),
 		.result_PC(result_PC),           // resolved branch's own PC 
-		.result_cond_branch(result_cond_branch),        // if the result instr is a cond branch for updating the history table
+		.result_cond_branch(update_predictor),        // if the result instr is a cond branch for updating the history table
 		
 		// output 
 		.tournament_taken(tournament_taken),              // result of the predictor : whether taken or not 
@@ -85,7 +91,7 @@ module if_id_stage(
 		.PC(PC_reg), 
 		
 		.result_taken(result_taken),           // branch is actually taken or not
-		.result_branch(result_cond_branch || result_uncond_branch),     // result is a branch or not
+		.result_branch(update_btb),     // result is a branch or not
 		.result_PC(result_PC),                 // resolved branch's own PC
 		.result_target_PC(result_target_PC),   // resolved branch target address
 

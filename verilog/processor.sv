@@ -145,6 +145,7 @@ module processor (
     	.result_global_taken(result_global_taken),  // result_global_taken
 		.result_taken(result_taken),        // result_taken
 		.result_mis_pred(result_mis_pred),
+        .result_valid(result_valid)
         
         //outputs
         .proc2Icache_addr(proc2Icache_addr),     // Address sent to Instruction memory
