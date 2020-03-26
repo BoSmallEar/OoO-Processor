@@ -265,7 +265,7 @@ module processor (
         , .module_select(module_select)               
         , .cdb_dest_preg_idx(cdb_dest_preg_idx)         
         , .cdb_rob_idx(cdb_rob_idx)
-        , .cdb_broadcast_value(cdb_result)
+        , .cdb_result(cdb_result)
         , .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC)       
         , .cdb_br_direction(cdb_br_direction)                 
         , .cdb_br_target_PC(cdb_br_target_PC)                 
