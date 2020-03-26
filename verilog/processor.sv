@@ -77,9 +77,21 @@ module processor (
     , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
     , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
     , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+
+    // Outputs of cdb
+    , output logic [3:0]           module_select
+    , output logic                 cdb_broadcast_valid
+    , output logic [`XLEN-1:0]     cdb_result
+    , output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx
+    , output logic [`ROB_LEN-1:0]  cdb_rob_idx
+    , output logic [`XLEN-1:0]     cdb_broadcast_inst_PC
+    , output logic                 cdb_br_direction
+    , output logic [`XLEN-1:0]     cdb_br_target_PC
+    , output logic                 cdb_mis_pred
+    , output logic                 cdb_local_pred_direction
+    , output logic                 cdb_global_pred_direction
 `endif
 );
-
 
     //if stage outputs
 	logic [`XLEN-1:0]	proc2Icache_addr;
@@ -247,6 +259,19 @@ module processor (
         , .rs_branch_free(rs_branch_free)
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx)
+    
+        // output
+        , .cdb_broadcast_valid(cdb_broadcast_valid)         
+        , .module_select(module_select)               
+        , .cdb_dest_preg_idx(cdb_dest_preg_idx)         
+        , .cdb_rob_idx(cdb_rob_idx)
+        , .cdb_broadcast_value(cdb_result)
+        , .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC)       
+        , .cdb_br_direction(cdb_br_direction)                 
+        , .cdb_br_target_PC(cdb_br_target_PC)                 
+        , .cdb_mis_pred(cdb_mis_pred)                         
+        , .cdb_local_pred_direction(cdb_local_pred_direction)
+        , .cdb_global_pred_direction(cdb_global_pred_direction)
     `endif
     );
 

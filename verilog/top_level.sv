@@ -73,7 +73,19 @@ module top_level (
     , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
     , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
     , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
-  
+
+    // Outputs of cdb
+    , output logic [3:0]           module_select
+    , output logic                 cdb_broadcast_valid
+    , output logic [`XLEN-1:0]     cdb_result
+    , output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx
+    , output logic [`ROB_LEN-1:0]  cdb_rob_idx
+    , output logic [`XLEN-1:0]     cdb_broadcast_inst_PC
+    , output logic                 cdb_br_direction
+    , output logic [`XLEN-1:0]     cdb_br_target_PC
+    , output logic                 cdb_mis_pred
+    , output logic                 cdb_local_pred_direction
+    , output logic                 cdb_global_pred_direction
 `endif
 );
 
@@ -158,6 +170,7 @@ module top_level (
     logic                     br_global_pred_direction; // br->cdb
     logic [`XLEN-1:0]         br_PC;                    // br->cdb
 
+`ifndef DEBUG
     // CDB OUTPUTS
     logic [`XLEN-1:0]         cdb_result;
     logic [3:0]               module_select;            // cdb->all FUs, all RSs
@@ -171,6 +184,7 @@ module top_level (
     logic                     cdb_mis_pred;             // cdb->rob
     logic                     cdb_local_pred_direction; // cdb->bp
     logic                     cdb_global_pred_direction;// cdb->bp
+`endif
     // CDB OUTPUTS for mem
     // logic [`XLEN-1:0]         mem_PC;
     // logic                     mem_valid;

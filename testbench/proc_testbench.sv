@@ -86,6 +86,19 @@ module proc_testbench;
     logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
     logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
 
+    // Outputs of cdb
+    logic [3:0]           module_select;
+    logic                 cdb_broadcast_valid;
+    logic [`XLEN-1:0]     cdb_result;
+    logic [`PRF_LEN-1:0]  cdb_dest_preg_idx;
+    logic [`ROB_LEN-1:0]  cdb_rob_idx;
+    logic [`XLEN-1:0]     cdb_broadcast_inst_PC;
+    logic                 cdb_br_direction;
+    logic [`XLEN-1:0]     cdb_br_target_PC;
+    logic                 cdb_mis_pred;
+    logic                 cdb_local_pred_direction;
+    logic                 cdb_global_pred_direction;
+
     logic [63:0] debug_counter;
 
     processor processor0(
@@ -141,6 +154,19 @@ module proc_testbench;
         , .rs_branch_free(rs_branch_free)
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx) 
+
+        // output
+        , .cdb_broadcast_valid(cdb_broadcast_valid)         
+        , .module_select(module_select)               
+        , .cdb_dest_preg_idx(cdb_dest_preg_idx)         
+        , .cdb_rob_idx(cdb_rob_idx)
+        , .cdb_result(cdb_result)
+        , .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC)       
+        , .cdb_br_direction(cdb_br_direction)                 
+        , .cdb_br_target_PC(cdb_br_target_PC)                 
+        , .cdb_mis_pred(cdb_mis_pred)                         
+        , .cdb_local_pred_direction(cdb_local_pred_direction)
+        , .cdb_global_pred_direction(cdb_global_pred_direction)
     `endif
     );
 
@@ -276,6 +302,39 @@ task print_predict;
     $display("============================================================================");
 endtask
 
+task print_cdb;
+    input logic [3:0]           module_select;
+    input logic                 cdb_broadcast_valid;
+    input logic [`XLEN-1:0]     cdb_result;
+    input logic [`PRF_LEN-1:0]  cdb_dest_preg_idx;
+    input logic [`ROB_LEN-1:0]  cdb_rob_idx;
+    input logic [`XLEN-1:0]     cdb_broadcast_inst_PC;
+    // branch
+    input logic                 cdb_br_direction;
+    input logic [`XLEN-1:0]     cdb_br_target_PC;
+    input logic                 cdb_mis_pred;
+    input logic                 cdb_local_pred_direction;
+    input logic                 cdb_global_pred_direction;
+
+    case(module_select)
+        4'b1000:  $display("module_select: ALU");
+        4'b0100:  $display("module_select: MUL");
+        4'b0010:  $display("module_select: MEM");
+        4'b0001:  $display("module_select: BRANCH");
+        default:  $display("module_select: EMPTY!!!");
+    endcase
+    $display("cdb_broadcast_inst_PC: %d", cdb_broadcast_inst_PC); 
+    $display("cdb_broadcast_valid: %d", cdb_broadcast_valid);
+    $display("cdb_result: %d", cdb_result);
+    $display("cdb_dest_preg_idx: %d", cdb_dest_preg_idx);
+    $display("cdb_rob_idx: %d", cdb_rob_idx);
+
+    $display("cdb_br_target_PC: %d", cdb_br_target_PC);
+    $display("cdb_br_direction: %d", cdb_br_direction);
+    $display("cdb_mis_pred: %d", cdb_mis_pred);
+    $display("cdb_local_pred_direction: %d", cdb_local_pred_direction);
+    $display("cdb_global_pred_direction: %d", cdb_global_pred_direction);
+endtask
 
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
     // so the actual period of the clock is 10, not 5.
@@ -320,6 +379,18 @@ endtask
             if (result_mis_pred) begin
                 $display("mis_predict!!!");
             end
+            print_cdb(module_select,
+                cdb_broadcast_valid,
+                cdb_result,
+                cdb_dest_preg_idx,
+                cdb_rob_idx,
+                cdb_broadcast_inst_PC,
+                cdb_br_direction,
+                cdb_br_target_PC,
+                cdb_mis_pred,
+                cdb_local_pred_direction,
+                cdb_global_pred_direction
+            );
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
             print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets);
