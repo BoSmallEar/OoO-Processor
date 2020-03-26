@@ -100,7 +100,6 @@ module top_level (
     logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
     logic [`PRF_LEN-1:0]    rob_commit_dest_preg_idx;   // rob -> rrat
     // logic [`ROB_LEN-1:0]    rob_tail;                   // rob -> rs
-    logic                   commit_valid;               // rob -> prf
     logic                   mis_pred_is_head;           // rob -> rs, prf, rat
 
     assign  result_mis_pred = mis_pred_is_head;
@@ -190,7 +189,7 @@ module top_level (
 
     // RRAT INPUTS
     logic                     rrat_enable;
-    assign rrat_enable = commit_valid;
+    assign rrat_enable = result_valid;
 
     always_comb begin
 		fu_opa_value = `XLEN'hdeadfbac;
@@ -445,7 +444,7 @@ module top_level (
         .prf_enable(rat_enable),            // ???
         .rrat_prev_reg_idx(rrat_prev_preg_idx),  // rrat
         .commit_mis_pred(mis_pred_is_head),      // rob
-        .commit_valid(commit_valid),             // rob
+        .commit_valid(result_valid),             // rob
         .rrat_free_backup(rrat_free_backup),     // rrat
         .rrat_valid_backup(rrat_valid_backup),   // rrat
         .rrat_free_preg_queue_backup(rrat_free_preg_queue_backup),              // rrat
