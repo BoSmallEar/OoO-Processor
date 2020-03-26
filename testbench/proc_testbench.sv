@@ -237,18 +237,18 @@ task print_rs;
         rs_alu_packets[i].dest_preg_idx,
         rs_alu_packets[i].rob_idx);
     end
-    // $display("======================================= RS-MUL ========================================");
-    // $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
-    // for (int i = 0; i < `RS_ALU_SIZE; i++) begin
-    //     $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
-    //     rs_mul_packets[i].PC,
-    //     rs_mul_packets[i].opa_ready,
-    //     rs_mul_packets[i].opa_value,
-    //     rs_mul_packets[i].opb_ready,
-    //     rs_mul_packets[i].opb_value,
-    //     rs_mul_packets[i].dest_preg_idx,
-    //     rs_mul_packets[i].rob_idx);
-    // end
+    $display("======================================= RS-MUL ========================================");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
+    for (int i = 0; i < `RS_MUL_SIZE; i++) begin
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+        rs_mul_packets[i].PC,
+        rs_mul_packets[i].opa_ready,
+        rs_mul_packets[i].opa_value,
+        rs_mul_packets[i].opb_ready,
+        rs_mul_packets[i].opb_value,
+        rs_mul_packets[i].dest_preg_idx,
+        rs_mul_packets[i].rob_idx);
+    end
     $display("============================================= RS-BR ==============================================");
     $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |");
     for (int i = 0; i < `RS_BR_SIZE; i++) begin
