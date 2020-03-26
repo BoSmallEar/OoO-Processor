@@ -126,8 +126,6 @@ module mult2cdb(
     );
 
 	assign mul_valid = done;
-	assign signed_opa = rs_mul_packet.opa_value;
-	assign mixed_mul = signed_opa*rs_mul_packet.opb_value;
 
 	always_comb begin
 		case (rs_mul_packet.mul_func)
