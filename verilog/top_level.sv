@@ -134,6 +134,7 @@ module top_level (
     logic [`PRF_LEN-1:0]      mul_prf_idx;             // mul->prf
     logic [`ROB_LEN-1:0]      mul_rob_idx;             // mul->cdb
     logic [`XLEN-1:0]         mul_PC;                  // alu->cdb
+    logic                     mul_free;                // mult2cdb->rs_mul
 
     // RS_MEM OUTPUTS
 
@@ -565,7 +566,7 @@ module top_level (
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_value(cdb_result), 
-
+        .mul_free(mul_free),
         //outputs
         .rs_mul_packet(rs_mul_packet),
         .rs_mul_out_valid(rs_mul_out_valid),
@@ -596,6 +597,7 @@ module top_level (
         //output
         .mul_value(mul_value),
         .mul_valid(mul_valid),
+        .mul_free(mul_free),
         .mul_prf_idx(mul_prf_idx),
         .mul_rob_idx(mul_rob_idx),
         .mul_PC(mul_PC)

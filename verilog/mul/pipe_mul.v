@@ -76,6 +76,7 @@ module mult2cdb(
 
 	output logic [`XLEN-1:0]     mul_value,
     output logic                 mul_valid,
+	output logic				 mul_free,
     output logic [`PRF_LEN-1:0]  mul_prf_idx,
     output logic [`ROB_LEN-1:0]  mul_rob_idx,
 	output logic [`XLEN-1:0]     mul_PC
@@ -138,10 +139,15 @@ module mult2cdb(
 		endcase
 	end
 
-	// always_ff @(posedge clock) begin
-	// 	if (reset)
-	// 		mul_valid <= `SD 1'b0;
-	// 	else
-	// 		mul_valid <= `SD done;
-	// end
+	always_ff @(posedge clock) begin
+		if (reset) begin 
+			mul_free <= `SD 1'b1;
+		end
+		else if (mul_enable) begin
+			mul_free <= `SD 1'b0;
+		end
+		else if (mul_valid) begin
+			mul_free <= `SD 1'b1;
+		end
+	end
 endmodule

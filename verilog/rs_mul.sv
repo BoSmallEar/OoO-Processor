@@ -35,6 +35,7 @@ module rs_mul(
     input                   cdb_broadcast_valid,
     input [`PRF_LEN-1:0]    cdb_dest_preg_idx,
     input [`XLEN-1:0]       cdb_value, 
+    input                   mul_free,
     // OUTPUTS
     output RS_MUL_PACKET    rs_mul_packet,        // overwrite opa and opb value, if needed
     output logic            rs_mul_out_valid,
@@ -80,7 +81,7 @@ module rs_mul(
     always_comb begin
         rs_mul_ex = `RS_MUL_SIZE'h0;
         for (k = 0; k<`RS_MUL_SIZE; k++) begin
-            rs_mul_ex[k] = (~rs_mul_free[k])&&(rs_mul_packets[k].opa_ready)&&(rs_mul_packets[k].opb_ready);
+            rs_mul_ex[k] = (~rs_mul_free[k])&&(rs_mul_packets[k].opa_ready)&&(rs_mul_packets[k].opb_ready)&&mul_free;
         end
     end
 
