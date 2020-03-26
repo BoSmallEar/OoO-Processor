@@ -253,38 +253,43 @@ task print_rrat;
 endtask
 
 task print_rs;
-    input RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets;
+    input RS_ALU_PACKET [`RS_ALU_SIZE-1:0]   rs_alu_packets;
+    input logic [`RS_ALU_SIZE-1:0]           rs_alu_free;
     input RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets;
-    input RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
+    input logic [`RS_BR_SIZE-1:0]            rs_branch_free;
+    input RS_MUL_PACKET [`RS_MUL_SIZE-1:0]   rs_mul_packets;
+    input logic [`RS_MUL_SIZE-1:0]           rs_mul_free;
 
     $display("======================================= RS-ALU ========================================");
-    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |free |");
     for (int i = 0; i < `RS_ALU_SIZE; i++) begin
-        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|%5d|", i,
         rs_alu_packets[i].PC,
         rs_alu_packets[i].opa_ready,
         rs_alu_packets[i].opa_value,
         rs_alu_packets[i].opb_ready,
         rs_alu_packets[i].opb_value,
         rs_alu_packets[i].dest_preg_idx,
-        rs_alu_packets[i].rob_idx);
+        rs_alu_packets[i].rob_idx,
+        rs_alu_free[i]);
     end
     $display("======================================= RS-MUL ========================================");
-    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |free |");
     for (int i = 0; i < `RS_MUL_SIZE; i++) begin
-        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%14d|%8d|%5d|", i,
         rs_mul_packets[i].PC,
         rs_mul_packets[i].opa_ready,
         rs_mul_packets[i].opa_value,
         rs_mul_packets[i].opb_ready,
         rs_mul_packets[i].opb_value,
         rs_mul_packets[i].dest_preg_idx,
-        rs_mul_packets[i].rob_idx);
+        rs_mul_packets[i].rob_idx,
+        rs_mul_free[i]);
     end
     $display("============================================= RS-BR ==============================================");
-    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |free |");
     for (int i = 0; i < `RS_BR_SIZE; i++) begin
-        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%10d|%14d|%8d|", i,
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%10d|%14d|%8d|%5d|", i,
         rs_branch_packets[i].PC,
         rs_branch_packets[i].opa_ready,
         rs_branch_packets[i].opa_value,
@@ -292,7 +297,8 @@ task print_rs;
         rs_branch_packets[i].opb_value,
         rs_branch_packets[i].br_pred_target_PC,
         rs_branch_packets[i].br_pred_direction,
-        rs_branch_packets[i].rob_idx);
+        rs_branch_packets[i].rob_idx,
+        rs_branch_free[i]);
     end
     $display("==================================================================================================");
 endtask
@@ -443,7 +449,12 @@ endtask
             print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets);
             print_rrat(rrat_packets);
-            print_rs(rs_alu_packets, rs_branch_packets, rs_mul_packets);
+            print_rs(rs_alu_packets, 
+                rs_alu_free,
+                rs_branch_packets, 
+                rs_branch_free,
+                rs_mul_packets,
+                rs_mul_free);
             print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
