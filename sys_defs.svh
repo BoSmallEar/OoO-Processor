@@ -428,7 +428,8 @@ typedef struct packed {
 
 	ALU_FUNC                alu_func;           // ALU function select (ALU_xxx *)
 	
-} RS_ALU_PACKET;
+} 
+;
 
 //////////////////////////////////////////////
 //

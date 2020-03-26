@@ -89,11 +89,11 @@ module rob(
         if (reset) begin
             rob_head    <= `SD `ROB_LEN'b0;
             rob_tail    <= `SD `ROB_LEN'b0; 
-            rob_counter <= `SD `ROB_LEN'h0;
+            rob_counter <= `SD 0;
         end
         else if (mis_pred_is_head) begin
             rob_head    <= `SD rob_tail;
-            rob_counter <= `SD `ROB_LEN'h0;
+            rob_counter <= `SD 0;
         end
         else begin 
             if (dispatch_enable) begin

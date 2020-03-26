@@ -104,7 +104,7 @@ module rs_mem(
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mem_free      <= `SD ~`RS_MEM_SIZE'h0;
-            rs_mem_counter   <= `SD `RS_MEM_LEN'h0;
+            rs_mem_counter   <= `SD 0;
             rs_mem_out_valid <= `SD 1'b0; 
         end 
         else begin

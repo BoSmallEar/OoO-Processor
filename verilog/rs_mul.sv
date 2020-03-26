@@ -109,7 +109,7 @@ module rs_mul(
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;
-            rs_mul_counter   <= `SD `RS_MUL_LEN'h0;
+            rs_mul_counter   <= `SD 0;
             rs_mul_out_valid <= `SD 1'b0; 
         end 
         else begin

@@ -108,7 +108,7 @@ module rs_alu(
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
-            rs_alu_counter   <= `SD `RS_ALU_LEN'h0;
+            rs_alu_counter   <= `SD 0;
             rs_alu_out_valid <= `SD 1'b0; 
         end 
         else begin

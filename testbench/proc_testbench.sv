@@ -99,6 +99,9 @@ module proc_testbench;
     logic                 cdb_local_pred_direction;
     logic                 cdb_global_pred_direction;
 
+    // id packet
+    ID_PACKET             id_packet_out;
+
     logic [63:0] debug_counter;
 
     processor processor0(
@@ -155,7 +158,7 @@ module proc_testbench;
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx) 
 
-        // output
+        // cdb output
         , .cdb_broadcast_valid(cdb_broadcast_valid)         
         , .module_select(module_select)               
         , .cdb_dest_preg_idx(cdb_dest_preg_idx)         
@@ -167,6 +170,9 @@ module proc_testbench;
         , .cdb_mis_pred(cdb_mis_pred)                         
         , .cdb_local_pred_direction(cdb_local_pred_direction)
         , .cdb_global_pred_direction(cdb_global_pred_direction)
+
+        // id packet
+        , .id_packet_out(id_packet_out)
     `endif
     );
 
@@ -316,6 +322,7 @@ task print_cdb;
     input logic                 cdb_local_pred_direction;
     input logic                 cdb_global_pred_direction;
 
+    $display("========================= CDB =========================");
     case(module_select)
         4'b1000:  $display("module_select: ALU");
         4'b0100:  $display("module_select: MUL");
@@ -334,6 +341,46 @@ task print_cdb;
     $display("cdb_mis_pred: %d", cdb_mis_pred);
     $display("cdb_local_pred_direction: %d", cdb_local_pred_direction);
     $display("cdb_global_pred_direction: %d", cdb_global_pred_direction);
+    $display("========================================================");
+
+endtask
+
+task print_id_packet;
+    input ID_PACKET         id_packet_out;
+    $display("========================= ID PACKET =========================");
+    $display("PC: %d", id_packet_out.PC);
+    case(fu_type)
+        ALU:  $display("fu_type: ALU");
+        MUL:  $display("fu_type: MUL");
+        MEM:  $display("fu_type: MEM");
+        BRANCH:  $display("fu_type: BRANCH");
+        default:  $display("fu_type: EMPTY!!!");
+    endcase
+    $display("opa_areg_idx: %d", id_packet_out.opa_areg_idx);
+    $display("opb_areg_idx: %d", id_packet_out.opb_areg_idx);
+    $display("dest_areg_idx: %d", id_packet_out.dest_areg_idx);
+    case(opa_select)
+	    OPA_IS_RS1  : $display("opa_select: OPA_IS_RS1");
+	    OPA_IS_NPC  : $display("opa_select: OPA_IS_NPC");
+	    OPA_IS_PC   : $display("opa_select: OPA_IS_PC");
+	    OPA_IS_ZERO : $display("opa_select: OPA_IS_ZERO");
+        default     : $display("opa_select: EMPTY!!!");
+    endcase
+    case(opb_select)
+        OPB_IS_RS2   :  $display("opb_select: OPB_IS_RS2");
+        OPB_IS_I_IMM :  $display("opb_select: OPB_IS_I_IMM");
+        OPB_IS_S_IMM :  $display("opb_select: OPB_IS_S_IMM");
+        OPB_IS_B_IMM :  $display("opb_select: OPB_IS_B_IMM");
+        OPB_IS_U_IMM :  $display("opb_select: OPB_IS_U_IMM");
+        OPB_IS_J_IMM :  $display("opb_select: OPB_IS_J_IMM");
+        default      :  $display("opb_select: EMPTY!!!");
+    endcase
+    $display("inst: %h", id_packet_out.inst);
+    $display("valid: %d", id_packet_out.valid);
+    $display("branch_prediction: %d", id_packet_out.branch_prediction);
+    $display("local_taken: %d", id_packet_out.local_taken);
+    $display("global_taken: %d", id_packet_out.global_taken);
+    $display("=============================================================");
 endtask
 
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -391,6 +438,7 @@ endtask
                 cdb_local_pred_direction,
                 cdb_global_pred_direction
             );
+            print_id_packet(id_packet_out);
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
             print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets);

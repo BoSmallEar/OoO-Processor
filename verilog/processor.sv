@@ -90,13 +90,17 @@ module processor (
     , output logic                 cdb_mis_pred
     , output logic                 cdb_local_pred_direction
     , output logic                 cdb_global_pred_direction
+
+    // id packet
+    , output ID_PACKET        id_packet_out
 `endif
 );
 
     //if stage outputs
 	logic [`XLEN-1:0]	proc2Icache_addr;
+`ifndef DEBUG
 	ID_PACKET        id_packet_out;
-
+`endif
 
     logic  	[`XLEN-1:0] 	 Icache2proc_data;
     logic                    Icache2proc_valid;
