@@ -8,7 +8,11 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
-
+`ifndef DEBUG
+`define DEBUG
+`endif
+`ifndef __IF_ID_STAGE_V__
+`define __IF_ID_STAGE_V__
 `timescale 1ns/100ps
 
 module if_id_stage(
@@ -29,15 +33,28 @@ module if_id_stage(
 
 	output logic [`XLEN-1:0] proc2Icache_addr,     // Address sent to Instruction memory
 	output ID_PACKET         id_packet_out         // Output data packet from IF going to ID, see sys_defs for signal information 
+
+`ifdef DEBUG
+	, output logic					btb_taken
+	, output logic	[`XLEN-1:0]		btb_target_PC
+	, output logic					tournament_taken
+	, output logic					local_taken
+	, output logic					global_taken
+`endif
 );
 
 	logic    [`XLEN-1:0] PC_reg;               // PC we are currently fetching
 	logic    [`XLEN-1:0] PC_plus_4;
-	logic    [`XLEN-1:0] btb_target_PC;
 	logic    [`XLEN-1:0] next_PC;  
-	 
+
+`ifndef DEBUG
 	logic			     btb_taken;
+	logic    [`XLEN-1:0] btb_target_PC;
 	logic                tournament_taken;
+	logic				 local_taken;
+	logic				 global_taken;
+`endif
+
 	logic				 decoder_valid;
 	DEST_REG_SEL 		 dest_reg_select; 
 
@@ -57,8 +74,8 @@ module if_id_stage(
 		
 		// output 
 		.tournament_taken(tournament_taken),              // result of the predictor : whether taken or not 
-		.local_taken(id_packet_out.local_taken),
-    	.global_taken(id_packet_out.global_taken)
+		.local_taken(local_taken),
+    	.global_taken(global_taken)
 	);  
 
 	btb btb0(
@@ -94,6 +111,9 @@ module if_id_stage(
 		.illegal(id_packet_out.illegal),
 		.valid_inst(decoder_valid)
 	);
+
+	assign id_packet_out.local_taken = local_taken;
+	assign id_packet_out.global_taken = global_taken;
 
 	assign next_PC =  ((id_packet_out.cond_branch && tournament_taken) || id_packet_out.uncond_branch) ? btb_target_PC : PC_plus_4;
 
@@ -139,3 +159,4 @@ module if_id_stage(
 	
 	 
 endmodule  // module if_stage
+`endif

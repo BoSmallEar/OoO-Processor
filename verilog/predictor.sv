@@ -1,3 +1,7 @@
+`ifndef __PREDICTOR_V__
+`define __PREDICTOR_V__
+`timescale 1ns/100ps
+
 module predictor(
     // current instruction
 	input                   clock,                  // system clock
@@ -205,3 +209,4 @@ module global_predictor(
         end
     end
 endmodule
+`endif

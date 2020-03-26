@@ -4,6 +4,10 @@ typedef struct packed{
     logic             valid;
 } BTB_PACKET;
 
+`ifndef __BTB_V__
+`define __BTB_V__
+`timescale 1ns/100ps
+
 module btb(
     //inputs
 	input                   clock,                  // system clock
@@ -26,8 +30,9 @@ module btb(
 
     BTB_PACKET [branch_offset_pow-1:0] btb_packets;
 
-    assign btb_target_PC = btb_taken ? btb_packets[PC[9:2]].target_PC : PC + 4;
+
     assign btb_taken = btb_packets[PC[9:2]].valid &&  (btb_packets[PC[9:2]].PC == PC);
+    assign btb_target_PC = btb_taken ? btb_packets[PC[9:2]].target_PC : PC + 4;
 
     always_ff @(posedge clock) begin
         if (reset) begin
@@ -43,6 +48,5 @@ module btb(
             btb_packets[result_PC[9:2]].valid <= `SD 1'b1;
         end
     end
-
-
 endmodule
+`endif

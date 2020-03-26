@@ -30,6 +30,14 @@ module proc_testbench;
 	MEM_SIZE proc2mem_size;          // data size sent to memory
 
     logic                                 result_mis_pred;
+
+    // from if_id_stage (debug)
+	logic					btb_taken;
+	logic	[`XLEN-1:0]		btb_target_PC;
+	logic					tournament_taken;
+	logic					local_taken;
+	logic					global_taken;
+
     // prf outputs (debug)
     logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values;
     logic [`PRF_SIZE-1:0]                 prf_free;
@@ -94,6 +102,12 @@ module proc_testbench;
         .proc2mem_size(proc2mem_size),           // data size sent to memory
         .processor_error_status(processor_error_status)
     `ifdef DEBUG
+        , .btb_taken(btb_taken)
+        , .btb_target_PC(btb_target_PC)
+        , .tournament_taken(tournament_taken)
+        , .local_taken(local_taken)
+        , .global_taken(global_taken)
+
         , .result_mis_pred(result_mis_pred)
         , .prf_values(prf_values)
         , .prf_free(prf_free)
@@ -251,6 +265,16 @@ task print_rs;
     $display("==================================================================================================");
 endtask
 
+task print_predict;
+	input logic					btb_taken;
+	input logic	[`XLEN-1:0]		btb_target_PC;
+	input logic					tournament_taken;
+	input logic					local_taken;
+	input logic					global_taken;
+    $display("|btb_taken | btb_target_PC | tournament_taken | local_taken | global_taken |");
+    $display("|%10d|%15d|%18d|%13d|%14d|", btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
+    $display("============================================================================");
+endtask
 
 
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -301,6 +325,7 @@ endtask
             print_rat(rat_packets);
             print_rrat(rrat_packets);
             print_rs(rs_alu_packets, rs_branch_packets, rs_mul_packets);
+            print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");  

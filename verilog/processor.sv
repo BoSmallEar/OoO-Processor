@@ -30,6 +30,13 @@ module processor (
 
     output EXCEPTION_CODE processor_error_status
 `ifdef DEBUG
+    // from if_id_stage
+	, output logic					btb_taken
+	, output logic	[`XLEN-1:0]		btb_target_PC
+	, output logic					tournament_taken
+	, output logic					local_taken
+	, output logic					global_taken
+
     , output logic                                 result_mis_pred
     , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values
     , output logic [`PRF_SIZE-1:0]                 prf_free
@@ -142,6 +149,14 @@ module processor (
         //outputs
         .proc2Icache_addr(proc2Icache_addr),     // Address sent to Instruction memory
 	    .id_packet_out(id_packet_out)     
+
+    `ifdef DEBUG
+        , .btb_taken(btb_taken)
+        , .btb_target_PC(btb_target_PC)
+        , .tournament_taken(tournament_taken)
+        , .local_taken(local_taken)
+        , .global_taken(global_taken)
+    `endif
 	);
 
 
