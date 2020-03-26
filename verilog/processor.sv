@@ -12,7 +12,6 @@
 `define DEBUG
 `ifndef __PROCESSOR_V__
 `define __PROCESSOR_V__
-`endif
 `timescale 1ns/100ps
 
 module processor (
@@ -236,3 +235,4 @@ module processor (
 
 endmodule  // module verisimple
 `endif // __PROCESSOR_V__ 
+`endif

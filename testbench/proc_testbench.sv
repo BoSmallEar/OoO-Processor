@@ -125,7 +125,6 @@ module proc_testbench;
         , .rs_branch_free(rs_branch_free)
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx) 
-
     `endif
     );
 
@@ -285,7 +284,6 @@ endtask
     
  
  
-
     always @(negedge clock) begin
         if(reset) begin
             $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
