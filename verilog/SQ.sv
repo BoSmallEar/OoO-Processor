@@ -22,7 +22,7 @@ module store_queue (
     input                       no_offset,
     input   [`XLEN-1:0]         source_data,
     // From load instruction @execution/@decode
-    inout   [`XLEN-1:0]         load_address,
+    input   [`XLEN-1:0]         load_address,
     input   [SQ_IDX_LEN-1:0]    load_age,  
     // From ALU
     input   [`XLEN-1:0]         alu2SQ_addr,

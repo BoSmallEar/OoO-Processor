@@ -5,7 +5,8 @@
 //                                                                      // 
 //////////////////////////////////////////////////////////////////////////
 
-
+`ifndef DEBUG
+`define DEBUG
 `ifndef __ROB_V__
 `define __ROB_V__
 
@@ -17,7 +18,7 @@ module rob(
     input [`XLEN-1:0]           PC,
     // dispatch
     input                       dispatch_enable,
-    input                       illegal,         // not only depend on rob_full, (e.g. invalid instr)
+    input                       illegal,        
     input                       halt,
 
     input [4:0]                 dest_areg_idx,
@@ -56,12 +57,12 @@ module rob(
 `endif
 );
 
-    // logic [`ROB_LEN-1:0]          rob_head;
-    logic                         rob_empty;
+    
 `ifndef DEBUG
-    ROB_PACKET [`ROB_SIZE-1:0]    rob_packets;
+    ROB_PACKET [`ROB_SIZE-1:0]    rob_packets;    
+    logic [`ROB_LEN-1:0]          rob_head;
 `endif
-
+    logic                         rob_empty;
     logic [`ROB_LEN:0]            rob_counter;
 
     assign rob_empty                    = (rob_counter == 0);

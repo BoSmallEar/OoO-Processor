@@ -5,6 +5,7 @@
 //                 RAT, RS, ROB, RRAT, PRF, Function Unit                 //
 //                                                                        // 
 ////////////////////////////////////////////////////////////////////////////
+`ifndef DEBUG
 `define DEBUG
 `ifndef __TOP_LEVEL_V__
 `define __TOP_LEVEL_V__
@@ -715,7 +716,6 @@ module top_level (
         .br_prf_idx(br_prf_idx),
         .br_value(br_value),
         .br_rob_idx(br_rob_idx),
-        .br_prf_idx(br_prf_idx),
         .br_mis_pred(br_mis_pred),
         .br_cond_branch(br_cond_branch),
         .br_uncond_branch(br_uncond_branch),

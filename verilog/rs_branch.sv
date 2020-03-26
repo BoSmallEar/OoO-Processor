@@ -5,7 +5,8 @@
 //   Description :  reservation station                                  //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+`ifndef DEBUG
+`define DEBUG
 `ifndef __RS_BRANCH_V__
 `define __RS_BRANCH_V__
 

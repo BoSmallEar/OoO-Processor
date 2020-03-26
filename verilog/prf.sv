@@ -7,7 +7,8 @@
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+`ifndef DEBUG
+`define DEBUG
 `ifndef __PRF_V__
 `define __PRF_V__
 
@@ -67,10 +68,11 @@ module prf(
             prf_valid              <= `SD `PRF_SIZE'b1;
             for (int i = 0; i < `PRF_SIZE; i++) begin
                 free_preg_queue[i] <= `SD i;
+                prf_values[i]      <= `SD `XLEN'b0;
             end 
             free_preg_queue_head  <= `SD `PRF_LEN'b1;
             free_preg_queue_tail  <= `SD `PRF_LEN'b1; 
-            prf_values[0]         <= `SD `XLEN'b0;
+            
         end
         else if (commit_mis_pred) begin
             prf_free             <= `SD rrat_free_backup;

@@ -8,11 +8,10 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
-
-`ifndef __PROCESSOR_V__
-`define __PROCESSOR_V__
 `ifndef DEBUG
 `define DEBUG
+`ifndef __PROCESSOR_V__
+`define __PROCESSOR_V__
 `endif
 `timescale 1ns/100ps
 
@@ -116,7 +115,7 @@ module processor (
 	                                NO_ERROR;
     
 	logic [3:0] rs_full;
-
+    assign rs_full = {rs_branch_full,rs_mem_full,rs_mul_full,rs_alu_full}; // ???
 //////////////////////////////////////////////////
 //                                              //
 //                  IF-ID Stage                 //
@@ -174,7 +173,7 @@ module processor (
 //                   top level                  //
 //                                              //
 //////////////////////////////////////////////////
-    assign rs_full = {rs_branch_full,rs_mem_full,rs_mul_full,rs_alu_full}; // ???
+    
     
     top_level top_level0(
         //inputs
