@@ -105,6 +105,7 @@ module rs_mul(
     end
 
     int t;
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mul_free      <= `SD ~`RS_MUL_SIZE'h0;

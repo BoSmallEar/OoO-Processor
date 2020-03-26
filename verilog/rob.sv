@@ -84,6 +84,7 @@ module rob(
     assign commit_halt                  = rob_packets[rob_head].halt && commit_valid;
     
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             rob_head    <= `SD `ROB_LEN'b0;

@@ -100,6 +100,7 @@ module rs_mem(
     end
 
     int t;
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_mem_free      <= `SD ~`RS_MEM_SIZE'h0;

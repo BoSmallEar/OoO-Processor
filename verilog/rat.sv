@@ -41,6 +41,7 @@ module rat(
     assign opa_preg_idx = rat_packets[opa_areg_idx];
     assign opb_preg_idx = rat_packets[opb_areg_idx];
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) 
             rat_packets      <= `SD'{32{`PRF_LEN'b0}};

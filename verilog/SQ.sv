@@ -124,6 +124,7 @@ module store_queue (
             match = 0;
     end
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             SQ.head <= `SD 0;

@@ -46,6 +46,7 @@ module rrat(
     assign rat_packets_backup = rrat_packets;
     assign rrat_prev_preg_idx = rrat_packets[rob_commit_dest_areg_idx]; 
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             rrat_packets      <= `SD '{32{`PRF_LEN'b0}};

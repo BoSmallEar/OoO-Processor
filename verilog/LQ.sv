@@ -53,6 +53,7 @@ module load_queue (
     assign head_load_address = (counter==0)? 0: LQ.entries[LQ.head].address;
     assign head_resolved = LQ.entries[LQ.head].resolved;
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             LQ.head <= `SD 0;

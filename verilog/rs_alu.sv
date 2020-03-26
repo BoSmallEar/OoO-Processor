@@ -104,6 +104,7 @@ module rs_alu(
     end
 
     int t;
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;

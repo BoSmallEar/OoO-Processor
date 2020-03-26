@@ -52,8 +52,6 @@ module cdb(
     output logic                 cdb_br_direction,
     output logic [`XLEN-1:0]     cdb_br_target_PC,
     output logic                 cdb_mis_pred,
-    output logic                 cdb_cond_branch,
-    output logic                 cdb_uncond_branch,
     output logic                 cdb_local_pred_direction,
     output logic                 cdb_global_pred_direction
 );
@@ -109,7 +107,7 @@ module cdb(
         .gnt_bus(gnt_bus),
         .empty(broadcast_empty)
     );
-
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             cdb_broadcast_valid       <= `SD 1'b0;
@@ -215,10 +213,6 @@ module cdb(
                                                                           cdb_br_queue[cdb_br_queue_head].br_target_PC;
                     cdb_mis_pred              <= `SD cdb_br_queue_empty ? br_mis_pred :
                                                                           cdb_br_queue[cdb_br_queue_head].br_mis_pred;
-                    cdb_cond_branch           <= `SD cdb_br_queue_empty ? br_cond_branch :
-                                                                          cdb_br_queue[cdb_br_queue_head].br_cond_branch;
-                    cdb_uncond_branch         <= `SD cdb_br_queue_empty ? br_uncond_branch :
-                                                                          cdb_br_queue[cdb_br_queue_head].br_uncond_branch;
                     cdb_local_pred_direction  <= `SD cdb_br_queue_empty ? br_local_pred_direction :
                                                                           cdb_br_queue[cdb_br_queue_head].br_local_pred_direction;
                     cdb_global_pred_direction <= `SD cdb_br_queue_empty ? br_global_pred_direction :

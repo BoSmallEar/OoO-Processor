@@ -34,6 +34,7 @@ module btb(
     assign btb_taken = btb_packets[PC[9:2]].valid &&  (btb_packets[PC[9:2]].PC == PC);
     assign btb_target_PC = btb_taken ? btb_packets[PC[9:2]].target_PC : PC + 4;
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;

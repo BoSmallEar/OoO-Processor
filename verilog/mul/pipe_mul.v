@@ -139,6 +139,7 @@ module mult2cdb(
 		endcase
 	end
 
+    // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin 
 			mul_free <= `SD 1'b1;

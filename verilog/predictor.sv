@@ -97,6 +97,7 @@ module tournament_selector(
  
     assign taken = tournament_prediction_table[PC[tournament_offset_length+1:2]] > 2'b01 ? local_taken : global_taken;
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;
@@ -143,6 +144,7 @@ module local_predictor(
 
     assign taken = local_prediction_table[local_history_table[PC[local_offset_length+1:2]]] > 2'b01;
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i,j;
@@ -190,6 +192,7 @@ module global_predictor(
     assign index_xor = global_history ^ PC[`XLEN-1:`XLEN-global_history_length];
     assign taken     = global_prediction_table[index_xor] > 2'b01;
 
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;

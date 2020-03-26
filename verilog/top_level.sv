@@ -762,8 +762,6 @@ module top_level (
         .br_target_PC(br_target_PC),
         .br_mis_pred(br_mis_pred), 
         .br_rob_idx(br_rob_idx),
-        .br_cond_branch(br_cond_branch),
-        .br_uncond_branch(br_uncond_branch),
         .br_local_pred_direction(br_local_pred_direction),
         .br_global_pred_direction(br_global_pred_direction),
 

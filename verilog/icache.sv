@@ -83,7 +83,7 @@ module icache(
     assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
     assign Icache2mem_command = (miss_outstanding && !changed_addr);
     
-    
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;
