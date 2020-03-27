@@ -107,6 +107,7 @@ module cdb(
         .gnt_bus(gnt_bus),
         .empty(broadcast_empty)
     );
+
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
