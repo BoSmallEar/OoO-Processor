@@ -102,6 +102,14 @@ module proc_testbench;
     // id packet
     ID_PACKET             id_packet_out;
 
+    // Outputs of prf
+    logic [`PRF_LEN-1:0]    prf_free_preg_idx;
+    logic [`PRF_LEN-1:0]    dest_preg_idx;
+    logic                   opa_ready;
+    logic [`XLEN-1:0]       opa_value;
+    logic                   opb_ready;
+    logic [`XLEN-1:0]       opb_value;
+
     logic [63:0] debug_counter;
 
     processor processor0(
@@ -173,6 +181,14 @@ module proc_testbench;
 
         // id packet
         , .id_packet_out(id_packet_out)
+
+        // Outputs of prf
+        , .prf_free_preg_idx(prf_free_preg_idx)
+        , .dest_preg_idx(dest_preg_idx)
+        , .opa_ready(opa_ready)
+        , .opa_value(opa_value)
+        , .opb_ready(opb_ready)
+        , .opb_value(opb_value)
     `endif
     );
 
@@ -389,6 +405,23 @@ task print_id_packet;
     $display("=============================================================");
 endtask
 
+task print_prf_out;
+    input logic [`PRF_LEN-1:0]    prf_free_preg_idx;
+    input logic [`PRF_LEN-1:0]    dest_preg_idx;
+    input logic                   opa_ready;
+    input logic [`XLEN-1:0]       opa_value;
+    input logic                   opb_ready;
+    input logic [`XLEN-1:0]       opb_value;
+    $display("========= PRF OUTPUTS ==========");
+    $display("prf_free_preg_idx: %d", prf_free_preg_idx);
+    $display("dest_preg_idx: %d", dest_preg_idx);
+    $display("opa_ready: %d", opa_ready);
+    $display("opa_value: %d", opa_value);
+    $display("opb_ready: %d", opb_ready);
+    $display("opb_value: %d", opb_value);
+    $display("================================");
+endtask
+
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
     // so the actual period of the clock is 10, not 5.
     always begin
@@ -445,6 +478,7 @@ endtask
                 cdb_global_pred_direction
             );
             print_id_packet(id_packet_out);
+            print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
             print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets);

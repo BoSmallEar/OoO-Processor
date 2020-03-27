@@ -93,6 +93,14 @@ module processor (
 
     // id packet
     , output ID_PACKET        id_packet_out
+
+    // Outputs of prf
+    , output logic [`PRF_LEN-1:0]    prf_free_preg_idx
+    , output logic [`PRF_LEN-1:0]    dest_preg_idx
+    , output logic                   opa_ready
+    , output logic [`XLEN-1:0]       opa_value
+    , output logic                   opb_ready
+    , output logic [`XLEN-1:0]       opb_value
 `endif
 );
 
@@ -276,6 +284,14 @@ module processor (
         , .cdb_mis_pred(cdb_mis_pred)                         
         , .cdb_local_pred_direction(cdb_local_pred_direction)
         , .cdb_global_pred_direction(cdb_global_pred_direction)
+
+        // Outputs of prf
+        , .prf_free_preg_idx(prf_free_preg_idx)
+        , .dest_preg_idx(dest_preg_idx)
+        , .opa_ready(opa_ready)
+        , .opa_value(opa_value)
+        , .opb_ready(opb_ready)
+        , .opb_value(opb_value)
     `endif
     );
 

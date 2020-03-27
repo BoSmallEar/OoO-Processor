@@ -86,6 +86,14 @@ module top_level (
     , output logic                 cdb_mis_pred
     , output logic                 cdb_local_pred_direction
     , output logic                 cdb_global_pred_direction
+
+    // Outputs of prf
+    , output logic [`PRF_LEN-1:0]    prf_free_preg_idx
+    , output logic [`PRF_LEN-1:0]    dest_preg_idx
+    , output logic                   opa_ready
+    , output logic [`XLEN-1:0]       opa_value
+    , output logic                   opb_ready
+    , output logic [`XLEN-1:0]       opb_value
 `endif
 );
 
@@ -100,14 +108,14 @@ module top_level (
     logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
 
     // PRF OUTPUTS
+`ifndef DEBUG
     logic [`PRF_LEN-1:0]    prf_free_preg_idx;               // prf -> rat, rob, rs
     logic [`PRF_LEN-1:0]    dest_preg_idx;
-
     logic                   opa_ready;                       // prf -> rs
     logic [`XLEN-1:0]       opa_value;                       // prf -> rs
     logic                   opb_ready;                       // prf -> rs
     logic [`XLEN-1:0]       opb_value;                       // prf -> rs
-
+`endif
     // ROB OUTPUTS
     logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
     logic [`PRF_LEN-1:0]    rob_commit_dest_preg_idx;   // rob -> rrat
@@ -198,7 +206,7 @@ module top_level (
 
     // RAT INPUTS
     logic                     rat_enable;
-    assign rat_enable = (id_packet.dest_areg_idx != `ZERO_REG)&&id_packet.valid;
+    assign rat_enable = (id_packet.dest_areg_idx != `ZERO_REG) && id_packet.valid;
 
     assign dest_preg_idx = (id_packet.dest_areg_idx != `ZERO_REG) ? prf_free_preg_idx : 0;
 
@@ -206,59 +214,6 @@ module top_level (
     logic                     rrat_enable;
     assign rrat_enable = result_valid;
 
-    always_comb begin
-		fu_opa_value = `XLEN'hdeadfbac;
-        fu_opa_ready = 1'b1;
-		case (id_packet.opa_select)
-			OPA_IS_RS1: begin 
-                fu_opa_value = opa_value; 
-                fu_opa_ready = opa_ready;
-            end
-			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
-			OPA_IS_PC:  begin 
-                fu_opa_value = (id_packet.inst==`RV32_JAL) ? id_packet.PC : opa_value;
-                fu_opa_ready = (id_packet.inst==`RV32_JAL) ? 1'b1 : opa_ready;
-            end
-			OPA_IS_ZERO: fu_opa_value = 0;
-		endcase
-	end
-	 // ALU opB mux
-	 //
-	always_comb begin
-		// Default value, Set only because the case isnt full.  If you see this
-		// value on the output of the mux you have an invalid opb_select
-        fu_opb_value = `XLEN'hfacefeed;
-        fu_opb_ready = 1'b1;
-        fu_offset = 0;
-		case (id_packet.opb_select)
-			OPB_IS_RS2:   begin
-                fu_opb_value = opb_value;
-                fu_opb_ready = opb_ready;  
-            end
-            OPB_IS_S_IMM:   begin
-                fu_opb_value = opb_value;
-                fu_opb_ready = opb_ready;  
-                fu_offset = `RV32_signext_Simm(id_packet.inst);
-            end
-            OPB_IS_B_IMM:   begin
-                fu_opb_value = opb_value;
-                fu_opb_ready = opb_ready; 
-                fu_offset = `RV32_signext_Bimm(id_packet.inst); 
-            end
-			OPB_IS_I_IMM: begin
-                case (id_packet.fu_type) 
-                     ALU: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
-                     MUL: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
-                     MEM: fu_offset = `RV32_signext_Iimm(id_packet.inst);
-                     BRANCH: fu_offset = `RV32_signext_Iimm(id_packet.inst);
-                     default: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
-                endcase
-            end
-			OPB_IS_U_IMM: fu_opb_value = `RV32_signext_Uimm(id_packet.inst);
-			OPB_IS_J_IMM: fu_offset = `RV32_signext_Jimm(id_packet.inst);
-            
-		endcase 
-	end
 
    //////////////////////////////////////////////////
     //                                              //
@@ -484,6 +439,57 @@ module top_level (
         , .free_preg_queue_tail(free_preg_queue_tail)
     `endif
     );
+
+    always_comb begin
+		fu_opa_value = `XLEN'hdeadfbac;
+        fu_opa_ready = 1'b1;
+		case (id_packet.opa_select)
+			OPA_IS_RS1: begin 
+                fu_opa_value = opa_value; 
+                fu_opa_ready = opa_ready;
+            end
+			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
+			OPA_IS_PC:  begin 
+                fu_opa_value = (id_packet.inst==`RV32_JAL) ? id_packet.PC : opa_value;
+                fu_opa_ready = (id_packet.inst==`RV32_JAL) ? 1'b1 : opa_ready;
+            end
+			OPA_IS_ZERO: fu_opa_value = 0;
+		endcase
+
+		// Default value, Set only because the case isnt full.  If you see this
+		// value on the output of the mux you have an invalid opb_select
+        fu_opb_value = `XLEN'hfacefeed;
+        fu_opb_ready = 1'b1;
+        fu_offset = 0;
+		case (id_packet.opb_select)
+			OPB_IS_RS2:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready;  
+            end
+            OPB_IS_S_IMM:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready;  
+                fu_offset = `RV32_signext_Simm(id_packet.inst);
+            end
+            OPB_IS_B_IMM:   begin
+                fu_opb_value = opb_value;
+                fu_opb_ready = opb_ready; 
+                fu_offset = `RV32_signext_Bimm(id_packet.inst); 
+            end
+			OPB_IS_I_IMM: begin
+                case (id_packet.fu_type) 
+                     ALU: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                     MUL: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                     MEM: fu_offset = `RV32_signext_Iimm(id_packet.inst);
+                     BRANCH: fu_offset = `RV32_signext_Iimm(id_packet.inst);
+                     default: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
+                endcase
+            end
+			OPB_IS_U_IMM: fu_opb_value = `RV32_signext_Uimm(id_packet.inst);
+			OPB_IS_J_IMM: fu_offset = `RV32_signext_Jimm(id_packet.inst); 
+		endcase 
+	end
+
 
     //////////////////////////////////////////////////
     //                                              //

@@ -113,6 +113,7 @@ module cdb(
             cdb_broadcast_valid       <= `SD 1'b0;
             cdb_broadcast_inst_PC     <= `SD `XLEN'hfacebeec;
             cdb_mis_pred              <= `SD 1'b0;
+            cdb_br_direction          <= `SD 1'b0;
             cdb_br_target_PC          <= `SD `XLEN'hfacebeec;
             cdb_local_pred_direction  <= `SD 1'b0;
             cdb_global_pred_direction <= `SD 1'b0;
@@ -173,6 +174,7 @@ module cdb(
                     cdb_rob_idx             <= `SD cdb_alu_queue_empty ? alu_rob_idx : cdb_alu_queue[cdb_alu_queue_head].alu_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD cdb_alu_queue_empty ? alu_PC      : cdb_alu_queue[cdb_alu_queue_head].alu_PC;
                     cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
                     cdb_alu_queue_head      <= `SD (cdb_alu_queue_head == `ALU_QUEUE_SIZE-1) ? 0 : cdb_alu_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
@@ -182,6 +184,7 @@ module cdb(
                     cdb_rob_idx             <= `SD cdb_mul_queue_empty ? mul_rob_idx : cdb_mul_queue[cdb_mul_queue_head].mul_rob_idx;
                     cdb_broadcast_inst_PC   <= `SD cdb_mul_queue_empty ? mul_PC      : cdb_mul_queue[cdb_mul_queue_head].mul_PC;
                     cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
                     cdb_mul_queue_head      <= `SD (cdb_mul_queue_head == `MUL_QUEUE_SIZE-1) ? 0 : cdb_mul_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
@@ -195,6 +198,7 @@ module cdb(
                     cdb_broadcast_inst_PC   <= `SD cdb_mem_queue_empty ? mem_PC :
                                                                          cdb_mem_queue[cdb_mem_queue_head].mem_PC;
                     cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
                     cdb_mem_queue_head      <= `SD (cdb_mem_queue_head == `MEM_QUEUE_SIZE-1) ? 0 : cdb_mem_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
@@ -226,6 +230,7 @@ module cdb(
                     cdb_broadcast_value     <= `SD 0;
                     cdb_rob_idx             <= `SD 0;
                     cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
                     cdb_broadcast_valid     <= `SD 1'b0;
                 end
             endcase 
