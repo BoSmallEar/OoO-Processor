@@ -53,6 +53,12 @@ module processor (
     , output logic [`PRF_LEN-1:0]                  opa_preg_idx
     , output logic [`PRF_LEN-1:0]                  opb_preg_idx 
 
+    , output logic                                 fu_opa_ready
+    , output logic                                 fu_opb_ready
+    , output logic [`XLEN-1:0]                     fu_opa_value
+    , output logic [`XLEN-1:0]                     fu_opb_value
+    , output logic [`XLEN-1:0]                     fu_offset
+
     ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
     ,output logic [`RS_ALU_LEN:0] rs_alu_counter
     ,output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
@@ -256,6 +262,12 @@ module processor (
 
         , .opa_preg_idx(opa_preg_idx)                // to prf
         , .opb_preg_idx(opb_preg_idx)                 // to prf
+
+        , .fu_opa_ready(fu_opa_ready)
+        , .fu_opb_ready(fu_opb_ready)
+        , .fu_opa_value(fu_opa_value)
+        , .fu_opb_value(fu_opb_value)
+        , .fu_offset(fu_offset)
 
         , .rs_alu_packets(rs_alu_packets)
         , .rs_alu_counter(rs_alu_counter)

@@ -49,12 +49,18 @@ module top_level (
     , output logic [`PRF_LEN-1:0]                  opa_preg_idx
     , output logic [`PRF_LEN-1:0]                  opb_preg_idx
 
-    ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
-    ,output logic [`RS_ALU_LEN:0] rs_alu_counter
-    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
-    ,output logic [`RS_ALU_SIZE-1:0] rs_alu_free
-    ,output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
-    ,output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
+    , output logic                           fu_opa_ready
+    , output logic                           fu_opb_ready
+    , output logic [`XLEN-1:0]               fu_opa_value
+    , output logic [`XLEN-1:0]               fu_opb_value
+    , output logic [`XLEN-1:0]               fu_offset
+
+    , output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
+    , output logic [`RS_ALU_LEN:0] rs_alu_counter
+    , output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
+    , output logic [`RS_ALU_SIZE-1:0] rs_alu_free
+    , output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
 
     , output RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
     , output logic [`RS_BR_LEN:0] rs_branch_counter
@@ -100,11 +106,6 @@ module top_level (
 `endif
 );
 
-    logic                           fu_opa_ready;
-    logic                           fu_opb_ready;
-    logic [`XLEN-1:0]               fu_opa_value;
-    logic [`XLEN-1:0]               fu_opb_value;
-    logic [`XLEN-1:0]               fu_offset;
 
      // RAT OUTPUTS
     // logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
@@ -182,6 +183,11 @@ module top_level (
     logic [`XLEN-1:0]         br_PC;                    // br->cdb
 
 `ifndef DEBUG
+    logic                           fu_opa_ready;
+    logic                           fu_opb_ready;
+    logic [`XLEN-1:0]               fu_opa_value;
+    logic [`XLEN-1:0]               fu_opb_value;
+    logic [`XLEN-1:0]               fu_offset;
     // RAT OUTPUTS
     logic [`PRF_LEN-1:0]      opa_preg_idx;
     logic [`PRF_LEN-1:0]      opb_preg_idx;

@@ -57,6 +57,13 @@ module proc_testbench;
     logic [`PRF_LEN-1:0]            opa_preg_idx;
     logic [`PRF_LEN-1:0]            opb_preg_idx;
 
+    // fu opa, opb, offset assignment
+    logic                                 fu_opa_ready;
+    logic                                 fu_opb_ready;
+    logic [`XLEN-1:0]                     fu_opa_value;
+    logic [`XLEN-1:0]                     fu_opb_value;
+    logic [`XLEN-1:0]                     fu_offset;
+
     // rrat internal reg
     logic [31:0] [`PRF_LEN-1:0]     rrat_packets; 
 
@@ -150,6 +157,12 @@ module proc_testbench;
 
         , .opa_preg_idx(opa_preg_idx)
         , .opb_preg_idx(opb_preg_idx)
+
+        , .fu_opa_ready(fu_opa_ready)
+        , .fu_opb_ready(fu_opb_ready)
+        , .fu_opa_value(fu_opa_value)
+        , .fu_opb_value(fu_opb_value)
+        , .fu_offset(fu_offset)
 
         , .rs_alu_packets(rs_alu_packets)
         , .rs_alu_counter(rs_alu_counter)
@@ -433,6 +446,21 @@ task print_prf_out;
     $display("================================");
 endtask
 
+task print_rs_in_opab;
+    input logic                              fu_opa_ready;
+    input logic                              fu_opb_ready;
+    input logic [`XLEN-1:0]                  fu_opa_value;
+    input logic [`XLEN-1:0]                  fu_opb_value;
+    input logic [`XLEN-1:0]                  fu_offset;
+    $display("========= FU OPA OPB ==========");
+    $display("fu_opa_ready: %d", fu_opa_ready);
+    $display("fu_opa_value: %d", fu_opa_value);
+    $display("fu_opb_ready: %d", fu_opb_ready);
+    $display("fu_opb_value: %d", fu_opb_value);
+    $display("fu_offset: %d", fu_offset);
+    $display("================================");
+endtask
+
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
     // so the actual period of the clock is 10, not 5.
     always begin
@@ -490,6 +518,7 @@ endtask
             );
             print_id_packet(id_packet_out);
             print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
+            print_rs_in_opab(fu_opa_ready, fu_opb_ready, fu_opa_value, fu_opb_value, fu_offset);
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
             print_rob(rob_packets, rob_head, rob_tail);
             print_rat(rat_packets, opa_preg_idx, opb_preg_idx);
