@@ -54,6 +54,9 @@ module proc_testbench;
     
     // rat internal reg
     logic [31:0] [`PRF_LEN-1:0]     rat_packets;
+    logic [`PRF_LEN-1:0]            opa_preg_idx;
+    logic [`PRF_LEN-1:0]            opb_preg_idx;
+
     // rrat internal reg
     logic [31:0] [`PRF_LEN-1:0]     rrat_packets; 
 
@@ -144,6 +147,9 @@ module proc_testbench;
         , .rob_tail(rob_tail)
         , .rat_packets(rat_packets)
         , .rrat_packets(rrat_packets)
+
+        , .opa_preg_idx(opa_preg_idx)
+        , .opb_preg_idx(opb_preg_idx)
 
         , .rs_alu_packets(rs_alu_packets)
         , .rs_alu_counter(rs_alu_counter)
@@ -248,12 +254,17 @@ endtask
 
 task print_rat;
     input logic [31:0] [`PRF_LEN-1:0]     rat_packets;
+    input logic [`PRF_LEN-1:0]            opa_preg_idx;
+    input logic [`PRF_LEN-1:0]            opb_preg_idx;
 
     $display("======= RAT =======");
     $display("|rat_idx |preg_idx|");
     for (int i = 0; i < 32; i++) begin
         $display("|%8d|%8d|", i, rat_packets[i]);
     end
+    $display("--------");
+    $display("opa_preg_idx: %d", opa_preg_idx);
+    $display("opb_preg_idx: %d", opb_preg_idx);
     $display("===================");
 endtask
 
@@ -481,7 +492,7 @@ endtask
             print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
             print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
             print_rob(rob_packets, rob_head, rob_tail);
-            print_rat(rat_packets);
+            print_rat(rat_packets, opa_preg_idx, opb_preg_idx);
             print_rrat(rrat_packets);
             print_rs(rs_alu_packets, 
                 rs_alu_free,

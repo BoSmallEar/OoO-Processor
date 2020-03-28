@@ -46,6 +46,9 @@ module top_level (
     , output logic [31:0] [`PRF_LEN-1:0]           rat_packets 
     , output logic [31:0] [`PRF_LEN-1:0]           rrat_packets 
     
+    , output logic [`PRF_LEN-1:0]                  opa_preg_idx
+    , output logic [`PRF_LEN-1:0]                  opb_preg_idx
+
     ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
     ,output logic [`RS_ALU_LEN:0] rs_alu_counter
     ,output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
@@ -104,8 +107,8 @@ module top_level (
     logic [`XLEN-1:0]               fu_offset;
 
      // RAT OUTPUTS
-    logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
-    logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
+    // logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
+    // logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
 
     // PRF OUTPUTS
 `ifndef DEBUG
@@ -179,6 +182,9 @@ module top_level (
     logic [`XLEN-1:0]         br_PC;                    // br->cdb
 
 `ifndef DEBUG
+    // RAT OUTPUTS
+    logic [`PRF_LEN-1:0]      opa_preg_idx;
+    logic [`PRF_LEN-1:0]      opb_preg_idx;
     // CDB OUTPUTS
     logic [`XLEN-1:0]         cdb_result;
     logic [3:0]               module_select;            // cdb->all FUs, all RSs

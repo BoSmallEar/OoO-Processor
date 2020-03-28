@@ -1,0 +1,118 @@
+ucliGUI::start /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/syn_simv -ucligui 
+set ucliGUI::state
+set ucliGUI::state
+ucliCore::getToolPID
+synopsys::env hasTB
+trigger_hier_stack_context_switch 0
+synUtils::setDVEInitPhase 1
+synopsys::dump -type VPD -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/inter.vpd -locking
+synopsys::dump -autoflush on -fid VPD1
+set ::dve_fid VPD1
+synUtils::setDVEInitPhase 0
+ucliCore::getToolPID
+synUtils::sendTool -active _icl_setToolSocket /tmp/smlnpMo1vmP
+synUtils::sendTool -active {_icl_start_rpc -version "N-2017.12-SP2-1_Full64" -sync_file /tmp/vcs_dve_rpc.shiyuliu.18959}
+synUtils::sendTool -active {_icl_createSharedMemory /tmp/vcs_dve_general.shiyuliu.18959}
+config endofsim noexit
+config onfail enable all
+config syscaddplainmembers
+config syscaddsourcenames
+config syscaddstructtypes
+synopsys::listing -disable
+# Begin_DVE_Session_Save_Info
+# DVE restart session
+# Saved on Fri Mar 27 21:38:19 2020
+# Designs open: 1
+#   Sim: /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/syn_simv
+# Toplevel windows open: 1
+# 	TopLevel.1
+#   Source.1: proc_testbench.print_rrat.unnamed$$_0
+#   Group count = 0
+# End_DVE_Session_Save_Info
+# DVE version: N-2017.12-SP2-1_Full64
+# DVE build date: Jul 14 2018 20:58:30
+#<Session mode="Restart" path=".restartSimSession.tcl" type="Debug">
+# Application preferences
+#<WindowLayout>
+# DVE top-level session
+# Create and position top-level window: TopLevel.1
+set TopLevel.1 TopLevel.1
+# Docked window settings
+set HSPane.1 HSPane.1
+set Hier.1 Hier.1
+set DLPane.1 DLPane.1
+set Data.1 Data.1
+set Console.1 Console.1
+# MDI window settings
+set Source.1 Source.1
+# End MDI window settings
+#</WindowLayout>
+#<Database>
+#</Database>
+# DVE Global setting session:
+# Global: Breakpoints
+# Global: Bus
+# Global: Expressions
+# Global: Signal Time Shift
+# Global: Signal Compare
+# Global: Signal Groups
+# Global: Highlighting
+# Global: Stack
+synopsys::xml {set_only_active_frame <data value="1" />}
+# Post database loading setting...
+# Save global setting...
+# Wave/List view global setting
+# Close all empty TopLevel windows
+foreach __top [gui_ekki_get_window_ids -type TopLevel] {     if { [llength [gui_ekki_get_window_ids -parent $__top]] == 0} {         gui_close_window -window $__top     } }
+# DVE View/pane content session:
+# Hier 'Hier.1'
+catch {gui_list_select -id ${Hier.1} {proc_testbench}}
+# Data 'Data.1'
+# Source 'Source.1'
+ucliGUI::getSignalValues -scope {proc_testbench.print_rrat.unnamed$$_0} -radix {hexadecimal } -list {proc_testbench.rat_packets }
+# Restore toplevel window zorder
+# The toplevel window could be closed if it has no view/pane
+if {[gui_exist_window -window ${TopLevel.1}]} { 	gui_set_active_window -window ${TopLevel.1} 	gui_set_active_window -window ${Source.1} 	gui_set_active_window -window ${Console.1} }
+#</Session>
+synopsys::run
+set ucliGUI::state
+set ucliGUI::state
+ucliCore::getToolPID
+ucliCore::stopTool -no_signal
+set ucliGUI::state
+set ucliGUI::state
+ucliGUI::getSignalValues -scope proc_testbench.print_cdb -radix {binary hexadecimal binary binary binary hexadecimal } -list {cdb_br_direction {cdb_br_target_PC[31:0]} cdb_mis_pred cdb_local_pred_direction cdb_global_pred_direction {module_select[3:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.print_cdb -radix {binary hexadecimal hexadecimal hexadecimal hexadecimal } -list {cdb_broadcast_valid {cdb_result[31:0]} {cdb_dest_preg_idx[4:0]} {cdb_rob_idx[2:0]} {cdb_broadcast_inst_PC[31:0]} }
+synopsys::run
+set ucliGUI::state
+set ucliGUI::state
+set synopsys::env(time) 25300
+ucliCore::getToolPID
+ucliCore::stopTool -no_signal
+set ucliGUI::state
+set ucliGUI::state
+ucliGUI::getSignalValues -scope proc_testbench -radix {binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {clock reset {memory.unified_memory[8191]} {memory.unified_memory[8190]} {memory.unified_memory[8189]} {memory.unified_memory[8188]} {memory.unified_memory[8187]} {memory.unified_memory[8186]} {memory.unified_memory[8185]} {memory.unified_memory[8184]} {memory.unified_memory[8183]} {memory.unified_memory[8182]} {memory.unified_memory[8181]} {memory.unified_memory[8180]} {memory.unified_memory[8179]} {memory.unified_memory[8178]} {memory.unified_memory[8177]} {memory.unified_memory[8176]} }
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {{memory.unified_memory[8191]} {memory.unified_memory[8190]} {memory.unified_memory[8189]} {memory.unified_memory[8188]} {memory.unified_memory[8187]} {memory.unified_memory[8186]} {memory.unified_memory[8185]} {memory.unified_memory[8184]} {memory.unified_memory[8183]} {memory.unified_memory[8182]} {memory.unified_memory[8181]} {memory.unified_memory[8180]} {memory.unified_memory[8179]} {memory.unified_memory[8178]} {memory.unified_memory[8177]} {memory.unified_memory[8176]} }
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary hexadecimal binary hexadecimal hexadecimal hexadecimal hexadecimal binary hexadecimal binary binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {{memory.unified_memory[8191]} {memory.unified_memory[8190]} {memory.unified_memory[8189]} {memory.unified_memory[8188]} {memory.unified_memory[8187]} {memory.unified_memory[8186]} {memory.unified_memory[8185]} {memory.unified_memory[8184]} {memory.unified_memory[8183]} {memory.unified_memory[8182]} {memory.unified_memory[8181]} {memory.unified_memory[8180]} {memory.unified_memory[8179]} {memory.unified_memory[8178]} {memory.unified_memory[8177]} {memory.unified_memory[8176]} {debug_counter[63:0]} result_mis_pred {module_select[3:0]} cdb_broadcast_valid {cdb_result[31:0]} {cdb_dest_preg_idx[4:0]} {cdb_rob_idx[2:0]} {cdb_broadcast_inst_PC[31:0]} cdb_br_direction {cdb_br_target_PC[31:0]} cdb_mis_pred cdb_local_pred_direction cdb_global_pred_direction id_packet_out prf_values {prf_free[31:0]} {prf_valid[31:0]} free_preg_queue {free_preg_queue_head[4:0]} {free_preg_queue_tail[4:0]} rob_packets {rob_head[2:0]} {rob_tail[2:0]} rat_packets rrat_packets }
+ucliGUI::getSignalValues -scope proc_testbench -radix {binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {print_id_packet.id_packet_out.local_taken print_id_packet.id_packet_out.global_taken {memory.unified_memory[8191]} {memory.unified_memory[8190]} {memory.unified_memory[8189]} {memory.unified_memory[8188]} {memory.unified_memory[8187]} {memory.unified_memory[8186]} {memory.unified_memory[8185]} {memory.unified_memory[8184]} {memory.unified_memory[8183]} {memory.unified_memory[8182]} {memory.unified_memory[8181]} {memory.unified_memory[8180]} {memory.unified_memory[8179]} {memory.unified_memory[8178]} {memory.unified_memory[8177]} {memory.unified_memory[8176]} }
+ucliGUI::vpdAddHierarchy -scope proc_testbench.print_id_packet -depth 1 -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/inter.vpd; synopsys::dump -flush VPD1
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary binary } -list {print_id_packet.id_packet_out {print_id_packet.id_packet_out.PC[31:0]} print_id_packet.id_packet_out.fu_type {print_id_packet.id_packet_out.opa_areg_idx[4:0]} {print_id_packet.id_packet_out.opb_areg_idx[4:0]} {print_id_packet.id_packet_out.dest_areg_idx[4:0]} print_id_packet.id_packet_out.opa_select print_id_packet.id_packet_out.opb_select print_id_packet.id_packet_out.inst print_id_packet.id_packet_out.valid print_id_packet.id_packet_out.branch_prediction }
+ucliGUI::getSignalValues -scope proc_testbench -radix {binary hexadecimal binary binary binary hexadecimal binary hexadecimal hexadecimal hexadecimal hexadecimal binary hexadecimal binary binary binary } -list {print_predict.btb_taken {print_predict.btb_target_PC[31:0]} print_predict.tournament_taken print_predict.local_taken print_predict.global_taken {print_cdb.module_select[3:0]} print_cdb.cdb_broadcast_valid {print_cdb.cdb_result[31:0]} {print_cdb.cdb_dest_preg_idx[4:0]} {print_cdb.cdb_rob_idx[2:0]} {print_cdb.cdb_broadcast_inst_PC[31:0]} print_cdb.cdb_br_direction {print_cdb.cdb_br_target_PC[31:0]} print_cdb.cdb_mis_pred print_cdb.cdb_local_pred_direction print_cdb.cdb_global_pred_direction }
+synopsys::dump -add {proc_testbench.rs_branch_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rs.rs_branch_packets} -aggregates  -fid VPD1
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal } -list {print_rs.rs_branch_packets {print_rs.rs_branch_free[3:0]} }
+synopsys::dump -add {proc_testbench.rs_alu_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rs.rs_alu_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.rs_mul_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rs.rs_mul_packets} -aggregates  -fid VPD1
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal hexadecimal } -list {print_rs.rs_alu_packets {print_rs.rs_alu_free[7:0]} print_rs.rs_mul_packets {print_rs.rs_mul_free[3:0]} }
+synopsys::dump -add {proc_testbench.prf_values} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_prf.prf_values} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.rob_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rob.rob_packets} -aggregates  -fid VPD1
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {{proc2mem_command[1:0]} {proc2mem_addr[31:0]} {proc2mem_data[63:0]} proc2mem_size {mem2proc_response[3:0]} {mem2proc_data[63:0]} {mem2proc_tag[3:0]} print_prf.prf_values {print_prf.prf_free[31:0]} {print_prf.prf_valid[31:0]} print_prf.free_preg_queue {print_prf.free_preg_queue_head[4:0]} {print_prf.free_preg_queue_tail[4:0]} print_rob.rob_packets {print_rob.rob_head[2:0]} {print_rob.rob_tail[2:0]} print_rat.rat_packets }
+synopsys::dump -add {proc_testbench.rat_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rat.rat_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.rrat_packets} -aggregates  -fid VPD1
+synopsys::dump -add {proc_testbench.print_rrat.rrat_packets} -aggregates  -fid VPD1
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal } -list {print_rrat.rrat_packets }

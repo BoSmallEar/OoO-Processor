@@ -47,8 +47,11 @@ module processor (
     , output ROB_PACKET [`ROB_SIZE-1:0]            rob_packets
     , output logic [`ROB_LEN-1:0]                  rob_head
     , output logic [`ROB_LEN-1:0]                  rob_tail
-    , output logic [31:0] [`PRF_LEN-1:0]     rat_packets 
-    , output logic [31:0] [`PRF_LEN-1:0]     rrat_packets 
+    , output logic [31:0] [`PRF_LEN-1:0]           rat_packets 
+    , output logic [31:0] [`PRF_LEN-1:0]           rrat_packets 
+
+    , output logic [`PRF_LEN-1:0]                  opa_preg_idx
+    , output logic [`PRF_LEN-1:0]                  opb_preg_idx 
 
     ,output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
     ,output logic [`RS_ALU_LEN:0] rs_alu_counter
@@ -250,6 +253,9 @@ module processor (
         , .rob_tail(rob_tail)
         , .rat_packets(rat_packets)
         , .rrat_packets(rrat_packets)
+
+        , .opa_preg_idx(opa_preg_idx)                // to prf
+        , .opb_preg_idx(opb_preg_idx)                 // to prf
 
         , .rs_alu_packets(rs_alu_packets)
         , .rs_alu_counter(rs_alu_counter)
