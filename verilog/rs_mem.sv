@@ -113,12 +113,32 @@ module rs_mem(
             if (enable) begin// instr can be dispatched
                 rs_mem_packets[rs_mem_free_idx].PC <= `SD PC;
                 rs_mem_packets[rs_mem_free_idx].NPC <= `SD NPC;
-                rs_mem_packets[rs_mem_free_idx].opa_ready <= `SD opa_ready;
-                rs_mem_packets[rs_mem_free_idx].opb_ready <= `SD opb_ready;
-                
-                if (opa_ready)  rs_mem_packets[rs_mem_free_idx].opa_value <= `SD opa_value;
-                else rs_mem_packets[rs_mem_free_idx].opa_value <= `SD opa_preg_idx;
-                if (opb_ready)  rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_value;
+
+                if (opa_ready) begin
+                    rs_mem_packets[rs_mem_free_idx].opa_value  <= `SD opa_value;
+                    rs_mem_packets[rs_mem_free_idx].opa_ready <= `SD opa_ready;
+                end
+                else if (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) begin
+                    rs_mem_packets[rs_mem_free_idx].opa_value <= `SD cdb_value;
+                    rs_mem_packets[rs_mem_free_idx].opa_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_mem_packets[rs_mem_free_idx].opa_value <= `SD opa_preg_idx;
+                    rs_mem_packets[rs_mem_free_idx].opa_ready <= `SD opa_ready;
+                end
+                if (opb_ready) begin
+                    rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_value;
+                    rs_mem_packets[rs_mem_free_idx].opb_ready <= `SD opb_ready;
+                end
+                else if (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) begin
+                    rs_mem_packets[rs_mem_free_idx].opb_value <= `SD cdb_value;
+                    rs_mem_packets[rs_mem_free_idx].opb_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_preg_idx;
+                    rs_mem_packets[rs_mem_free_idx].opb_ready <= `SD opb_ready;
+                end
+
                 else rs_mem_packets[rs_mem_free_idx].opb_value <= `SD opb_preg_idx;
                 rs_mem_packets[rs_mem_free_idx].alu_func       <= `SD id_packet_in.alu_func;
                 rs_mem_packets[rs_mee_free_idx].offset         <= `SD id_packet_in.offset;
@@ -140,13 +160,15 @@ module rs_mem(
             // cdb broadcast
             if (cdb_broadcast_valid) begin
                 for (t=0; t<`RS_MEM_SIZE; t++) begin
-                    if (~rs_mem_packets[t].opa_ready && (rs_mem_packets[t].opa_value==cdb_dest_preg_idx)) begin
-                        rs_mem_packets[t].opa_ready <= `SD 1'b1;
-                        rs_mem_packets[t].opa_value <= `SD cdb_value;
-                    end
-                    if (~rs_mem_packets[t].opb_ready && (rs_mem_packets[t].opb_value==cdb_dest_preg_idx)) begin
-                        rs_mem_packets[t].opb_ready <= `SD 1'b1;
-                        rs_mem_packets[t].opb_value <= `SD cdb_value;
+                    if (t != rs_mem_free_idx) begin
+                        if (~rs_mem_packets[t].opa_ready && (rs_mem_packets[t].opa_value==cdb_dest_preg_idx)) begin
+                            rs_mem_packets[t].opa_ready <= `SD 1'b1;
+                            rs_mem_packets[t].opa_value <= `SD cdb_value;
+                        end
+                        if (~rs_mem_packets[t].opb_ready && (rs_mem_packets[t].opb_value==cdb_dest_preg_idx)) begin
+                            rs_mem_packets[t].opb_ready <= `SD 1'b1;
+                            rs_mem_packets[t].opb_value <= `SD cdb_value;
+                        end
                     end
                 end
             end  

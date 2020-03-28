@@ -117,13 +117,32 @@ module rs_alu(
             if (enable && !halt &&!illegal) begin// instr can be dispatched
                 rs_alu_packets[rs_alu_free_idx].PC <= `SD PC;
                 rs_alu_packets[rs_alu_free_idx].NPC <= `SD NPC;
-                rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
-                rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD opb_ready;
-                
-                if (opa_ready)  rs_alu_packets[rs_alu_free_idx].opa_value <= `SD opa_value;
-                else rs_alu_packets[rs_alu_free_idx].opa_value <= `SD opa_preg_idx;
-                if (opb_ready)  rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_value;
-                else rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_preg_idx;
+
+                if (opa_ready) begin
+                    rs_alu_packets[rs_alu_free_idx].opa_value  <= `SD opa_value;
+                    rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
+                end
+                else if (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) begin
+                    rs_alu_packets[rs_alu_free_idx].opa_value <= `SD cdb_value;
+                    rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_alu_packets[rs_alu_free_idx].opa_value <= `SD opa_preg_idx;
+                    rs_alu_packets[rs_alu_free_idx].opa_ready <= `SD opa_ready;
+                end
+                if (opb_ready) begin
+                    rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_value;
+                    rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD opb_ready;
+                end
+                else if (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) begin
+                    rs_alu_packets[rs_alu_free_idx].opb_value <= `SD cdb_value;
+                    rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_alu_packets[rs_alu_free_idx].opb_value <= `SD opb_preg_idx;
+                    rs_alu_packets[rs_alu_free_idx].opb_ready <= `SD opb_ready;
+                end
+
                 rs_alu_packets[rs_alu_free_idx].alu_func      <= `SD alu_func;
                 rs_alu_packets[rs_alu_free_idx].dest_preg_idx <= `SD dest_preg_idx;
                 rs_alu_packets[rs_alu_free_idx].rob_idx       <= `SD rob_idx;
@@ -143,13 +162,15 @@ module rs_alu(
             // cdb broadcast
             if (cdb_broadcast_valid) begin
                 for (t=0; t<`RS_ALU_SIZE; t++) begin
-                    if (~rs_alu_packets[t].opa_ready && (rs_alu_packets[t].opa_value==cdb_dest_preg_idx)) begin
-                        rs_alu_packets[t].opa_ready <= `SD 1'b1;
-                        rs_alu_packets[t].opa_value <= `SD cdb_value;
-                    end
-                    if (~rs_alu_packets[t].opb_ready && (rs_alu_packets[t].opb_value==cdb_dest_preg_idx)) begin
-                        rs_alu_packets[t].opb_ready <= `SD 1'b1;
-                        rs_alu_packets[t].opb_value <= `SD cdb_value;
+                    if (t != rs_alu_free_idx) begin
+                        if (~rs_alu_packets[t].opa_ready && (rs_alu_packets[t].opa_value==cdb_dest_preg_idx)) begin
+                            rs_alu_packets[t].opa_ready <= `SD 1'b1;
+                            rs_alu_packets[t].opa_value <= `SD cdb_value;
+                        end
+                        if (~rs_alu_packets[t].opb_ready && (rs_alu_packets[t].opb_value==cdb_dest_preg_idx)) begin
+                            rs_alu_packets[t].opb_ready <= `SD 1'b1;
+                            rs_alu_packets[t].opb_value <= `SD cdb_value;
+                        end
                     end
                 end
             end  

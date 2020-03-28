@@ -123,13 +123,32 @@ module rs_branch(
             if (enable) begin// instr can be dispatched
                 rs_branch_packets[rs_branch_free_idx].PC <= `SD PC;
                 rs_branch_packets[rs_branch_free_idx].NPC <= `SD NPC;
-                rs_branch_packets[rs_branch_free_idx].opa_ready <= `SD opa_ready;
-                rs_branch_packets[rs_branch_free_idx].opb_ready <= `SD opb_ready;
-                
-                if (opa_ready)  rs_branch_packets[rs_branch_free_idx].opa_value <= `SD opa_value;
-                else rs_branch_packets[rs_branch_free_idx].opa_value <= `SD opa_preg_idx;
-                if (opb_ready)  rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_value;
-                else rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_preg_idx;
+
+                if (opa_ready) begin
+                    rs_branch_packets[rs_branch_free_idx].opa_value  <= `SD opa_value;
+                    rs_branch_packets[rs_branch_free_idx].opa_ready <= `SD opa_ready;
+                end
+                else if (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) begin
+                    rs_branch_packets[rs_branch_free_idx].opa_value <= `SD cdb_value;
+                    rs_branch_packets[rs_branch_free_idx].opa_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_branch_packets[rs_branch_free_idx].opa_value <= `SD opa_preg_idx;
+                    rs_branch_packets[rs_branch_free_idx].opa_ready <= `SD opa_ready;
+                end
+                if (opb_ready) begin
+                    rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_value;
+                    rs_branch_packets[rs_branch_free_idx].opb_ready <= `SD opb_ready;
+                end
+                else if (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) begin
+                    rs_branch_packets[rs_branch_free_idx].opb_value <= `SD cdb_value;
+                    rs_branch_packets[rs_branch_free_idx].opb_ready <= `SD 1'b1;
+                end
+                else begin
+                    rs_branch_packets[rs_branch_free_idx].opb_value <= `SD opb_preg_idx;
+                    rs_branch_packets[rs_branch_free_idx].opb_ready <= `SD opb_ready;
+                end
+
                 rs_branch_packets[rs_branch_free_idx].rob_idx               <= `SD rob_idx;
                 rs_branch_packets[rs_branch_free_idx].dest_preg_idx         <= `SD dest_preg_idx;
                 rs_branch_packets[rs_branch_free_idx].offset                <= `SD offset;
@@ -158,13 +177,15 @@ module rs_branch(
             // cdb broadcast
             if (cdb_broadcast_valid) begin
                 for (t=0; t<`RS_BR_SIZE; t++) begin
-                    if (~rs_branch_packets[t].opa_ready && (rs_branch_packets[t].opa_value==cdb_dest_preg_idx)) begin
-                        rs_branch_packets[t].opa_ready <= `SD 1'b1;
-                        rs_branch_packets[t].opa_value <= `SD cdb_value;
-                    end
-                    if (~rs_branch_packets[t].opb_ready && (rs_branch_packets[t].opb_value==cdb_dest_preg_idx)) begin
-                        rs_branch_packets[t].opb_ready <= `SD 1'b1;
-                        rs_branch_packets[t].opb_value <= `SD cdb_value;
+                    if (t != rs_branch_free_idx) begin
+                        if (~rs_branch_packets[t].opa_ready && (rs_branch_packets[t].opa_value==cdb_dest_preg_idx)) begin
+                            rs_branch_packets[t].opa_ready <= `SD 1'b1;
+                            rs_branch_packets[t].opa_value <= `SD cdb_value;
+                        end
+                        if (~rs_branch_packets[t].opb_ready && (rs_branch_packets[t].opb_value==cdb_dest_preg_idx)) begin
+                            rs_branch_packets[t].opb_ready <= `SD 1'b1;
+                            rs_branch_packets[t].opb_value <= `SD cdb_value;
+                        end
                     end
                 end
             end  
