@@ -157,7 +157,7 @@ module rs_branch(
             // cdb broadcast
             if (cdb_broadcast_valid) begin
                 for (t=0; t<`RS_BR_SIZE; t++) begin
-                    if (!rs_alu_free[t]) begin
+                    if (!rs_branch_free[t]) begin
                         if (~rs_branch_packets[t].opa_ready && (rs_branch_packets[t].opa_value==cdb_dest_preg_idx)) begin
                             rs_branch_packets[t].opa_ready <= `SD 1'b1;
                             rs_branch_packets[t].opa_value <= `SD cdb_value;

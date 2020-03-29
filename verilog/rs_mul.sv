@@ -144,7 +144,7 @@ module rs_mul(
             if (cdb_broadcast_valid) begin
             // broadcast values on cdb to relative RS entries
                 for (t=0; t<`RS_MUL_SIZE; t++) begin
-                    if (!rs_alu_free[t]) begin
+                    if (!rs_mul_free[t]) begin
                         if (~rs_mul_packets[t].opa_ready && (rs_mul_packets[t].opa_value==cdb_dest_preg_idx)) begin
                             rs_mul_packets[t].opa_ready <= `SD 1'b1;
                             rs_mul_packets[t].opa_value <= `SD cdb_value;
