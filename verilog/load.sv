@@ -61,12 +61,15 @@ module load_buffer (
             else begin
                 if (LB.entries[j].no_preceding_store || sq_addr_all_rsvd)
                     LB.issue_list[j] = 1;
+                if (LB.entries[j].age == sq_head)
+                    LB.issue_list[j] = 1;
                 else begin
-                    if (sq_head <= oldest_unrsvd_sq_idx)
+                    if (sq_head <= oldest_unrsvd_sq_idx) begin
                         if(LB.entries[j].age -1 <  oldest_unrsvd_sq_idx)
                             LB.issue_list[j] = 1;
+                    end
                     else begin
-                        if (LB.entries[j].age -1 >= sq_head ||LB.entries[j].age -1<oldest_unrsvd_sq_idx)
+                        if (LB.entries[j].age -1>sq_head&&LB.entries[j].age -1 < oldest_unrsvd_sq_idx)
                             LB.issue_list[j] = 1;
                         else
                             LB.issue_list[j] = 0;
@@ -127,14 +130,13 @@ module load_buffer (
 
         if (!none_selected) begin
             lb_request_valid <= `SD 1;
-            lb_request_entry <= LB.entries[issue_idx];
+            lb_request_entry <= `SD LB.entries[issue_idx];
         end
 
         for (int j=0; j<`LB_CAPACITY; j++) begin
             if (LB.entries[j].rob_idx==retire_tag) 
-                LB.free_list[j]=1;
-        end
-       
+                LB.free_list[j] <=`SD 1;
+        end   
     end
 
 endmodule

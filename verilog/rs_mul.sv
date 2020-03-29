@@ -117,31 +117,13 @@ module rs_mul(
             // dispatch 
             if (enable) begin// instr can be dispatched
                 rs_mul_packets[rs_mul_free_idx].PC       <= `SD PC;
-                rs_mul_packets[rs_mul_free_idx].NPC      <= `SD NPC;                
-                if (opa_ready) begin
-                    rs_mul_packets[rs_mul_free_idx].opa_value  <= `SD opa_value;
-                    rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
-                end
-                else if (cdb_broadcast_valid && opa_preg_idx == cdb_dest_preg_idx) begin
-                    rs_mul_packets[rs_mul_free_idx].opa_value <= `SD cdb_value;
-                    rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD 1'b1;
-                end
-                else begin
-                    rs_mul_packets[rs_mul_free_idx].opa_value <= `SD opa_preg_idx;
-                    rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
-                end
-                if (opb_ready) begin
-                    rs_mul_packets[rs_mul_free_idx].opb_value <= `SD opb_value;
-                    rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
-                end
-                else if (cdb_broadcast_valid && opb_preg_idx == cdb_dest_preg_idx) begin
-                    rs_mul_packets[rs_mul_free_idx].opb_value <= `SD cdb_value;
-                    rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD 1'b1;
-                end
-                else begin
-                    rs_mul_packets[rs_mul_free_idx].opb_value <= `SD opb_preg_idx;
-                    rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
-                end
+                rs_mul_packets[rs_mul_free_idx].NPC      <= `SD NPC;       
+
+                rs_mul_packets[rs_mul_free_idx].opa_ready <= `SD opa_ready;
+                rs_mul_packets[rs_mul_free_idx].opb_ready <= `SD opb_ready;
+                rs_mul_packets[rs_mul_free_idx].opa_value <= `SD opa_ready? opa_value : opa_preg_idx; 
+                rs_mul_packets[rs_mul_free_idx].opb_value <= `SD opb_ready? opb_value : opb_preg_idx;
+
                 rs_mul_packets[rs_mul_free_idx].dest_preg_idx              <= `SD dest_preg_idx;
                 rs_mul_packets[rs_mul_free_idx].rob_idx                    <= `SD rob_idx;
                 rs_mul_packets[rs_mul_free_idx].mul_func                   <= `SD mul_func;
@@ -162,7 +144,7 @@ module rs_mul(
             if (cdb_broadcast_valid) begin
             // broadcast values on cdb to relative RS entries
                 for (t=0; t<`RS_MUL_SIZE; t++) begin
-                    if (t != rs_mul_free_idx) begin
+                    if (!rs_alu_free[t]) begin
                         if (~rs_mul_packets[t].opa_ready && (rs_mul_packets[t].opa_value==cdb_dest_preg_idx)) begin
                             rs_mul_packets[t].opa_ready <= `SD 1'b1;
                             rs_mul_packets[t].opa_value <= `SD cdb_value;
