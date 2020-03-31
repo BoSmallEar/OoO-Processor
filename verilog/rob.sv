@@ -28,12 +28,15 @@ module rob(
     input                       uncond_branch,
     input                       local_pred_direction,
     input                       global_pred_direction,
+    input                       wr_mem,
     // cdb broadcast
     input                       cdb_broadcast_valid,     // make executed_rob_idx valid
     input [`ROB_LEN-1:0]        executed_rob_idx,                      
     input                       cdb_br_prediction,
     input [`XLEN-1:0]           cdb_br_target_PC,
     input                       cdb_mis_pred,
+    //sq
+    input                       sq_head_rsvd,
 
     //Outputs
     output logic [4:0]          rob_commit_dest_areg_idx,
@@ -50,7 +53,8 @@ module rob(
     output logic                result_branch_direction,
     output logic                commit_illegal,
     output logic                commit_halt,
-    output logic                mis_pred_is_head
+    output logic                mis_pred_is_head,
+    output logic                store_enable
 
 `ifdef DEBUG
     , output ROB_PACKET [`ROB_SIZE-1:0]    rob_packets
@@ -67,7 +71,8 @@ module rob(
     logic [`ROB_LEN:0]            rob_counter;
 
     assign rob_empty                    = (rob_counter == 0);
-    assign commit_valid                 = (rob_packets[rob_head].executed) && (~rob_empty);
+    assign store_enable                 = (rob_packets[rob_head].wr_mem) && sq_head_rsvd;
+    assign commit_valid                 = (rob_packets[rob_head].executed || store_enable) && (~rob_empty);
     assign rob_commit_dest_areg_idx     = rob_packets[rob_head].dest_areg_idx;
     assign rob_commit_dest_preg_idx     = rob_packets[rob_head].dest_preg_idx;
     assign rob_full                     = (rob_head == rob_tail) & (rob_counter != 0);
@@ -111,6 +116,7 @@ module rob(
                 rob_packets[rob_tail].global_pred_direction <= `SD global_pred_direction;
                 rob_packets[rob_tail].branch_direction      <= `SD 1'b0;
                 rob_packets[rob_tail].branch_mis_pred       <= `SD cdb_mis_pred;
+                rob_packets[rob_tail].wr_mem                <= `SD wr_mem;
                 rob_tail                                    <= `SD (rob_tail == `ROB_SIZE-1)? 0: rob_tail + 1;
             end  
             if(commit_valid) begin

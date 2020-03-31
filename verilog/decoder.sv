@@ -30,12 +30,14 @@ module decoder(
 	output DEST_REG_SEL   dest_reg, // mux selects
 	output ALU_FUNC       alu_func,
 	output FU_TYPE		  fu_type,
-	output logic rd_mem, wr_mem, cond_branch, uncond_branch,
-	output logic csr_op,    // used for CSR operations, we only used this as 
+	output logic          rd_mem, wr_mem, cond_branch, uncond_branch,
+	output MEM_SIZE       mem_size,
+	output logic          load_signed,
+	output logic          csr_op,    // used for CSR operations, we only used this as 
 	                        //a cheap way to get the return code out
-	output logic halt,      // non-zero on a halt
-	output logic illegal,    // non-zero on an illegal instruction
-	output logic valid_inst  // for counting valid instructions executed
+	output logic          halt,      // non-zero on a halt
+	output logic          illegal,    // non-zero on an illegal instruction
+	output logic          valid_inst  // for counting valid instructions executed
 	                        // and for making the fetch stage die on halts/
 	                        // keeping track of when to allow the next
 	                        // instruction out of fetch
@@ -43,7 +45,6 @@ module decoder(
 
 ); 
 	assign valid_inst    =  ~illegal;
-	
 	always_comb begin
 		// default control values:
 		// - valid instructions must override these defaults as necessary.
@@ -63,6 +64,8 @@ module decoder(
 		halt = `FALSE;
 		illegal = `FALSE;
 		fu_type = ALU; 
+		mem_size = WORD;
+		load_signed = `FALSE;
 		casez (inst) 
 			`RV32_LUI: begin
 				dest_reg   = DEST_RD;
@@ -100,12 +103,15 @@ module decoder(
 				dest_reg   = DEST_RD;
 				opb_select = OPB_IS_I_IMM;
 				rd_mem     = `TRUE;
-				fu_type    = MEM;
+				fu_type    = LOAD;
+				mem_size   =  MEM_SIZE'(inst.r.funct3[1:0]);
+				load_signed =	~inst.r.funct3[2];
 			end
 			`RV32_SB, `RV32_SH, `RV32_SW: begin
 				opb_select = OPB_IS_S_IMM;
 				wr_mem     = `TRUE;
-				fu_type    = MEM;
+				fu_type    = STORE;
+				mem_size   =  MEM_SIZE'(inst.r.funct3[1:0]);
 			end
 			`RV32_ADDI: begin
 				dest_reg   = DEST_RD;
@@ -217,7 +223,6 @@ module decoder(
 				halt = `TRUE;
 			end
 			default: illegal = `TRUE;
-
 	endcase // casez (inst) 
 	end // always
 endmodule // decoder

@@ -189,7 +189,7 @@ typedef union packed {
 		logic [6:0] opcode;
 	} s; //store instructions
 	struct packed {
-		logic       of; //offset[12]
+		logic       of; //offset[12]s
 		logic [5:0] s;   //offset[10:5]
 		logic [4:0] rs2;//source 2
 		logic [4:0] rs1;//source 1
@@ -291,17 +291,23 @@ typedef struct packed {
 //
 //////////////////////////////////////////////
 
-`define PRF_SIZE      32	// number of entries
-`define PRF_LEN		  5		// length in bits == log(PRF_SIZE)
+`define PRF_SIZE      16	// number of entries
+`define PRF_LEN		  4		// length in bits == log(PRF_SIZE)
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
+`define SQ_LEN 		  3
+`define LB_LEN 		  3
+`define LB_CAPACITY   8
+`define SQ_CAPACITY   8
 `define RS_ALU_SIZE		  8		// number of entries: RS ALU module
 `define RS_MUL_SIZE       4     // number of entries: RS MUL module
-`define RS_MEM_SIZE       4     // number of entries: RS MEM module
+`define RS_SQ_SIZE       4     // number of entries: RS MEM module
+`define RS_LB_SIZE       4
 `define RS_BR_SIZE        4     	// number of entries: RS BRANCH module
 `define RS_ALU_LEN		  3		// length in bits == log(RS_LEN)
 `define RS_MUL_LEN		  2
-`define RS_MEM_LEN		  2
+`define RS_SQ_LEN		  2
+`define RS_LB_LEN		  2
 `define RS_BR_LEN		  2
 `define RAT_SIZE      32	// number of entries == number of arch reg
 
@@ -309,14 +315,12 @@ typedef struct packed {
 
 `define XLENFU		  4		// number of function units
 
-// Python: "".join([hex(i)[2:].zfill(2) for i in range(256)])
-`define INIT_FREE_PREG_QUEUE	2048'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
-
-typedef enum logic [1:0] {
-	ALU        = 2'h0,
-	MUL        = 2'h1,
-	MEM        = 2'h2,
-	BRANCH     = 2'h3
+typedef enum logic [2:0] {
+	ALU        = 3'h0,
+	MUL        = 3'h1,
+	BRANCH     = 3'h2,
+	LOAD       = 3'h3,
+	STORE      = 3'h4
 } FU_TYPE;
 
 //////////////////////////////////////////////
@@ -342,6 +346,9 @@ typedef struct packed {
 	ALU_FUNC    alu_func;         // ALU function select (ALU_xxx *)
 	logic       rd_mem;           // does inst read memory?
 	logic       wr_mem;           // does inst write memory?
+	MEM_SIZE	mem_size; 		  //how many bytes would the instruction acees the memory?
+	logic		load_signed;      //is the load signed or not?
+
 	logic       cond_branch;      // is inst a conditional branch?
 	logic       uncond_branch;    // is inst an unconditional branch?
 
@@ -352,36 +359,8 @@ typedef struct packed {
 	logic       branch_prediction;// is the branch predict taken or not taken  
 	logic		local_taken;
 	logic		global_taken;
-
+	
 } ID_PACKET;
-
-typedef struct packed {
-	logic [`XLEN-1:0] NPC;                // NPC
-	logic [`XLEN-1:0] PC;                 // PC
-	logic             opa_ready;
-	logic             opb_ready;
-	logic [`XLEN-1:0] opa_value;          // reg A value                                  
-	logic [`XLEN-1:0] opb_value;          // reg B value 
-
-	logic [`ROB_LEN-1:0] rob_idx;          // the rob index of the instr that is sent to FU
-	logic [`PRF_LEN-1:0] dest_preg_idx;    // the destination preg index
-	                     
-	                                                                                
-	ALU_OPA_SELECT opa_select;             // ALU opa mux select (ALU_OPA_xxx *)
-	ALU_OPB_SELECT opb_select;             // ALU opb mux select (ALU_OPB_xxx *)
-	INST inst;                             // instruction
-	  
-	ALU_FUNC    alu_func;                  // ALU function select (ALU_xxx *)
-	logic       rd_mem;                    // does inst read memory?
-	logic       wr_mem;                    // does inst write memory?
-	logic       cond_branch;               // is inst a conditional branch?
-	logic       uncond_branch;             // is inst an unconditional branch?
-	logic       halt;             	       // is this a halt?
-	logic       illegal;                   // is this instruction illegal?
-	logic       csr_op;           		   // is this a CSR operation? (we only used this as a cheap way to get return code)
-	logic       valid;                     // is inst a valid instruction to be counted for CPI calculations?
-	logic       branch_prediction;         // is the branch predict taken or not taken
-} RS_FU_PACKET;
 
 //////////////////////////////////////////////
 //
@@ -404,6 +383,7 @@ typedef struct packed {
 	logic                branch_mis_pred;
 	logic				 halt;
 	logic				 illegal;
+	logic                wr_mem;
 } ROB_PACKET;
 
 //////////////////////////////////////////////
@@ -466,16 +446,34 @@ typedef struct packed {
 	logic [`XLEN-1:0]       NPC;                // NPC
 	logic [`XLEN-1:0]       PC;                 // PC
 	
-	logic 					opa_ready;
-	logic 	[`XLEN-1:0] 	opa_value;   
-	logic 					opb_ready;
-	logic 	[`XLEN-1:0] 	opb_value; 
-	 
-	logic 					offset;
-	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
+	logic 					base_ready;
+	logic 	[`XLEN-1:0] 	base_value;  
+	logic 	[11:0]			offset;
+
+	logic 					src_ready;
+	logic 	[`XLEN-1:0] 	src_value; 
+
+	logic   [`SQ_LEN-1:0]	sq_idx; 
 	logic 	[`ROB_LEN-1:0] 	rob_idx;
 
-} RS_MEM_PACKET;
+	MEM_SIZE                mem_size;
+} RS_SQ_PACKET;
+
+typedef struct packed {
+	logic [`XLEN-1:0]       NPC;                // NPC
+	logic [`XLEN-1:0]       PC;                 // PC
+	
+	logic 					base_ready;
+	logic 	[`XLEN-1:0] 	base_value;   
+	logic 	 [11:0]			offset;
+
+	logic 	[`LB_LEN]		lb_idx;
+	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
+	logic 	[`ROB_LEN-1:0] 	rob_idx;
+	
+	MEM_SIZE                mem_size;
+	logic                   load_signed;
+} RS_LB_PACKET;
 
 
 //////////////////////////////////////////////
@@ -515,12 +513,14 @@ typedef struct packed {
 
 `define ALU_QUEUE_SIZE 128
 `define MUL_QUEUE_SIZE 128
-`define MEM_QUEUE_SIZE 128
+`define SQ_QUEUE_SIZE 128
+`define DCACHE_QUEUE_SIZE 128
 `define BR_QUEUE_SIZE  128
 `define ALU_QUEUE_LEN 7
 `define MUL_QUEUE_LEN 7
-`define MEM_QUEUE_LEN 7
+`define SQ_QUEUE_LEN 7
 `define BR_QUEUE_LEN  7
+`define DCACHE_QUEUE_LEN  7
 
 
 typedef struct packed {
@@ -540,14 +540,20 @@ typedef struct packed {
 } CDB_MUL_PACKET;
 
 typedef struct packed {
-	logic  [`XLEN-1:0]    mem_value;
-	logic                 mem_rd;
-	logic                 mem_wr;
-	logic  [`PRF_LEN-1:0] mem_prf_idx;
-	logic  [`ROB_LEN-1:0] mem_rob_idx;
-	logic  [`XLEN-1:0]    mem_PC;
+	logic  [`XLEN-1:0]    dcache_value; 
+	logic  [`PRF_LEN-1:0] dcache_prf_idx;
+	logic  [`ROB_LEN-1:0] dcache_rob_idx;
+	logic  [`XLEN-1:0]    dcache_PC;
 
-} CDB_MEM_PACKET; // needs to be completed
+} CDB_DCACHE_PACKET;
+
+typedef struct packed {
+	logic  [`XLEN-1:0]    sq_value; 
+	logic  [`PRF_LEN-1:0] sq_prf_idx;
+	logic  [`ROB_LEN-1:0] sq_rob_idx;
+	logic  [`XLEN-1:0]    sq_PC;
+
+} CDB_SQ_PACKET;
 
 typedef struct packed { 
 	logic  [`PRF_LEN-1:0] br_prf_idx;
@@ -564,5 +570,44 @@ typedef struct packed {
 
 } CDB_BR_PACKET;
 
+typedef struct packed {          
+	logic [`XLEN-1:0]       PC;       
+    logic [`XLEN-1:0]       addr;
+    logic [4:0]             rd_preg;
+    logic                   rob_idx;
+    logic [`SQ_LEN-1:0]     age;
+    logic                   rsvd;   //  Load address is resolved
+	MEM_SIZE                mem_size;
+	logic                   load_signed;
+} LB_ENTRY;
+
+typedef struct packed {
+    LB_ENTRY    [`LB_CAPACITY-1:0]   entries;       
+    logic       [`LB_CAPACITY-1:0]   free_list;     // Unoccupied entries
+    logic       [`LB_CAPACITY-1:0]   rsvd_list;   
+    logic       [`LB_CAPACITY-1:0]   issue_list;   
+} LOAD_BUFFER;
+
+typedef struct packed {            
+	logic [`XLEN-1:0]       PC;                
+    logic [`XLEN-1:0]       addr;
+    logic [`XLEN-1:0]       data;
+    logic                   rob_idx;
+    logic                   rsvd;
+	MEM_SIZE                mem_size;
+} SQ_ENTRY;
+
+typedef struct packed {
+    SQ_ENTRY    [`SQ_CAPACITY-1:0]   entries;
+    logic       [`SQ_LEN-1:0]        head;
+    logic       [`SQ_LEN-1:0]        tail;
+} STORE_QUEUE;
+
+typedef struct packed {            
+	logic [`XLEN-1:0]       PC;       
+    logic [`XLEN-1:0]       forward_data;
+    logic [4:0]             rd_preg;
+    logic                   rob_idx;    
+} FORWARD_PACKET;
 
 `endif // __SYS_DEFS_VH__

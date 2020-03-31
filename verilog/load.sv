@@ -1,46 +1,27 @@
-typedef struct packed {          
-	logic [`XLEN-1:0]       PC;       
-    logic [`XLEN-1:0]       addr;
-    logic [4:0]             rd_preg;
-    logic                   rob_idx;
-    logic [`SQ_LEN-1:0]     age;
-    logic                   rsvd;   //  Load address is resolved
-    logic                   issue;
-    logic  [3:0]            load_byte; // LOAD 1 BYTE / HALF WORD/ ONE WORD
-} LB_ENTRY;
-
-typedef struct packed {
-    LB_ENTRY    [`LB_LEN-1:0]        entries;
-    logic       [`LB_CAPACITY-1:0]   free_list;      // Unoccupied entries
-    logic       [`LB_CAPACITY-1:0]   rsvd_list;   
-    logic       [`LB_CAPACITY-1:0]   issue_list;   
-} LOAD_BUFFER;
-
 module load_buffer ( 
     input                                       clock,
     input                                       reset,
     input                                       lb_enable,  
     // From RS_SQ
     input                                       rs_lb_out_valid,
-    input                                       rs_lb_packet,  
+    input              RS_LB_PACKET             rs_lb_packet,  
     // From SQ
-    input                                       sq_empty,
-    input                                       sq_head,
-    input                                       sq_tail,  
-    input                                       sq_addr_all_rsvd,
-    input                                       secure_age,  
+    input                                       sq_all_rsvd,
+    input              [`SQ_LEN-1:0]            sq_head,
+    input              [`SQ_LEN-1:0]            sq_tail,  
+    input              [`SQ_LEN-1:0]            secure_age,  
     // To previous stage : no space for you
     output  logic                               lb_full,
     // To RS 
-    output  logic      [`LB_LEN-1:0]            Assigned_lb_idx,    
+    output  logic      [`LB_LEN-1:0]            assigned_lb_idx,    
     // To SQ
     output  logic                               lb_request_valid,
-    output  LB_ENTRY                            lb_request_entry,
+    output  LB_ENTRY                            lb_request_entry
 );
 
-    LOAD_BUFFER                                 LB;
-    logic                                       lb_full;
-    assign                                      lb_full = LB.free_list==0;
+    LOAD_BUFFER                              LB;
+    logic                                    lb_full;
+    assign                                   lb_full = LB.free_list==0;
 
     // Choose a free entry to put the new instruction
     logic [`LB_LEN-1:0]                      free_idx;
@@ -66,34 +47,39 @@ module load_buffer (
                 // new sq_head has index 1, which is equal the load_age 1
                 // Hence we should consider load_age geq current sq_head
                 //                                   leq secure_age
-                if (sq_head <= secure_age) begin
+                if (sq_all_rsvd)
+                    LB.issue_list[j] = 1;
+                else begin
+                    if (sq_head <= secure_age) begin
                     //  START [....... |HEAD ------ SECURE ---|..... ] END
                     //  Whether TAIL wraps doesn't matter, we only care about the range between H&S
-                    if (LB.entries[j].age >= sq_head && LB.entries[j].age <= secure_age)
-                        LB.issue_list[j] = 1;
-                end
-                else if (sq_head > secure_age) begin
-                    //  START [|---- SECURE ----| ...... |HEAD ----|] END
-                    if(LB.entries[j].age >= sq_head || LB.entries[j].age <= secure_age)
-                        LB.issue_list[j] = 1;
+                        if (LB.entries[j].age >= sq_head && LB.entries[j].age <= secure_age) begin
+                            LB.issue_list[j] = 1;
+                        end
+                        else if (sq_head > secure_age) begin
+                        //  START [|---- SECURE ----| ...... |HEAD ----|] END
+                            if(LB.entries[j].age >= sq_head || LB.entries[j].age <= secure_age) begin
+                                LB.issue_list[j] = 1;
+                            end
+                        end
                     end
+                    else LB.issue_list[j] = 0;
                 end
-                else
-                    LB.issue_list[j] = 0;
             end 
         end
     end
 
     // Choose an issuable entry to issue with the given selector
-    logic none_selected;
-    logic [`LB_CAPACITY-1:0] gnt_bus;
-    logic [`LB_CAPACITY-1:0] psel_gnt;
+    logic                       none_selected;
+    logic [`LB_CAPACITY-1:0]    gnt_bus;
+    logic [`LB_CAPACITY-1:0]    psel_gnt;
     psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel (
         .req(LB.issue_list),
         .gnt(psel_gnt),
         .gnt_bus(gnt_bus),
         .empty(none_selected)
     );
+
     logic [`LB_LEN-1:0] issue_idx;
     always_comb begin
         issue_idx = `LB_CAPACITY'h0; 
@@ -115,23 +101,24 @@ module load_buffer (
         
         if (lb_enable) begin  
             // Tell RS this inst is entered into FREE_INDEX 
-            Assigned_LB_idx <= `SD free_idx;
+            assigned_lb_idx                 <= `SD free_idx;
             // Age is the current SQ tail, new entry is always unresolved
-            LB.entries[free_idx].age <= `SD sq_tail;
-            LB.entries[free_idx].rsvd <=`SD 0;
+            LB.entries[free_idx].age        <= `SD sq_tail;
+            LB.entries[free_idx].rsvd       <= `SD 0;
             // Update the list - this entry no longer free/resolved
-            LB.free_list[free_idx] <= `SD 0;    
-            LB.rsvd_list[free_idx] <=`SD 0;
+            LB.free_list[free_idx]          <= `SD 0;    
+            LB.rsvd_list[free_idx]          <= `SD 0;
         end 
         
         // RS fills information into specific entry when it's ready
-        if (rs_lb_out_valid&&LB.entries[rs_lb_packet.lb_idx].rsvd==0) begin
-            LB.entries[rs_lb_packet.lb_idx].rsvd <=`SD 1;
-            LB.entries[rs_lb_packet.lb_idx].addr <= `SD rs_lb_packet.base_value + rs_lb_packet.offset;
-            LB.entries[rs_lb_packet.lb_idx].rd_preg <=`SD rs_lb_packet.dest_preg_idx;
-            LB.entries[rs_lb_packet.lb_idx].rob_idx <=`SD rs_lb_packet.rob_idx;
-            LB.entries[rs_lb_packet.lb_idx].PC <=`SD rs_lb_packet.PC;
-            LB.entries[rs_lb_packet.lb_idx].load_byte <=`SD rs_lb_packet.load_byte;
+        if (rs_lb_out_valid && LB.entries[rs_lb_packet.lb_idx].rsvd == 0) begin
+            LB.entries[rs_lb_packet.lb_idx].PC          <= `SD rs_lb_packet.PC;
+            LB.entries[rs_lb_packet.lb_idx].addr        <= `SD rs_lb_packet.base_value + rs_lb_packet.offset;
+            LB.entries[rs_lb_packet.lb_idx].rd_preg     <= `SD rs_lb_packet.dest_preg_idx;
+            LB.entries[rs_lb_packet.lb_idx].rob_idx     <= `SD rs_lb_packet.rob_idx;
+            LB.entries[rs_lb_packet.lb_idx].rsvd        <= `SD 1;
+            LB.entries[rs_lb_packet.lb_idx].mem_size    <= `SD rs_lb_packet.mem_size;
+            LB.entries[rs_lb_packet.lb_idx].load_signed <= `SD rs_lb_packet.load_signed;
         end
 
         // Some load inst can be issued
@@ -139,8 +126,10 @@ module load_buffer (
         if (!none_selected) begin
             lb_request_valid <= `SD 1;
             lb_request_entry <= `SD LB.entries[issue_idx];
-            LB.free_list[j] <=`SD 1;
+            LB.free_list[j]  <= `SD 1;
         end
+        else
+            lb_request_valid <= `SD 0;
     end
 
 endmodule

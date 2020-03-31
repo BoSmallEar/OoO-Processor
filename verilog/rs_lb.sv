@@ -19,32 +19,32 @@ module rs_lb(
     input [`XLEN-1:0]                           PC,
     input [`XLEN-1:0]                           NPC,
     input                                       enable,
-
+    // from ID_PACKET
     input [`PRF_LEN-1:0]                        base_preg_idx,
 	input 				                        base_ready,
 	input [`XLEN-1:0]	                        base_value,
     input [`XLEN-1:0]                           offset,
     input [`PRF_LEN-1:0]                        dest_preg_idx,
+    input MEM_SIZE                              mem_size,
+    input                                       load_signed,
 
     input                                       commit_mis_pred,
     input [`ROB_LEN-1:0]                        rob_idx,
-    input                                       lb_idx,
+    input [`LB_LEN-1:0]                         lb_idx,
     input [`PRF_LEN-1:0]                        cdb_dest_preg_idx,
     input                                       cdb_broadcast_valid,
     input [`XLEN-1:0]                           cdb_value,
-    input                                       halt,
-    input                                       illegal,
 
     output RS_LB_PACKET                         rs_lb_packet,     // overwrite base value, if needed
     output                                      rs_lb_out_valid,
     output                                      rs_lb_full           // sent rs_lb_full signal to if stage
     `ifdef DEBUG
-    , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
-    , output logic [`RS_LB_LEN:0]               rs_lb_counter
-    , output logic [`RS_LB_SIZE-1:0]            rs_lb_ex     // goes to priority selector (data ready && FU free)
-    , output logic [`RS_LB_SIZE-1:0]            rs_lb_free
-    , output logic [`RS_LB_LEN-1:0]             rs_lb_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_LB_LEN-1:0]             rs_lb_ex_idx
+        , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
+        , output logic [`RS_LB_LEN:0]               rs_lb_counter
+        , output logic [`RS_LB_SIZE-1:0]            rs_lb_ex     // goes to priority selector (data ready && FU free)
+        , output logic [`RS_LB_SIZE-1:0]            rs_lb_free
+        , output logic [`RS_LB_LEN-1:0]             rs_lb_free_idx // the rs idx that is selected for the dispatched instr
+        , output logic [`RS_LB_LEN-1:0]             rs_lb_ex_idx
     `endif
 );
 
@@ -102,21 +102,21 @@ module rs_lb(
             rs_lb_out_valid <= `SD 1'b0; 
         end 
         else begin
-            rs_lb_counter <= `SD rs_lb_counter + (enable&&!halt&&!illegal) - (!no_rs_selected);
+            rs_lb_counter <= `SD rs_lb_counter + enable - (!no_rs_selected);
             // dispatch 
-            if (enable && !halt &&!illegal) begin// instr can be dispatched
-                rs_lb_packets[rs_lb_free_idx].PC <= `SD PC;
-                rs_lb_packets[rs_lb_free_idx].NPC <= `SD NPC;
-                rs_lb_packets[rs_lb_free_idx].base_ready <= `SD base_ready;
-                
-                if (base_ready)  rs_lb_packets[rs_lb_free_idx].base_value <= `SD base_value;
-                else rs_lb_packets[rs_lb_free_idx].base_value <= `SD base_preg_idx;
-                rs_lb_packets[rs_mee_free_idx].offset         <= `SD id_packet_in.offset;
-                rs_lb_packets[rs_lb_free_idx].dest_preg_idx  <= `SD dest_preg_idx;
-                rs_lb_packets[rs_lb_free_idx].rob_idx        <= `SD rob_idx;
-                rs_lb_packets[rs_lb_free_idx].lb_idx        <= `SD lb_idx;
+            if (enable) begin// instr can be dispatched
+                rs_lb_packets[rs_lb_free_idx].NPC               <= `SD NPC;
+                rs_lb_packets[rs_lb_free_idx].PC                <= `SD PC;
+                rs_lb_packets[rs_lb_free_idx].base_ready        <= `SD base_ready;
+                rs_lb_packets[rs_lb_free_idx].base_value        <= `SD base_ready ? base_value : base_preg_idx; 
+                rs_lb_packets[rs_lb_free_idx].offset            <= `SD offset;
+                rs_lb_packets[rs_lb_free_idx].lb_idx            <= `SD lb_idx;
+                rs_lb_packets[rs_lb_free_idx].dest_preg_idx     <= `SD dest_preg_idx;
+                rs_lb_packets[rs_lb_free_idx].rob_idx           <= `SD rob_idx;
+                rs_lb_packets[rs_lb_free_idx].mem_size          <= `SD mem_size;
+                rs_lb_packets[rs_lb_free_idx].load_signed       <= `SD load_signed;
 
-                rs_lb_free[rs_lb_free_idx] <= `SD 1'b0;
+                rs_lb_free[rs_lb_free_idx]                      <= `SD 1'b0;
             end
             
             // issue
@@ -130,10 +130,12 @@ module rs_lb(
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin
-                for (t=0; t<`RS_LB_SIZE; t++) begin
-                    if (~rs_lb_packets[t].base_ready && (rs_lb_packets[t].base_value==cdb_dest_preg_idx)) begin
-                        rs_lb_packets[t].base_ready <= `SD 1'b1;
-                        rs_lb_packets[t].base_value <= `SD cdb_value;
+                if (!rs_lb_free[t]) begin
+                    for (t=0; t<`RS_LB_SIZE; t++) begin
+                        if (~rs_lb_packets[t].base_ready && (rs_lb_packets[t].base_value==cdb_dest_preg_idx)) begin
+                            rs_lb_packets[t].base_ready <= `SD 1'b1;
+                            rs_lb_packets[t].base_value <= `SD cdb_value;
+                        end
                     end
                 end
             end  

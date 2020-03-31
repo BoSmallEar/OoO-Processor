@@ -129,8 +129,9 @@ module processor (
 	logic rob_full;
 	logic rs_alu_full;
     logic rs_mul_full;
-    logic rs_mem_full;
     logic rs_branch_full;
+    logic rs_lb_full;
+    logic rs_sq_full;
     logic [`XLEN-1:0] result_PC;
     logic result_cond_branch;
     logic result_uncond_branch;
@@ -155,7 +156,7 @@ module processor (
 	                                NO_ERROR;
     
 	logic [3:0] rs_full;
-    assign rs_full = {rs_branch_full,rs_mem_full,rs_mul_full,rs_alu_full}; // ???
+    assign rs_full = {rs_sq_full,rs_lb_full,rs_branch_full,rs_mul_full,rs_alu_full};
 //////////////////////////////////////////////////
 //                                              //
 //                  IF-ID Stage                 //
@@ -217,6 +218,43 @@ module processor (
         .Icache2mem_addr(Icache2mem_addr)  // Address sent to memory
     );
 
+
+//////////////////////////////////////////////////
+//                                              //
+//                 Cache Arbiter                //
+//                                              //
+//////////////////////////////////////////////////
+
+    module cache_arbiter(
+        // Main Memory
+        .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
+        .Dcache2mem_size(Dcache2mem_size),
+        .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
+        .Dcache2mem_data(Dcache2mem_data), 
+        .Icache2mem_command(Icache2mem_command),    // command sent to memory
+        .Icache2mem_addr(Icache2mem_addr),  // Address sent to memor 
+        
+        .mem2cache_response(mem2cache_response),     // Tag from memory about current request
+        .mem2cache_data(mem2cache_data),         // Data coming back from memory
+        .mem2cache_tag(mem2cache_tag),    
+
+        .mem2Dcache_response(mem2Dcache_response),     // Tag from memory about current request
+        .mem2Dcache_data(mem2Dcache_data),         // Data coming back from memory
+        .mem2Dcache_tag(mem2Dcache_tag),    
+        .mem2Dcache_response_valid(mem2Dcache_response_valid),      
+        .mem2Icache_response(mem2Icache_response),     // Tag from memory about current request
+        .mem2Icache_data(mem2Icache_data),         // Data coming back from memory
+        .mem2Icache_tag(mem2Icache_tag),        
+        .mem2Icache_response_valid(mem2Icache_response_valid),     
+        .cache2mem_command(cache2mem_command),      // Issue a bus load
+        .cache2mem_size(cache2mem_size),  
+
+        .cache2mem_addr(cache2mem_addr),         // Address sent to memory
+        .cache2mem_data(cache2mem_data), 
+    );
+
+
+
 //////////////////////////////////////////////////
 //                                              //
 //                   top level                  //
@@ -228,13 +266,20 @@ module processor (
         //inputs
         .clock(clock),        
         .reset(reset),    
+        .mem2Dcache_data(mem2Dcache_data),
+        .mem2Dcache_tag(mem2Dcache_tag),
+        .mem2Dcache_response_valid(mem2Dcache_response_valid),
+        .mem2Dcache_response(mem2Dcache_response),
+
+
         .id_packet(id_packet_out),              // Output of ID stage - decoded 
         // Outputs
         .rob_full(rob_full),     
         .rs_alu_full(rs_alu_full),
         .rs_mul_full(rs_mul_full),
-        .rs_mem_full(rs_mem_full),
         .rs_branch_full(rs_branch_full),
+        .rs_lb_full(rs_lb_full),
+        .rs_sq_full(rs_sq_full),
         .result_valid(result_valid),   //TODO: connect result_valid
         .result_PC(result_PC),
         .result_cond_branch(result_cond_branch),

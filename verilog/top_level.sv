@@ -14,14 +14,21 @@
 
 module top_level (
 	input                           clock,        
-	input                           reset,    
+	input                           reset,
+    //dcache
+    input                           mem2Dcache_data,
+    input                           mem2Dcache_tag,
+    input                           mem2Dcache_response_valid,
+    input                           mem2Dcache_response,
+
     input ID_PACKET                 id_packet,              // Output of ID stage - decoded 
     // Outputs
     output logic                    rob_full,     
     output logic                    rs_alu_full,
     output logic                    rs_mul_full,
-    output logic                    rs_mem_full,
     output logic                    rs_branch_full,
+    output logic                    rs_lb_full,
+    output logic                    rs_sq_full,
     output logic                    result_valid,          // the current output is valid or not    
     output logic  [`XLEN-1:0]       result_PC,              // branch target address that is committed
     output logic                    result_cond_branch,
@@ -32,7 +39,12 @@ module top_level (
     output logic                    result_branch_direction, // branch is actually taken or not
     output logic                    result_mis_pred,
     output                          commit_halt,
-    output                          commit_illegal
+    output                          commit_illegal,
+    output logic    [1:0]           Dcache2mem_command,      // Issue a bus load
+	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
+    output MEM_SIZE                 Dcache2mem_size,
+    output logic    [`XLEN-1:0]     Dcache2mem_data
+    
 `ifdef DEBUG
     , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values
     , output logic [`PRF_SIZE-1:0]                 prf_free
@@ -82,6 +94,13 @@ module top_level (
     , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
     , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
     , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+    
+    , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
+    , output logic [`RS_LB_LEN:0]               rs_lb_counter
+    , output logic [`RS_LB_SIZE-1:0]            rs_lb_ex     // goes to priority selector (data ready && FU free)
+    , output logic [`RS_LB_SIZE-1:0]            rs_lb_free
+    , output logic [`RS_LB_LEN-1:0]             rs_lb_free_idx // the rs idx that is selected for the dispatched instr
+    , output logic [`RS_LB_LEN-1:0]             rs_lb_ex_idx
 
     // Outputs of cdb
     , output logic [3:0]           module_select
@@ -226,88 +245,7 @@ module top_level (
     logic                     rrat_enable;
     assign rrat_enable = result_valid;
 
-
-   //////////////////////////////////////////////////
-    //                                              //
-    //                    Store Queue               //
-    //                                              //
-    //////////////////////////////////////////////////
-    /*  wr_mem     = `TRUE;
-	    fu_type    = MEM;
-        opa_select = OPA_IS_RS1;        Base Address - to add
-        opb_select = OPB_IS_S_IMM;      Source Data
-        alu_func = ALU_ADD;
-		dest_reg = DEST_NONE;
-		csr_op = `FALSE;
-		rd_mem = `FALSE;
-		cond_branch = `FALSE;
-		uncond_branch = `FALSE;
-		halt = `FALSE;
-		illegal = `FALSE;
-        fu_offset = `RV32_signext_Bimm(id_packet.inst); 
-    */
-	/*
-        The resolved address should be sent to Store queue, hence we provide an index
-    */
     
-    //////////////////////////////////////////////////
-    //                                              //
-    //                    Load  Queue               //
-    //                                              //
-    //////////////////////////////////////////////////
-    /*  opa_select = OPA_IS_RS1;            BASE: fu_opa_value
-		opb_select = OPB_IS_I_IMM;          fu_offset
-		alu_func = ALU_ADD;
-		csr_op = `FALSE;
-		wr_mem = `FALSE;
-		cond_branch = `FALSE;
-		uncond_branch = `FALSE;
-		halt = `FALSE;
-		illegal = `FALSE;
-        dest_reg   = DEST_RD;		    id_packet.dest_areg_idx
-		rd_mem     = `TRUE;
-		fu_type    = MEM; 
-        
-        */
- 
-    //////////////////////////////////////////////////
-    //                                              //
-    //                   R S _ M E M                //
-    //                                              //
-    //////////////////////////////////////////////////
-
-    // rs_mem rs_mem0(
-    //     //inputs
-    //     .clock(clock),
-    //     .reset(reset),
-    //     .PC(id_packet.PC),
-    //     .NPC(id_packet.NPC),
-    //     .enable(id_packet.valid && id_packet.fu_type == MEM),
-    //     .opa_preg_idx(opa_preg_idx),
-    //     .opb_preg_idx(opb_preg_idx),
-    //     .opa_ready(fu_opa_ready),
-    //     .opa_value(fu_opa_value),
-    //     .opb_ready(fu_opb_ready),
-    //     .opb_value(fu_opb_value),
-    //     .offset(fu_offset),
-    //     .dest_SQ_idx(sq_tail),
-    //     .rob_idx(rob_tail),
-    //     .rd_mem(id_packet.rd_mem),
-    //     .wr_mem(id_packet.wr_mem),
-    //     // empty on mis prediction
-    //     .commit_mis_pred(mis_pred_is_head),
-    //     // cdb broadcast
-    //     .cdb_broadcast_valid(cdb_broadcast_valid),
-    //     .cdb_dest_preg_idx(cdb_dest_preg_idx),
-    //     .cdb_value(cdb_result),
-    //     .mem_func(),
-    //     //outputs
-    //     .rs_mem_packet(rs_mem_packet),
-    //     .rs_mem_out_valid(rs_mem_out_valid),
-    //     .rs_mem_full(rs_mem_full)
-    // );
-
-
     //////////////////////////////////////////////////
     //                                              //
     //                    R A T                     //
@@ -379,12 +317,14 @@ module top_level (
         .uncond_branch(id_packet.uncond_branch),
         .local_pred_direction(id_packet.local_taken),
         .global_pred_direction(id_packet.global_taken),
+        .wr_mem(id_packet.wr_mem),
         // cdb broadcast
         .cdb_broadcast_valid(cdb_broadcast_valid),     // make executed_rob_idx valid
         .executed_rob_idx(cdb_rob_idx),                      
         .cdb_br_prediction(cdb_br_direction),
         .cdb_br_target_PC(cdb_br_target_PC),
         .cdb_mis_pred(cdb_mis_pred),
+        .sq_head_rsvd(sq_head_rsvd),
 
         //Outputs
         .rob_commit_dest_areg_idx(rob_commit_dest_areg_idx),
@@ -402,7 +342,8 @@ module top_level (
         .result_branch_direction(result_branch_direction),
         .commit_illegal(commit_illegal),
         .commit_halt(commit_halt),
-        .mis_pred_is_head(mis_pred_is_head)
+        .mis_pred_is_head(mis_pred_is_head),
+        .store_enable(store_enable)
 
     `ifdef DEBUG
         , .rob_packets(rob_packets)
@@ -490,7 +431,7 @@ module top_level (
                 fu_opb_ready = opb_ready; 
                 fu_offset = `RV32_signext_Bimm(id_packet.inst); 
             end
-			OPB_IS_I_IMM: begin
+			OPB_IS_I_IMM: begin  
                 casez (id_packet.fu_type) 
                      ALU: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
                      MUL: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
@@ -625,7 +566,7 @@ module top_level (
     mult2cdb mult2cdb0(
         //input
         .clock(clock),
-        .reset(reset),
+        .reset(reset || mis_pred_is_head),
         .rs_mul_packet(rs_mul_packet),
         .mul_enable(rs_mul_out_valid), 
         //output
@@ -640,46 +581,148 @@ module top_level (
     
     //////////////////////////////////////////////////
     //                                              //
-    //                   R S _ M E M                //
+    //                  R S _ L B                   //
     //                                              //
     //////////////////////////////////////////////////
 
-    // rs_mem rs_mem0(
-    //     //inputs
-    //     .clock(clock),
-    //     .reset(reset),
-    //     .PC(id_packet.PC),
-    //     .NPC(id_packet.NPC),
-    //     .enable(id_packet.valid && id_packet.fu_type == MEM),
-    //     .opa_preg_idx(opa_preg_idx),
-    //     .opb_preg_idx(opb_preg_idx),
-    //     .opa_ready(fu_opa_ready),
-    //     .opa_value(fu_opa_value),
-    //     .opb_ready(fu_opb_ready),
-    //     .opb_value(fu_opb_value),
-    //     .offset(fu_offset),
-    //     .dest_preg_idx(dest_preg_idx),
-    //     .rob_idx(rob_tail),
-    //     .rd_mem(id_packet.rd_mem),
-    //     .wr_mem(id_packet.wr_mem),
-    //     // empty on mis prediction
-    //     .commit_mis_pred(mis_pred_is_head),
-    //     // cdb broadcast
-    //     .cdb_broadcast_valid(cdb_broadcast_valid),
-    //     .cdb_dest_preg_idx(cdb_dest_preg_idx),
-    //     .cdb_value(cdb_result),
-    //     .mem_func(),
-    //     //outputs
-    //     .rs_mem_packet(rs_mem_packet),
-    //     .rs_mem_out_valid(rs_mem_out_valid),
-    //     .rs_mem_full(rs_mem_full)
-    // );
+
+    rs_lb rs_lb0(
+        .clock(clock),
+        .reset(reset),
+        .PC(id_packet.PC),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem == `TRUE),
+        // from ID_PACKET
+        .base_preg_idx(opa_preg_idx),
+	    .base_ready(fu_opa_ready),
+	    .base_value(fu_opa_value),
+        .offset(fu_offset),
+        .dest_preg_idx(dest_preg_idx),
+        .mem_size(id_packet.mem_size),                              
+        .load_signed(id_packet.load_signed),
+
+        .commit_mis_pred(mis_pred_is_head),
+        .rob_idx(rob_tail),
+        .lb_idx(assigned_lb_idx),
+        .cdb_dest_preg_idx(cdb_dest_preg_idx),
+        .cdb_broadcast_valid(cdb_broadcast_valid),
+        .cdb_value(cdb_result),
+
+        // outputs
+        .rs_lb_packet(rs_lb_packet),     // overwrite base value, if needed
+        .rs_lb_out_valid(rs_lb_out_valid),
+        .rs_lb_full(rs_lb_full)           // sent rs_lb_full signal to if stage
+    `ifdef DEBUG
+        , .rs_lb_packets(rs_lb_packets)
+        , .rs_lb_counter(rs_lb_counter)
+        , .rs_lb_ex(rs_lb_ex)     // goes to priority selector (data ready && FU free)
+        , .rs_lb_free(rs_lb_free)
+        , .rs_lb_free_idx(rs_lb_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_lb_ex_idx(rs_lb_ex_idx)
+    `endif
+);
 
     //////////////////////////////////////////////////
     //                                              //
-    //                   M E M - FU                 //
+    //                     L B                      //
     //                                              //
     //////////////////////////////////////////////////
+
+
+    load_buffer lb0(
+        .clock(clock),
+        .reset(reset),
+        .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
+        .rs_lb_out_valid(rs_lb_out_valid),
+        .rs_lb_packet(rs_lb_packet),
+        .sq_all_rsvd(sq_all_rsvd),
+        .sq_head(sq_head),
+        .sq_tail(sq_tail),
+        .secure_age(secure_age),
+
+        // outputs
+        .lb_full(lb_full),
+        .assigned_lb_idx(assigned_lb_idx),    
+        .lb_request_valid(lb_request_valid),
+        .lb_request_entry(lb_request_entry)
+    );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                  R S _ S Q                   //
+    //                                              //
+    //////////////////////////////////////////////////
+
+    // directly copy from qyj history commit
+    rs_sq  rs_sq0 (
+        .clock(clock),
+        .reset(reset),
+        .PC(id_packet.PC),
+        .NPC(id_packet.NPC),
+        .enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.wr_mem == `TRUE),
+        .base_preg_idx(opa_preg_idx),
+        .src_preg_idx(opb_preg_idx),
+        .offset(fu_offset),
+        .mem_size(id_packet.mem_size),
+        .base_ready(fu_opa_ready),
+        .base_value(fu_opa_value),
+        .src_ready(fu_opb_ready),
+        .src_value(fu_opb_value),
+        .commit_mis_pred(mis_pred_is_head),
+        .rob_idx(rob_tail),
+        .sq_idx(sq_tail),
+        .cdb_dest_preg_idx(cdb_dest_preg_idx),
+        .cdb_broadcast_valid(cdb_broadcast_valid),
+        .cdb_value(cdb_result), 
+    
+        //outputs
+        .rs_sq_packet(rs_sq_packet),
+        .rs_sq_out_valid(rs_sq_out_valid),
+        .rs_sq_full(rs_sq_full)
+    `ifdef DEBUG
+        , .rs_sq_packets(rs_sq_packets)
+        , .rs_sq_counter(rs_sq_counter)
+        , .rs_sq_ex(rs_sq_ex)    // goes to priority selector (data ready && FU free) 
+        , .rs_sq_free(rs_sq_free)
+        , .rs_sq_free_idx(rs_sq_free_idx) // the rs idx that is selected for the dispatched instr
+        , .rs_sq_ex_idx(rs_sq_ex_idx) 
+    `endif
+    );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                     S Q                      //
+    //                                              //
+    //////////////////////////////////////////////////
+
+
+    // directly copy from qyj history commit
+    store_queue sq0(
+        .clock(clock),
+        .reset(reset),
+        .sq_enable(id_packet.valid &&id_packet.wr_mem==`TRUE),
+        .rs_sq_out_valid(rs_sq_out_valid),
+        .rs_sq_packet(rs_sq_packet),
+        .lb2sq_request_valid(lb_request_valid),
+        .lb2sq_request_entry(lb_request_entry),
+        .store_enable(store_enable),
+
+        // outputs
+        .sq_head_rsvd(sq_head_rsvd),
+        .sq_full(sq_full),
+        .sq_all_rsvd(sq_all_rsvd),
+        .sq_tail(sq_tail),    
+        .sq_head(sq_head), 
+        .secure_age(secure_age),
+        .forward_valid(forward_valid),
+        .forward_pack(forward_pack),     // To CDB
+    
+        .lb2cache_request_valid(lb2cache_request_valid),
+        .lb2cache_request_entry(lb2cache_request_entry),
+        .sq2cache_request_valid(sq2cache_request_valid),
+        .sq2cache_request_entry(sq2cache_request_entry)
+    );
+
 
     //////////////////////////////////////////////////
     //                                              //
@@ -813,6 +856,51 @@ module top_level (
         .cdb_local_pred_direction(cdb_local_pred_direction),
         .cdb_global_pred_direction(cdb_global_pred_direction)
     );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                     D$                       //
+    //                                              //
+    //////////////////////////////////////////////////
     
+    dcache dcache0(
+        // Inputs
+        .clock(clock),
+        .reset(reset),
+
+        // Load buffer
+        .lb2cache_request_entry(lb2cache_request_entry),
+        .lb2cache_request_valid(lb2cache_request_valid),
+
+        // Store queue
+        .sq2cache_request_entry(sq2cache_request_entry),
+        .sq2cache_request_valid(sq2cache_request_valid),
+
+        // Main Memory
+        .mem2Dcache_data(mem2Dcache_data),         // Data coming back from memory
+        .mem2Dcache_tag(mem2Dcache_tag),          
+
+        // D-cache/I-cache arbiter
+        .mem2Dcache_response_valid(mem2Dcache_response_valid),
+        .mem2Dcache_response(mem2Dcache_response),     // Tag from memory about current request
+        .commit_mis_pred(mis_pred_is_head),
+
+        // Outputs
+        // CDB
+        .dcache_PC(dcache_PC),
+        .dcache_valid(dcache_valid),
+        .dcache_value(dcache_value),
+        .dcache_prf_idx(dcache_prf_idx),
+        .dcache_rob_idx(dcache_rob_idx),
+
+
+        // Main Memory
+        .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
+        .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
+        .Dcache2mem_size(Dcache2mem_size),
+        .Dcache2mem_data(Dcache2mem_data)
+);
+
+
 endmodule
 `endif

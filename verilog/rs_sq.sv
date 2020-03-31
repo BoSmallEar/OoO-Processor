@@ -16,40 +16,38 @@
 module rs_sq(
     input                           clock,
     input                           reset,
-    input                           PC,
-    input                           NPC,
+    input   [`XLEN-1:0]             PC,
+    input   [`XLEN-1:0]             NPC,
     input                           enable,
     // From ID_PACKET
-    input                           base_preg_idx,
-    input                           src_preg_idx,
-    input                           offset,
+    input   [`PRF_LEN-1:0]          base_preg_idx,
+    input   [`PRF_LEN-1:0]          src_preg_idx,
+    input   [`XLEN-1:0]             offset,
+    input   MEM_SZIE                mem_size,
     // From PRF or CDB
 	input 				            base_ready,
+	input   [`XLEN-1:0]        	    base_value,
 	input 				            src_ready,
-	input           	            base_value,
-	input            	            src_value,
+	input   [`XLEN-1:0]         	src_value,
 
     input                           commit_mis_pred,
-    input                           rob_idx,
-    input                           sq_idx,
-    input                           cdb_dest_preg_idx,
+    input   [`ROB_LEN-1:0]          rob_idx,
+    input   [`SQ_LEN-1:0]           sq_idx,
+    input   [`PRF_LEN-1:0]          cdb_dest_preg_idx,
     input                           cdb_broadcast_valid,
-    input                           cdb_value, 
-
-    input                           halt,
-    input                           illegal,
+    input   [`XLEN-1:0]             cdb_value,
 
     output RS_SQ_PACKET             rs_sq_packet,     // overwrite base and src value, if needed
     output                          rs_sq_out_valid,
     output                          rs_sq_full       // sent rs_sq_full signal to if stage
 
     `ifdef DEBUG
-    , output RS_SQ_PACKET [`RS_SQ_SIZE-1:0] rs_sq_packets
-    , output logic [`RS_SQ_LEN:0] rs_sq_counter
-    , output logic [`RS_SQ_SIZE-1:0] rs_sq_ex     // goes to priority selector (data ready && FU free)
-    , output logic [`RS_SQ_SIZE-1:0] rs_sq_free
-    , output logic [`RS_SQ_LEN-1:0] rs_sq_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_SQ_LEN-1:0] rs_sq_ex_idx
+        , output RS_SQ_PACKET [`RS_SQ_SIZE-1:0] rs_sq_packets
+        , output logic [`RS_SQ_LEN:0] rs_sq_counter
+        , output logic [`RS_SQ_SIZE-1:0] rs_sq_ex     // goes to priority selector (data ready && FU free)
+        , output logic [`RS_SQ_SIZE-1:0] rs_sq_free
+        , output logic [`RS_SQ_LEN-1:0] rs_sq_free_idx // the rs idx that is selected for the dispatched instr
+        , output logic [`RS_SQ_LEN-1:0] rs_sq_ex_idx
     `endif
 );
 
@@ -111,26 +109,21 @@ module rs_sq(
             rs_sq_out_valid <= `SD 1'b0; 
         end 
         else begin
-            rs_sq_counter <= `SD rs_sq_counter + (enable&&!halt&&!illegal) - (!no_rs_selected);
+            rs_sq_counter <= `SD rs_sq_counter + enable - (!no_rs_selected);
             // dispatch 
             if (enable && !halt &&!illegal) begin
-                rs_sq_packets[rs_sq_free_idx].PC <= `SD PC;
-                rs_sq_packets[rs_sq_free_idx].NPC <= `SD NPC;
+                rs_sq_packets[rs_sq_free_idx].NPC           <= `SD NPC;
+                rs_sq_packets[rs_sq_free_idx].PC            <= `SD PC;
+                rs_sq_packets[rs_sq_free_idx].base_ready    <= `SD base_ready;
+                rs_sq_packets[rs_sq_free_idx].base_value    <= `SD base_ready ? base_value : base_preg_idx; 
+                rs_sq_packets[rs_sq_free_idx].offset        <= `SD offset;
+                rs_sq_packets[rs_sq_free_idx].src_ready     <= `SD src_ready;
+                rs_sq_packets[rs_sq_free_idx].src_value     <= `SD src_ready ? src_value : src_preg_idx; 
+                rs_sq_packets[rs_sq_free_idx].sq_idx        <= `SD sq_idx; 
+                rs_sq_packets[rs_sq_free_idx].rob_idx       <= `SD rob_idx;
+                rs_sq_packets[rs_sq_free_idx].mem_size      <= `SD mem_size;
 
-                rs_sq_packets[rs_sq_free_idx].base_ready <= `SD base_ready;
-                rs_sq_packets[rs_sq_free_idx].src_ready <= `SD src_ready;
-                
-                if (base_ready)  rs_sq_packets[rs_sq_free_idx].base_value <= `SD base_value;
-                else rs_sq_packets[rs_sq_free_idx].base_value <= `SD base_preg_idx;
-                rs_sq_packets[rs_mee_free_idx].offset         <= `SD offset;
-                if (src_ready)  rs_sq_packets[rs_sq_free_idx].src_value <= `SD src_value;
-                else rs_sq_packets[rs_sq_free_idx].src_value <= `SD src_preg_idx;
-
-                rs_sq_packets[rs_sq_free_idx].rob_idx        <= `SD rob_idx;
-                rs_sq_packets[rs_sq_free_idx].sq_idx        <= `SD sq_idx;
-                rs_sq_packets[rs_sq_free_idx].sq_idx        <= `SD sq_idx;
-
-                rs_sq_free[rs_sq_free_idx] <= `SD 1'b0;
+                rs_sq_free[rs_sq_free_idx]                  <= `SD 1'b0;
             end
             
             // issue
@@ -138,20 +131,22 @@ module rs_sq(
                 rs_sq_packet <= `SD rs_sq_packets[rs_sq_ex_idx];
                 rs_sq_out_valid <= `SD 1'b1;
                 rs_sq_free[rs_sq_ex_idx] <= `SD 1'b1; 
-            end
+            end 
             else
                 rs_sq_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin
                 for (t=0; t<`RS_SQ_SIZE; t++) begin
-                    if (~rs_sq_packets[t].base_ready && (rs_sq_packets[t].base_value==cdb_dest_preg_idx)) begin
-                        rs_sq_packets[t].base_ready <= `SD 1'b1;
-                        rs_sq_packets[t].base_value <= `SD cdb_value;
-                    end
-                    if (~rs_sq_packets[t].src_ready && (rs_sq_packets[t].src_value==cdb_dest_preg_idx)) begin
-                        rs_sq_packets[t].src_ready <= `SD 1'b1;
-                        rs_sq_packets[t].src_value <= `SD cdb_value;
+                    if (!rs_sq_free[t]) begin
+                        if (~rs_sq_packets[t].base_ready && (rs_sq_packets[t].base_value==cdb_dest_preg_idx)) begin
+                            rs_sq_packets[t].base_ready <= `SD 1'b1;
+                            rs_sq_packets[t].base_value <= `SD cdb_value;
+                        end
+                        if (~rs_sq_packets[t].src_ready && (rs_sq_packets[t].src_value==cdb_dest_preg_idx)) begin
+                            rs_sq_packets[t].src_ready <= `SD 1'b1;
+                            rs_sq_packets[t].src_value <= `SD cdb_value;
+                        end
                     end
                 end
             end  

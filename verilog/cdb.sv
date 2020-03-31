@@ -18,12 +18,19 @@ module cdb(
     input [`ROB_LEN-1:0]  mul_rob_idx,
     input [`XLEN-1:0]     mul_PC,
 
-    /* Inputs from MEM */
-    // input                 mem_valid,
-    // input [`XLEN-1:0]     mem_value,
-    // input [`PRF_LEN-1:0]  mem_prf_idx,
-    // input [`ROB_LEN-1:0]  mem_rob_idx,
-    // input [`XLEN-1:0]     mem_PC,
+    /* Inputs from Dcache */
+    input                 dcache_valid,
+    input [`XLEN-1:0]     dcache_value,
+    input [`PRF_LEN-1:0]  dcache_prf_idx,
+    input [`ROB_LEN-1:0]  dcache_rob_idx,  
+    input [`XLEN-1:0]     dcache_PC,
+
+    /* Inputs from Store Queue */
+    input                 sq_valid,
+    input [`XLEN-1:0]     sq_value,
+    input [`PRF_LEN-1:0]  sq_prf_idx,
+    input [`ROB_LEN-1:0]  sq_rob_idx,
+    input [`XLEN-1:0]     sq_PC,
 
     /* Inputs from BRANCH */
     input [`XLEN-1:0]     br_PC,
@@ -40,7 +47,7 @@ module cdb(
     input                 br_global_pred_direction, // predicted by global predictor
 
     /* Outputs */
-    output logic [3:0]           module_select,              // Whose value to broadcast
+    output logic [4:0]           module_select,              // Whose value to broadcast
     output logic                 cdb_broadcast_valid,
     output logic [`XLEN-1:0]     cdb_broadcast_value,
     output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx,
@@ -67,9 +74,10 @@ module cdb(
     logic [`XLEN-1:0]     mem_PC;
 
     CDB_ALU_PACKET [`ALU_QUEUE_SIZE-1:0] cdb_alu_queue; 
-    CDB_MUL_PACKET [`MUL_QUEUE_SIZE-1:0] cdb_mul_queue; 
-    CDB_MEM_PACKET [`MEM_QUEUE_SIZE-1:0] cdb_mem_queue; 
-    CDB_BR_PACKET  [`BR_QUEUE_SIZE-1:0]  cdb_br_queue; 
+    CDB_MUL_PACKET [`MUL_QUEUE_SIZE-1:0] cdb_mul_queue;  
+    CDB_BR_PACKET  [`BR_QUEUE_SIZE-1:0]  cdb_br_queue;
+    CDB_BR_PACKET  [`BR_QUEUE_SIZE-1:0]  cdb_dcache_queue;  
+    CDB_MEM_PACKET [`MEM_QUEUE_SIZE-1:0] cdb_sq_queue;
 
     logic    [`ALU_QUEUE_LEN-1:0]   cdb_alu_queue_head;
     logic    [`ALU_QUEUE_LEN-1:0]   cdb_alu_queue_tail; 
@@ -90,18 +98,29 @@ module cdb(
     logic    [`BR_QUEUE_LEN-1:0]    cdb_br_queue_tail; 
     logic                           cdb_br_queue_empty;
     //logic    [`BR_QUEUE_LEN-1:0]    cdb_br_queue_counter;
+
+    logic    [`DCACHE_QUEUE_LEN-1:0]    cdb_dcache_queue_head;
+    logic    [`DCACHE_QUEUE_LEN-1:0]    cdb_dcache_queue_tail; 
+    logic                               cdb_dcache_queue_empty; 
+
+    logic    [`SQ_QUEUE_LEN-1:0]    cdb_sq_queue_head;
+    logic    [`SQ_QUEUE_LEN-1:0]    cdb_sq_queue_tail; 
+    logic                               cdb_sq_queue_empty; 
     
     assign mem_valid = 0;
-    assign cdb_req = {alu_valid|(~cdb_alu_queue_empty) , mul_valid|(~cdb_mul_queue_empty), mem_valid|(~cdb_mem_queue_empty), br_valid|(~cdb_br_queue_empty)};
+    assign cdb_req = {alu_valid|(~cdb_alu_queue_empty) , mul_valid|(~cdb_mul_queue_empty), br_valid|(~cdb_br_queue_empty), dcache_valid|(~cdb_dcache_queue_empty), sq_valid|(~cdb_sq_queue_empty)};
     assign cdb_alu_queue_empty = cdb_alu_queue_head == cdb_alu_queue_tail;
     assign cdb_mul_queue_empty = cdb_mul_queue_head == cdb_mul_queue_tail;
     assign cdb_mem_queue_empty = cdb_mem_queue_head == cdb_mem_queue_tail;
     assign cdb_br_queue_empty = cdb_br_queue_head   == cdb_br_queue_tail;
+    assign cdb_dcache_queue_empty = cdb_dcache_queue_head   == cdb_dcache_queue_tail;
+    assign cdb_sq_queue_empty = cdb_sq_queue_head   == cdb_sq_queue_tail;
+    
     
     // WIDTH is # candidates to select
     // REQ is # to select
     // example: WIDTH=3, REQ=2: req(111) -> 110 , 100 010 , 0
-    psel_gen #(.WIDTH(4), .REQS(1)) psel (
+    psel_gen #(.WIDTH(5), .REQS(1)) psel (
         .req(cdb_req),
         .gnt(module_select),
         .gnt_bus(gnt_bus),
@@ -126,6 +145,8 @@ module cdb(
             cdb_mem_queue_tail        <= `SD `MEM_QUEUE_LEN'b0;
             cdb_br_queue_head         <= `SD `BR_QUEUE_LEN'b0;
             cdb_br_queue_tail         <= `SD `BR_QUEUE_LEN'b0;
+            cdb_dcache_queue_head         <= `SD `BR_QUEUE_LEN'b0;
+            cdb_dcache_queue_tail         <= `SD `BR_QUEUE_LEN'b0;
         end
         else begin
             // results from FU, store in queue
@@ -143,15 +164,6 @@ module cdb(
                 cdb_mul_queue[cdb_mul_queue_tail].mul_PC      <= `SD mul_PC;
                 cdb_mul_queue_tail                            <= `SD (cdb_mul_queue_tail == `MUL_QUEUE_SIZE-1) ? 0 : cdb_mul_queue_tail + 1;
             end
-            if (mem_valid) begin
-                // cdb_mem_queue[cdb_mem_queue_tail].alu_value   <= `SD mem_value;
-                // cdb_mem_queue[cdb_mem_queue_tail].mem_rd      <= `SD mem_rd;  // no such input signal
-                // cdb_mem_queue[cdb_mem_queue_tail].mem_wr      <= `SD mem_wr;  // no such input signal                
-                // cdb_mem_queue[cdb_mem_queue_tail].alu_prf_idx <= `SD mem_prf_idx;
-                // cdb_mem_queue[cdb_mem_queue_tail].alu_rob_idx <= `SD mem_rob_idx;
-                // cdb_mem_queue[cdb_mem_queue_tail].alu_PC      <= `SD mem_PC;
-                // cdb_mem_queue_tail                            <= `SD (cdb_mem_queue_tail == `MEM_QUEUE_SIZE-1) ? 0 : cdb_mem_queue_tail + 1;
-            end
             if (br_valid) begin 
                 cdb_br_queue[cdb_br_queue_tail].br_value   <= `SD br_value;
                 cdb_br_queue[cdb_br_queue_tail].br_prf_idx <= `SD br_prf_idx;
@@ -166,10 +178,24 @@ module cdb(
                 cdb_br_queue[cdb_br_queue_tail].br_global_pred_direction    <= `SD br_global_pred_direction;
                 cdb_br_queue_tail                                           <= `SD (cdb_br_queue_tail == `BR_QUEUE_SIZE-1) ? 0 : cdb_br_queue_tail + 1;
             end
+            if (dcache_valid) begin
+                cdb_dcache_queue[cdb_dcache_queue_tail].dcache_value   <= `SD dcache_value;
+                cdb_dcache_queue[cdb_dcache_queue_tail].dcache_prf_idx <= `SD dcache_prf_idx;
+                cdb_dcache_queue[cdb_dcache_queue_tail].dcache_rob_idx <= `SD dcache_rob_idx;
+                cdb_dcache_queue[cdb_dcache_queue_tail].dcache_PC      <= `SD dcache_PC;
+                cdb_dcache_queue_tail                                  <= `SD (cdb_dcache_queue_tail == `DCACHE_QUEUE_SIZE-1) ? 0 : cdb_dcache_queue_tail + 1;
+            end
+            if(sq_valid) begin
+                cdb_sq_queue[cdb_sq_queue_tail].sq_value     <= `SD sq_value;
+                cdb_sq_queue[cdb_sq_queue_tail].sq_prf_idx   <= `SD sq_prf_idx;
+                cdb_sq_queue[cdb_sq_queue_tail].sq_rob_idx   <= `SD sq_rob_idx;
+                cdb_sq_queue[cdb_sq_queue_tail].sq_PC        <= `SD sq_PC;
+                cdb_sq_queue_tail                            <= `SD (cdb_sq_queue_tail == `SQ_QUEUE_SIZE-1) ? 0 : cdb_sq_queue_tail + 1;
+            end
 
             // select a result to broacast
             case(module_select)
-                4'b1000: begin
+                5'b10000: begin
                     cdb_dest_preg_idx       <= `SD cdb_alu_queue_empty ? alu_prf_idx : cdb_alu_queue[cdb_alu_queue_head].alu_prf_idx;
                     cdb_broadcast_value     <= `SD cdb_alu_queue_empty ? alu_value   : cdb_alu_queue[cdb_alu_queue_head].alu_value;
                     cdb_rob_idx             <= `SD cdb_alu_queue_empty ? alu_rob_idx : cdb_alu_queue[cdb_alu_queue_head].alu_rob_idx;
@@ -179,7 +205,7 @@ module cdb(
                     cdb_alu_queue_head      <= `SD (cdb_alu_queue_head == `ALU_QUEUE_SIZE-1) ? 0 : cdb_alu_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
-                4'b0100: begin
+                5'b01000: begin
                     cdb_dest_preg_idx       <= `SD cdb_mul_queue_empty ? mul_prf_idx : cdb_mul_queue[cdb_mul_queue_head].mul_prf_idx;
                     cdb_broadcast_value     <= `SD cdb_mul_queue_empty ? mul_value   : cdb_mul_queue[cdb_mul_queue_head].mul_value;
                     cdb_rob_idx             <= `SD cdb_mul_queue_empty ? mul_rob_idx : cdb_mul_queue[cdb_mul_queue_head].mul_rob_idx;
@@ -189,21 +215,7 @@ module cdb(
                     cdb_mul_queue_head      <= `SD (cdb_mul_queue_head == `MUL_QUEUE_SIZE-1) ? 0 : cdb_mul_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
-                4'b0010: begin 
-                    cdb_dest_preg_idx       <= `SD cdb_mem_queue_empty ? mem_prf_idx :
-                                                                         cdb_mem_queue[cdb_mem_queue_head].mem_prf_idx;
-                    cdb_broadcast_value     <= `SD cdb_mem_queue_empty ? mem_value :
-                                                                         cdb_mem_queue[cdb_mem_queue_head].mem_value;
-                    cdb_rob_idx             <= `SD cdb_mem_queue_empty ? mem_rob_idx :
-                                                                         cdb_mem_queue[cdb_mem_queue_head].mem_rob_idx;
-                    cdb_broadcast_inst_PC   <= `SD cdb_mem_queue_empty ? mem_PC :
-                                                                         cdb_mem_queue[cdb_mem_queue_head].mem_PC;
-                    cdb_mis_pred            <= `SD 1'b0;
-                    cdb_br_direction        <= `SD 1'b0;
-                    cdb_mem_queue_head      <= `SD (cdb_mem_queue_head == `MEM_QUEUE_SIZE-1) ? 0 : cdb_mem_queue_head + 1;
-                    cdb_broadcast_valid     <= `SD 1'b1;
-                end
-                4'b0001: begin
+                5'b00100: begin
                     cdb_dest_preg_idx         <= `SD cdb_br_queue_empty ? br_prf_idx :
                                                                           cdb_br_queue[cdb_br_queue_head].br_prf_idx;
                     cdb_broadcast_value       <= `SD cdb_br_queue_empty ? br_value :
@@ -224,6 +236,26 @@ module cdb(
                                                                           cdb_br_queue[cdb_br_queue_head].br_global_pred_direction;
                     cdb_br_queue_head         <= `SD (cdb_br_queue_head == `BR_QUEUE_SIZE-1) ? 0 : cdb_br_queue_head + 1;
                     cdb_broadcast_valid       <= `SD 1'b1;
+                end
+                5'b00010: begin
+                    cdb_dest_preg_idx       <= `SD cdb_dcache_queue_empty ? dcache_prf_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_prf_idx;
+                    cdb_broadcast_value     <= `SD cdb_dcache_queue_empty ? dcache_value   : cdb_dcache_queue[cdb_dcache_queue_head].dcache_value;
+                    cdb_rob_idx             <= `SD cdb_dcache_queue_empty ? dcache_rob_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_rob_idx;
+                    cdb_broadcast_inst_PC   <= `SD cdb_dcache_queue_empty ? dcache_PC      : cdb_dcache_queue[cdb_dcache_queue_head].dcache_PC;
+                    cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
+                    cdb_dcache_queue_head      <= `SD (cdb_dcache_queue_head == `DCACHE_QUEUE_SIZE-1) ? 0 : cdb_dcache_queue_head + 1;
+                    cdb_broadcast_valid     <= `SD 1'b1;
+                end
+                5'b00001: begin
+                    cdb_dest_preg_idx       <= `SD cdb_sq_queue_empty ? sq_prf_idx : cdb_sq_queue[cdb_sq_queue_head].sq_prf_idx;
+                    cdb_broadcast_value     <= `SD cdb_sq_queue_empty ? sq_value   : cdb_sq_queue[cdb_sq_queue_head].sq_value;
+                    cdb_rob_idx             <= `SD cdb_sq_queue_empty ? sq_rob_idx : cdb_sq_queue[cdb_sq_queue_head].sq_rob_idx;
+                    cdb_broadcast_inst_PC   <= `SD cdb_sq_queue_empty ? sq_PC      : cdb_sq_queue[cdb_sq_queue_head].sq_PC;
+                    cdb_mis_pred            <= `SD 1'b0;
+                    cdb_br_direction        <= `SD 1'b0;
+                    cdb_sq_queue_head      <= `SD (cdb_sq_queue_head == `SQ_QUEUE_SIZE-1) ? 0 : cdb_sq_queue_head + 1;
+                    cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 default: begin 
                     cdb_broadcast_inst_PC   <= `SD `XLEN'hfacebeec;

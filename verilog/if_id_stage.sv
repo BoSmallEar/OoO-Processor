@@ -111,6 +111,8 @@ module if_id_stage(
 		.dest_reg(dest_reg_select),
 		.rd_mem(id_packet_out.rd_mem),
 		.wr_mem(id_packet_out.wr_mem),
+		.mem_size(id_packet_out.mem_size),
+		.load_signed(id_packet_out.load_signed),
 		.cond_branch(id_packet_out.cond_branch),
 		.uncond_branch(id_packet_out.uncond_branch),
 		.csr_op(id_packet_out.csr_op),
