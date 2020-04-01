@@ -104,7 +104,6 @@ module tree_plru(
     logic [`SET_SIZE-1:0][2:0] status_bit_table;
 
     always_comb begin
-
         case(status_bit_table[load_set_idx_lookup]) 
             3'b000: load_lru_way_idx = 0;
             3'b001: load_lru_way_idx = 2;
@@ -119,10 +118,9 @@ module tree_plru(
 
     int i;
     always_ff @(posedge clock) begin
-
         if (reset) begin
-            for (i=0; i<`SET_SIZE; i++) 
-                status_bit_table[i] <= `SD 
+            for (i=0; i<`SET_SIZE; i++)
+                status_bit_table[i] <= `SD 3'h0;
         end 
         else if(load_update_enable) begin
             case (load_way_idx_hit)
@@ -132,7 +130,6 @@ module tree_plru(
                 2'b11: status_bit_table[load_set_idx_hit] <= `SD {1'b0, status_bit_table[load_set_idx_hit][1], 1'b0};
             endcase
         end
-
         else if(store_update_enable) begin
             case (store_way_idx_hit)
                 2'b00: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b11};
