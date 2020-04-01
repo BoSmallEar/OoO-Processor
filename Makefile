@@ -96,10 +96,13 @@ TESTBENCH = 	sys_defs.svh	\
 SIMFILES =	verilog/alu.sv	\
 		verilog/branch.sv	\
 		verilog/btb.sv	\
+		verilog/cache_arbiter.sv	\
 		verilog/cdb.sv	\
+		verilog/dcache.sv	\
 		verilog/decoder.sv	\
 		verilog/icache.sv	\
 		verilog/if_id_stage.sv	\
+		verilog/load_store_queue.sv	\
 		verilog/predictor.sv	\
 		verilog/prf.sv	\
 		verilog/processor.sv	\
@@ -110,6 +113,8 @@ SIMFILES =	verilog/alu.sv	\
 		verilog/rs_alu.sv	\
 		verilog/rs_branch.sv	\
 		verilog/rs_mul.sv	\
+		verilog/rs_lb.sv	\
+		verilog/rs_sq.sv	\
 		verilog/top_level.sv	\
 		verilog/wand_sel.sv	\
 		verilog/mul/pipe_mul.v
