@@ -67,11 +67,7 @@ module cdb(
     logic broadcast_empty;
     logic [3:0] gnt_bus;
 
-    logic                 mem_valid;
-    logic [`XLEN-1:0]     mem_value;
-    logic [`PRF_LEN-1:0]  mem_prf_idx;
-    logic [`ROB_LEN-1:0]  mem_rob_idx;
-    logic [`XLEN-1:0]     mem_PC;
+ 
 
     CDB_ALU_PACKET [`ALU_QUEUE_SIZE-1:0] cdb_alu_queue; 
     CDB_MUL_PACKET [`MUL_QUEUE_SIZE-1:0] cdb_mul_queue;  
@@ -88,12 +84,7 @@ module cdb(
     logic    [`MUL_QUEUE_LEN-1:0]   cdb_mul_queue_tail; 
     logic                           cdb_mul_queue_empty;
     //logic    [`MUL_QUEUE_LEN-1:0]   cdb_mul_queue_counter;
-    
-    logic    [`MEM_QUEUE_LEN-1:0]   cdb_mem_queue_head;
-    logic    [`MEM_QUEUE_LEN-1:0]   cdb_mem_queue_tail; 
-    logic                           cdb_mem_queue_empty;
-    //logic    [`MEM_QUEUE_LEN-1:0]   cdb_mem_queue_counter;
-    
+ 
     logic    [`BR_QUEUE_LEN-1:0]    cdb_br_queue_head;
     logic    [`BR_QUEUE_LEN-1:0]    cdb_br_queue_tail; 
     logic                           cdb_br_queue_empty;
@@ -105,13 +96,11 @@ module cdb(
 
     logic    [`SQ_QUEUE_LEN-1:0]    cdb_sq_queue_head;
     logic    [`SQ_QUEUE_LEN-1:0]    cdb_sq_queue_tail; 
-    logic                               cdb_sq_queue_empty; 
+    logic                           cdb_sq_queue_empty; 
     
-    assign mem_valid = 0;
     assign cdb_req = {alu_valid|(~cdb_alu_queue_empty) , mul_valid|(~cdb_mul_queue_empty), br_valid|(~cdb_br_queue_empty), dcache_valid|(~cdb_dcache_queue_empty), sq_valid|(~cdb_sq_queue_empty)};
     assign cdb_alu_queue_empty = cdb_alu_queue_head == cdb_alu_queue_tail;
     assign cdb_mul_queue_empty = cdb_mul_queue_head == cdb_mul_queue_tail;
-    assign cdb_mem_queue_empty = cdb_mem_queue_head == cdb_mem_queue_tail;
     assign cdb_br_queue_empty = cdb_br_queue_head   == cdb_br_queue_tail;
     assign cdb_dcache_queue_empty = cdb_dcache_queue_head   == cdb_dcache_queue_tail;
     assign cdb_sq_queue_empty = cdb_sq_queue_head   == cdb_sq_queue_tail;
@@ -141,8 +130,7 @@ module cdb(
             cdb_alu_queue_tail        <= `SD `ALU_QUEUE_LEN'b0;
             cdb_mul_queue_head        <= `SD `MUL_QUEUE_LEN'b0;
             cdb_mul_queue_tail        <= `SD `MUL_QUEUE_LEN'b0;
-            cdb_mem_queue_head        <= `SD `MEM_QUEUE_LEN'b0;
-            cdb_mem_queue_tail        <= `SD `MEM_QUEUE_LEN'b0;
+        
             cdb_br_queue_head         <= `SD `BR_QUEUE_LEN'b0;
             cdb_br_queue_tail         <= `SD `BR_QUEUE_LEN'b0;
             cdb_dcache_queue_head         <= `SD `BR_QUEUE_LEN'b0;
