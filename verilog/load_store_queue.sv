@@ -245,6 +245,7 @@ module load_store_queue(
     // Also we need to consider such cases:
     // STORE 1 byte in the address but the load instruction loads 1 word
     // This is not a perfect match which needs overwritten in D$/Memory
+    logic [`XLEN-1:0] addr_diff;
 
     always_comb begin
         forward_addr = lb2sq_request_entry.addr;
@@ -276,12 +277,13 @@ module load_store_queue(
             end
         end
         // don't forward if load instr needs more data
+        addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
-                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7]}},  SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+6 :forward_addr-SQ.entries[forward_match_idx].addr]}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7 : forward_addr-SQ.entries[forward_match_idx].addr]};
-                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15]}}, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+14:forward_addr-SQ.entries[forward_match_idx].addr]}
-                                                                        : {16'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15 : forward_addr-SQ.entries[forward_match_idx].addr]};
+                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[addr_diff+7]}},  SQ.entries[forward_match_idx].data[addr_diff+6 :addr_diff}
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[addr_diff+7 : addr_diff};
+                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff+14:addr_diff}
+                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff+15 : addr_diff};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
                 default: forward_data = SQ.entries[forward_match_idx].data;
             endcase 
@@ -330,11 +332,11 @@ module load_store_queue(
     always_ff @(posedge clock) begin
         if (reset) begin
             for(int i=0;i<`LB_CAPACITY;i++) begin
-                LB.entries[i].rsvd <= `SD 0;
+                LB.entries[i].rsvd <= `SD 1'b0;
             end 
-            LB.free_list <= `SD {`LB_CAPACITY{1}};
-            LB.rsvd_list <= `SD {`LB_CAPACITY{0}};
-            LB.issue_list <= `SD {`LB_CAPACITY{0}};
+            LB.free_list <= `SD {`LB_CAPACITY{1'b1}};
+            LB.rsvd_list <= `SD {`LB_CAPACITY{1'b0}};
+            LB.issue_list <= `SD {`LB_CAPACITY{1'b0}};
         end
         
         if (lb_enable) begin  

@@ -61,9 +61,9 @@ module cdb(
     output logic                 cdb_global_pred_direction
 );
 
-    logic [3:0] cdb_req;
+    logic [4:0] cdb_req;
     logic broadcast_empty;
-    logic [3:0] gnt_bus;
+    logic [4:0] gnt_bus;
 
  
 

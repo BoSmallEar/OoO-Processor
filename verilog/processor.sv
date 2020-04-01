@@ -245,9 +245,9 @@ module processor (
         .clock(clock),
         .reset(reset),
         .proc2Icache_addr(proc2Icache_addr),
-        .mem2Icache_response(mem2proc_response),         // Tag from memory about current request
-        .mem2Icache_data(mem2proc_data),             // Data coming back from memory
-        .mem2Icache_tag(mem2proc_tag),    
+        .mem2Icache_response(mem2Icache_response),         // Tag from memory about current request
+        .mem2Icache_data(mem2Icache_data),             // Data coming back from memory
+        .mem2Icache_tag(mem2Icache_tag),    
         .mem2Icache_response_valid(mem2Icache_response_valid),
 
         // outputs

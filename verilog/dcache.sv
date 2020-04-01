@@ -175,7 +175,7 @@ module dcache(
     output logic    [`PRF_LEN-1:0]  dcache_prf_idx,
     output logic    [`ROB_LEN-1:0]  dcache_rob_idx,
 
-    // Main Memory
+    // D-cache/I-cache Arbiter -> Main Memory
     output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
     output MEM_SIZE                 Dcache2mem_size,         // load: always cache block; store: depends
@@ -408,9 +408,9 @@ module dcache(
             // Update: store hit -> cache
             if (store_cache_hit) begin
                 case (sq2cache_request_entry.mem_size)
-                    BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data[(sq2cache_request_entry.addr % 8) * 8 + 7 : (sq2cache_request_entry.addr % 8 ) * 8] <= `SD sq2cache_request_entry.data[7:0];
-                    HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data[(sq2cache_request_entry.addr % 8) * 8 + 15 : (sq2cache_request_entry.addr % 8 ) * 8] <= `SD sq2cache_request_entry.data[15:0];
-                    WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data[(sq2cache_request_entry.addr % 8) * 8 + 31 : (sq2cache_request_entry.addr % 8 ) * 8] <= `SD sq2cache_request_entry.data;
+                    BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                    HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                    WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                 endcase
             end
         end
