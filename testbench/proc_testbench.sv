@@ -726,7 +726,7 @@ endtask
                 rs_lb_free,
                 rs_sq_packets,
                 rs_sq_free);
-            print_lsq(SQ, LB, sq_all_rsvd, sq_head, secure_age, lb2sq_request_valid, lb2sq_request_entry, sq_counter, sq_empty, forward_match, forward_data;, forward_match_idx, forward_addr, forward_age, forward_mem_size, none_selected, psel_gnt, lq_free_idx, lq_conflict, lq_issue_idx);
+            print_lsq(SQ, LB, sq_all_rsvd, sq_head, secure_age, lb2sq_request_valid, lb2sq_request_entry, sq_counter, sq_empty, forward_match, forward_data, forward_match_idx, forward_addr, forward_age, forward_mem_size, none_selected, psel_gnt, lq_free_idx, lq_conflict, lq_issue_idx);
             print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
