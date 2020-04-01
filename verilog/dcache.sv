@@ -94,7 +94,7 @@ module tree_plru(
     input [2:0] store_set_idx_hit,
     input [1:0] store_way_idx_hit,
     
-    output logic [`WAY_WIDTH-1:0] load_lru_way_idx
+    output logic [`WAY_LEN-1:0] load_lru_way_idx
 );
 
     // logic [2:0][2:0] status_bit_table;
