@@ -289,7 +289,7 @@ module processor (
         .cache2mem_size(cache2mem_size),  
 
         .cache2mem_addr(cache2mem_addr),         // Address sent to memory
-        .cache2mem_data(cache2mem_data), 
+        .cache2mem_data(cache2mem_data)
     );
 
 
