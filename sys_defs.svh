@@ -656,6 +656,7 @@ typedef union packed {
 
 typedef struct packed {
     logic [9:0]     tag;
+    logic           valid;
     CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
 } DCACHE_BLOCK;
 

@@ -642,7 +642,7 @@ task print_lsq;
     $display("======================= S Q =============================");
     $display("|PC      |addr    |rob_idx |data      |resolved|mem_size|");
     for (int i=0; i<`SQ_CAPACITY; i++) begin
-        if (SQ.head == i && SSQ.tail == i)
+        if (SQ.head == i && SQ.tail == i)
             $display("|%8d|%8d|%8d|%10d|%8d|%8d| <- HEAD & TAIL", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
         else if (SQ.head == i)
             $display("|%8d|%8d|%8d|%10d|%8d|%8d| <- HEAD", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
