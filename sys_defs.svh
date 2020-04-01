@@ -558,7 +558,7 @@ typedef struct packed {
 
 typedef struct packed { 
 	logic  [`PRF_LEN-1:0] br_prf_idx;
-	logic   [`XLEN-1:0]    br_value;
+	logic  [`XLEN-1:0]    br_value;
 	logic  [`ROB_LEN-1:0] br_rob_idx;
     logic  [`XLEN-1:0]    br_PC;
 	logic				  br_direction;

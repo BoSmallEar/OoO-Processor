@@ -347,9 +347,9 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.rd_preg;
                 load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx;
 
-                load_buffer[load_buffer_tail_ptr].address     <= `SD lb2cache_request_entry.rob_idx.addr;
-                load_buffer[load_buffer_tail_ptr].mem_size    <= `SD lb2cache_request_entry.rob_idx.mem_size;
-                load_buffer[load_buffer_tail_ptr].load_signed <= `SD lb2cache_request_entry.rob_idx.load_signed;
+                load_buffer[load_buffer_tail_ptr].address     <= `SD lb2cache_request_entry.addr;
+                load_buffer[load_buffer_tail_ptr].mem_size    <= `SD lb2cache_request_entry.mem_size;
+                load_buffer[load_buffer_tail_ptr].load_signed <= `SD lb2cache_request_entry.load_signed;
                 load_buffer[load_buffer_tail_ptr].mem_tag     <= `SD 0;
                 load_buffer[load_buffer_tail_ptr].done        <= `SD 0;
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
@@ -367,7 +367,7 @@ module dcache(
 
                 // update cache block data
                 dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].data <= `SD load_buffer[load_buffer_head_ptr].data;
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].tag <= `SD load_buffer[load_buffer_head_ptr].addr[15:6];
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
                 dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].valid <= `SD 1;
             end
 
