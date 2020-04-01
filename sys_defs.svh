@@ -634,6 +634,12 @@ typedef union packed {
     logic [7:0][7:0] bytes;
 } CACHE_BLOCK;
 
+typedef struct packed{
+    logic [7:0]     tag;
+    logic           valid;
+    CACHE_BLOCK    data;  
+} ICACHE_BLOCK;
+
 typedef struct packed {
     logic [7:0] tag;
     logic [4:0] block_num;

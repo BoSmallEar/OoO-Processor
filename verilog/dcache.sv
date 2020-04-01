@@ -82,6 +82,9 @@
     // );
 
 module tree_plru(
+    input       clock,
+    input       reset,
+
     // Load instruction: Look for LRU block of the set
     input [2:0] load_set_idx_lookup,
 
@@ -114,9 +117,14 @@ module tree_plru(
         endcase
     end
 
-
+    int i;
     always_ff @(posedge clock) begin
-        if(load_update_enable) begin
+
+        if (reset) begin
+            for (i=0; i<`SET_SIZE; i++) 
+                status_bit_table[i] <= `SD 
+        end 
+        else if(load_update_enable) begin
             case (load_way_idx_hit)
                 2'b00: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b11};
                 2'b01: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b10};
@@ -297,9 +305,9 @@ module dcache(
 
     // Outputs: Main Memory
     assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
-                                (load_buffer[store_buffer_send_ptr].valid && ~load_buffer[store_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
+                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
-                                (load_buffer[store_buffer_send_ptr].valid && ~load_buffer[store_buffer_send_ptr].done) ? load_buffer[store_buffer_send_ptr].addr : 0;
+                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].addr : 0;
     assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : 0;
     assign Dcache2mem_data = sq2cache_request_valid ? sq2cache_request_entry.data : 0;
 
@@ -307,6 +315,9 @@ module dcache(
     logic [`WAY_LEN-1:0] current_load_assigned_way;
 
     tree_plru tree_plru_0(
+        .clock(clock),
+        .reset(reset),
+        
         .load_set_idx_lookup(load_set),
 
         .load_update_enable(lb2cache_request_valid && load_cache_hit),
@@ -323,7 +334,7 @@ module dcache(
 
     always_ff @(posedge clock) begin
         if(reset || commit_mis_pred) begin
-            for(i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
                 load_buffer[i].valid <= `SD 0;
             end
             load_buffer_head_ptr <= `SD 0;
@@ -365,7 +376,7 @@ module dcache(
             // Update: accept data from Main Memory
             if (!load_buffer_empty) begin
                 if (load_buffer_head_ptr < load_buffer_tail_ptr) begin
-                    for(i = load_buffer_head_ptr; i < load_buffer_tail_ptr; i++) begin
+                    for(int i = load_buffer_head_ptr; i < load_buffer_tail_ptr; i++) begin
                         if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
                             load_buffer[i].done <= `SD 1;
                             load_buffer[i].data <= `SD mem2Dcache_data;
@@ -373,14 +384,14 @@ module dcache(
                     end
                 end
                 else begin
-                    for(i = load_buffer_head_ptr; i < `LOAD_BUFFER_SIZE; i++) begin
+                    for(int i = load_buffer_head_ptr; i < `LOAD_BUFFER_SIZE; i++) begin
                         if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
                             load_buffer[i].done <= `SD 1;
                             load_buffer[i].data <= `SD mem2Dcache_data;
                         end
                     end
 
-                    for(i = 0; i < load_buffer_tail_ptr; i++) begin
+                    for(int i = 0; i < load_buffer_tail_ptr; i++) begin
                         if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
                             load_buffer[i].done <= `SD 1;
                             load_buffer[i].data <= `SD mem2Dcache_data;

@@ -232,7 +232,7 @@ module load_store_queue(
                 end
             end
             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-                if (SQ.entries[i].rsvd==0)
+                if (SQ.entries[i].rsvd==0) begin
                     sq_unkwn_idx = i;
                     all_rsvd = 0;
                 end

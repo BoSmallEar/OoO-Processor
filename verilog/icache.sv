@@ -3,18 +3,7 @@
 `endif
 `ifndef __ICACHE_V__
 `define __ICACHE_V__
-typedef union packed {
-    logic [63:0] double;
-    logic [1:0][31:0] words;
-    logic [3:0][15:0] halves;
-    logic [7:0][7:0] bytes;
-} CACHE_BLOCK;
 
-typedef struct packed{
-    logic [7:0]     tag;
-    logic           valid;
-    CACHE_BLOCK    data;  
-} ICACHE_BLOCK;
 //icahe: 256 byte: 32 lines, block size: 8 byte
         /*
         Cache Size Restriction
