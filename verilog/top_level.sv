@@ -496,7 +496,7 @@ module top_level (
                 casez (id_packet.fu_type) 
                      ALU: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
                      MUL: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
-                     MEM: fu_offset = `RV32_signext_Iimm(id_packet.inst);
+                     LOAD, STORE: fu_offset = `RV32_signext_Iimm(id_packet.inst);
                      BRANCH: fu_offset = `RV32_signext_Iimm(id_packet.inst);
                      default: fu_opb_value = `RV32_signext_Iimm(id_packet.inst);
                 endcase
