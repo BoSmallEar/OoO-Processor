@@ -98,7 +98,7 @@ module tree_plru(
 );
 
     // logic [2:0][2:0] status_bit_table;
-    logic [`NUM_SETS-1:0][2:0] status_bit_table;
+    logic [`SET_SIZE-1:0][2:0] status_bit_table;
 
     always_comb begin
 
