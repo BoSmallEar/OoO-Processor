@@ -43,7 +43,7 @@ module top_level (
     output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
     output MEM_SIZE                 Dcache2mem_size,
-    output logic    [2*`XLEN-1:0]     Dcache2mem_data
+    output logic    [2*`XLEN-1:0]    Dcache2mem_data
     
 `ifdef DEBUG
     , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values
@@ -103,7 +103,7 @@ module top_level (
     , output logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx
 
     // Outputs of cdb
-    , output logic [3:0]           module_select
+    , output logic [4:0]           module_select
     , output logic                 cdb_broadcast_valid
     , output logic [`XLEN-1:0]     cdb_result
     , output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx
@@ -245,6 +245,13 @@ module top_level (
     logic                     br_global_pred_direction; // br->cdb
     logic [`XLEN-1:0]         br_PC;                    // br->cdb
 
+    // DCACHE OUTPUTS
+    logic                     dcache_valid;             // dcache->cdb
+    logic [`XLEN-1:0]         dcache_value;             // dcache->cdb
+    logic [`PRF_LEN-1:0]      dcache_prf_idx;           // dcache->cdb
+    logic [`ROB_LEN-1:0]      dcache_rob_idx;           // dcache->cdb 
+    logic [`XLEN-1:0]         dcache_PC;                // dcache->cdb
+
 `ifndef DEBUG
     logic                           fu_opa_ready;
     logic                           fu_opb_ready;
@@ -256,7 +263,7 @@ module top_level (
     logic [`PRF_LEN-1:0]      opb_preg_idx;
     // CDB OUTPUTS
     logic [`XLEN-1:0]         cdb_result;
-    logic [3:0]               module_select;            // cdb->all FUs, all RSs
+    logic [4:0]               module_select;            // cdb->all FUs, all RSs
     logic                     cdb_broadcast_valid;      // cdb->rs (newly dispatched inst+current entries)
     logic [`PRF_LEN-1:0]      cdb_dest_preg_idx;        // cdb->rob
     logic [`ROB_LEN-1:0]      cdb_rob_idx;              // cdb->rob

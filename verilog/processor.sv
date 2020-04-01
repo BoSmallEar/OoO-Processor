@@ -280,8 +280,9 @@ module processor (
         
         .mem2cache_response(mem2cache_response),     // Tag from memory about current request
         .mem2cache_data(mem2cache_data),         // Data coming back from memory
-        .mem2cache_tag(mem2cache_tag),    
-
+        .mem2cache_tag(mem2cache_tag), 
+   
+        // outputs
         .mem2Dcache_response(mem2Dcache_response),     // Tag from memory about current request
         .mem2Dcache_data(mem2Dcache_data),         // Data coming back from memory
         .mem2Dcache_tag(mem2Dcache_tag),    

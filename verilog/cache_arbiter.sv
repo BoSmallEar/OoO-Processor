@@ -9,7 +9,7 @@ module cache_arbiter(
     input BUS_COMMAND     Dcache2mem_command,      // Issue a bus load
     input MEM_SIZE        Dcache2mem_size,
 	input [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
-    input [2*`XLEN-1:0]     Dcache2mem_data, 
+    input [2*`XLEN-1:0]   Dcache2mem_data, 
     input BUS_COMMAND     Icache2mem_command,    // command sent to memory
 	input [`XLEN-1:0]     Icache2mem_addr,  // Address sent to memor 
     
