@@ -238,7 +238,7 @@ module dcache(
 
     // 1st/2nd 4 byte of cache hit block data
     logic [31:0] cache_hit_data_select;
-    assign cache_hit_data_select = lb2cache_request_entry.address[2] ? dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[63:32] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[31:0];
+    assign cache_hit_data_select = lb2cache_request_entry.addr[2] ? dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[63:32] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[31:0];
 
     // 1st/2nd 4 byte of load_buffer_head_data
     logic [31:0] load_buffer_head_data_select; // [63:32] or [31:0] of the cache line
@@ -405,6 +405,7 @@ module dcache(
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
 
+            // Update: store hit -> cache
             if (store_cache_hit) begin
                 case (sq2cache_request_entry.mem_size)
                     BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data[(sq2cache_request_entry.addr % 8) * 8 + 7 : (sq2cache_request_entry.addr % 8 ) * 8] <= `SD sq2cache_request_entry.data[7:0];
