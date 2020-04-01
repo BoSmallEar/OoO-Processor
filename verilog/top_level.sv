@@ -241,8 +241,6 @@ module top_level (
     logic [`PRF_LEN-1:0]      br_prf_idx;               // legacy output, have no meaning for BR inst
     logic [`ROB_LEN-1:0]      br_rob_idx;               // br->cdb
     logic                     br_mis_pred;              // br->cdb
-    logic                     br_cond_branch;           // br->cdb
-    logic                     br_uncond_branch;         // br->cdb
     logic                     br_local_pred_direction;  // br->cdb
     logic                     br_global_pred_direction; // br->cdb
     logic [`XLEN-1:0]         br_PC;                    // br->cdb
@@ -855,8 +853,6 @@ module top_level (
         .br_value(br_value),
         .br_rob_idx(br_rob_idx),
         .br_mis_pred(br_mis_pred),
-        .br_cond_branch(br_cond_branch),
-        .br_uncond_branch(br_uncond_branch),
         .br_local_pred_direction(br_local_pred_direction),
         .br_global_pred_direction(br_global_pred_direction),
         .br_PC(br_PC)
@@ -872,12 +868,14 @@ module top_level (
         .clock(clock),
         .reset(reset),
         .commit_mis_pred(mis_pred_is_head),
+        
         // ALU
         .alu_PC(alu_PC),
         .alu_valid(alu_valid),
         .alu_value(alu_value),
         .alu_prf_idx(alu_prf_idx),
         .alu_rob_idx(alu_rob_idx),
+
         // MUL
         .mul_PC(mul_PC),
         .mul_valid(mul_valid),
@@ -892,16 +890,18 @@ module top_level (
         .br_value(br_value),
         .br_direction(br_direction),
         .br_target_PC(br_target_PC),
-        .br_mis_pred(br_mis_pred), 
         .br_rob_idx(br_rob_idx),
+        .br_mis_pred(br_mis_pred), 
         .br_local_pred_direction(br_local_pred_direction),
         .br_global_pred_direction(br_global_pred_direction),
+
         //SQ 
         .sq_valid(sq_valid),
         .sq_value(sq_value),
         .sq_prf_idx(sq_prf_idx),
         .sq_rob_idx(sq_rob_idx),
         .sq_PC(sq_PC), 
+
         //DCACHE
         .dcache_valid(dcache_valid),
         .dcache_value(dcache_value),
@@ -910,12 +910,13 @@ module top_level (
         .dcache_PC(dcache_PC), 
 
         // output
-        .cdb_broadcast_valid(cdb_broadcast_valid),         
         .module_select(module_select),                
+        .cdb_broadcast_valid(cdb_broadcast_valid),         
+        .cdb_broadcast_value(cdb_result),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),         
         .cdb_rob_idx(cdb_rob_idx),
-        .cdb_broadcast_value(cdb_result),
-        .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC),       
+        .cdb_broadcast_inst_PC(cdb_broadcast_inst_PC),   
+            
         // outputs for branch
         .cdb_br_direction(cdb_br_direction),                 
         .cdb_br_target_PC(cdb_br_target_PC),                 

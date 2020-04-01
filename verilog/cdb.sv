@@ -40,9 +40,7 @@ module cdb(
     input                 br_direction,
     input [`XLEN-1:0]     br_target_PC,
     input [`ROB_LEN-1:0]  br_rob_idx,
-    input                 br_mis_pred, 
-    input                 br_cond_branch,
-    input                 br_uncond_branch,             
+    input                 br_mis_pred,            
     input                 br_local_pred_direction,  // predicted by local predictor
     input                 br_global_pred_direction, // predicted by global predictor
 
@@ -162,8 +160,6 @@ module cdb(
                 cdb_br_queue[cdb_br_queue_tail].br_direction        <= `SD br_direction;
                 cdb_br_queue[cdb_br_queue_tail].br_target_PC        <= `SD br_target_PC;
                 cdb_br_queue[cdb_br_queue_tail].br_mis_pred         <= `SD br_mis_pred;
-                cdb_br_queue[cdb_br_queue_tail].br_cond_branch      <= `SD br_cond_branch;
-                cdb_br_queue[cdb_br_queue_tail].br_uncond_branch    <= `SD br_uncond_branch;
                 cdb_br_queue[cdb_br_queue_tail].br_local_pred_direction     <= `SD br_local_pred_direction;
                 cdb_br_queue[cdb_br_queue_tail].br_global_pred_direction    <= `SD br_global_pred_direction;
                 cdb_br_queue_tail                                           <= `SD (cdb_br_queue_tail == `BR_QUEUE_SIZE-1) ? 0 : cdb_br_queue_tail + 1;

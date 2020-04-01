@@ -36,8 +36,6 @@ module branch(
 	output logic [`XLEN-1:0]     br_value,
     output logic [`ROB_LEN-1:0]  br_rob_idx,
 	output logic                 br_mis_pred,
-	output logic                 br_cond_branch,
-	output logic                 br_uncond_branch,
 	output logic                 br_local_pred_direction,     // direction predicted by local predictor
 	output logic                 br_global_pred_direction,    // direction predicted by global predictor
 	output logic [`XLEN-1:0]     br_PC
@@ -58,12 +56,10 @@ module branch(
 	                                  (rs_branch_packet.is_jalr) ? (rs_branch_packet.opa_value + br_offset) :
 									                               (rs_branch_packet.PC + br_offset); 
 	assign br_prf_idx				= rs_branch_packet.dest_preg_idx;
-	assign br_value                 = (br_uncond_branch) ? (rs_branch_packet.PC + 4) : 0;
+	assign br_value                 = (rs_branch_packet.uncond_branch) ? (rs_branch_packet.PC + 4) : 0;
 	assign br_rob_idx               = rs_branch_packet.rob_idx;
 	assign br_direction             = rs_branch_packet.cond_branch ? br_cond : 1;
 	assign br_mis_pred              = rs_branch_packet.br_pred_target_PC != br_target_PC;
-	assign br_cond_branch           = rs_branch_packet.cond_branch;
-	assign br_uncond_branch         = rs_branch_packet.uncond_branch;
 	assign br_local_pred_direction  = rs_branch_packet.local_pred_direction;
 	assign br_global_pred_direction = rs_branch_packet.global_pred_direction;
 	assign br_PC                    = rs_branch_packet.PC;

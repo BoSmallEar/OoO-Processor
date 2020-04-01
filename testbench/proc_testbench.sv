@@ -159,9 +159,9 @@ module proc_testbench;
 
         .clock(clock),                     // System clock
         .reset(reset),                     // System reset
-        .mem2proc_response(mem2proc_response),         // Tag from memory about current request
-        .mem2proc_data(mem2proc_data),             // Data coming back from memory
-        .mem2proc_tag(mem2proc_tag),              // Tag from memory about current reply
+        .mem2cache_response(mem2proc_response),         // Tag from memory about current request
+        .mem2cache_data(mem2proc_data),             // Data coming back from memory
+        .mem2cache_tag(mem2proc_tag),              // Tag from memory about current reply
         
         .cache2mem_command(proc2mem_command),    // command sent to memory
         .cache2mem_addr(proc2mem_addr),  // Address sent to memory

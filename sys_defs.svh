@@ -564,11 +564,8 @@ typedef struct packed {
 	logic				  br_direction;
 	logic  [`XLEN-1:0]	  br_target_PC;
 	logic				  br_mis_pred;
-	logic				  br_cond_branch;
-	logic				  br_uncond_branch;
 	logic				  br_local_pred_direction;
 	logic				  br_global_pred_direction;
-
 } CDB_BR_PACKET;
 
 typedef struct packed {          
