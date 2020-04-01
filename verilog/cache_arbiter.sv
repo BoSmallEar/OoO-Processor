@@ -29,7 +29,7 @@ module cache_arbiter(
     output MEM_SIZE                       cache2mem_size,  
 
 	output logic          [`XLEN-1:0]     cache2mem_addr,         // Address sent to memory
-    output logic          [2*`XLEN-1:0]     cache2mem_data 
+    output logic          [2*`XLEN-1:0]   cache2mem_data 
 );
     assign mem2Dcache_response = mem2cache_response;
     assign mem2Icache_response = mem2cache_response;
