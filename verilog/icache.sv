@@ -10,21 +10,6 @@ typedef union packed {
     logic [7:0][7:0] bytes;
 } CACHE_BLOCK;
 
-typedef struct packed {
-    logic [7:0] tag;
-    logic [4:0] block_num;
-    logic [2:0] block_offset;
-} DMAP_ADDR; //address breakdown for a direct-mapped cache
-typedef struct packed {
-    logic [9:0] tag;
-    logic [2:0] set_index;
-    logic [2:0] block_offset;
-} SASS_ADDR; //address breakdown for a set associative cache
-typedef union packed {
-    DMAP_ADDR d; //for direct mapped
-    SASS_ADDR s; //for set associative
-} ADDR; //now we can pass around a common data type
-
 typedef struct packed{
     logic [7:0]     tag;
     logic           valid;
