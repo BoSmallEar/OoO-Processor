@@ -76,8 +76,8 @@ module cdb(
     CDB_ALU_PACKET [`ALU_QUEUE_SIZE-1:0] cdb_alu_queue; 
     CDB_MUL_PACKET [`MUL_QUEUE_SIZE-1:0] cdb_mul_queue;  
     CDB_BR_PACKET  [`BR_QUEUE_SIZE-1:0]  cdb_br_queue;
-    CDB_BR_PACKET  [`BR_QUEUE_SIZE-1:0]  cdb_dcache_queue;  
-    CDB_MEM_PACKET [`MEM_QUEUE_SIZE-1:0] cdb_sq_queue;
+    CDB_DCACHE_PACKET  [`DCACHE_QUEUE_SIZE-1:0]  cdb_dcache_queue;  
+    CDB_SQ_PACKET [`SQ_QUEUE_SIZE-1:0] cdb_sq_queue;
 
     logic    [`ALU_QUEUE_LEN-1:0]   cdb_alu_queue_head;
     logic    [`ALU_QUEUE_LEN-1:0]   cdb_alu_queue_tail; 
