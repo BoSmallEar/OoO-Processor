@@ -141,8 +141,8 @@ module processor (
     , output logic [`LB_LEN-1:0]        lq_issue_idx
 
     // Outputs of dcache
-    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
-    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
+    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
+    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer
 `endif
 );
 
@@ -157,10 +157,10 @@ module processor (
     logic   [1:0]            Icache2mem_command;    // command sent to memory
 	logic   [`XLEN-1:0]      Icache2mem_addr;  // Address sent to memory
 
-    logic    [1:0]           Dcache2mem_command,      // Issue a bus load
-	logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
-    MEM_SIZE                 Dcache2mem_size,
-    logic    [`XLEN-1:0]     Dcache2mem_data
+    logic    [1:0]           Dcache2mem_command;      // Issue a bus load
+	logic    [`XLEN-1:0]     Dcache2mem_addr;         // Address sent to memory
+    MEM_SIZE                 Dcache2mem_size;
+    logic    [`XLEN-1:0]     Dcache2mem_data;
 
 
     //toplevel_outputs

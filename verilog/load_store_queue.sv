@@ -279,9 +279,9 @@ module load_store_queue(
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
                 BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7]}},  SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+6 :forward_addr-SQ.entries[forward_match_idx].addr]}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7: forward_addr-SQ.entries[forward_match_idx].addr]};
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7 : forward_addr-SQ.entries[forward_match_idx].addr]};
                 HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15]}}, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+14:forward_addr-SQ.entries[forward_match_idx].addr]}
-                                                                        : {16'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15:forward_addr-SQ.entries[forward_match_idx].addr]};
+                                                                        : {16'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15 : forward_addr-SQ.entries[forward_match_idx].addr]};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
                 default: forward_data = SQ.entries[forward_match_idx].data;
             endcase 
@@ -362,9 +362,9 @@ module load_store_queue(
         // Some load inst can be issued
         // Once issued; Retire from LB
         if (!none_selected) begin
-            lb2sq_request_valid <= `SD 1;
-            lb2sq_request_entry <= `SD LB.entries[lq_issue_idx];
-            LB.free_list[j]  <= `SD 1;
+            lb2sq_request_valid         <= `SD 1;
+            lb2sq_request_entry         <= `SD LB.entries[lq_issue_idx];
+            LB.free_list[lq_issue_idx]  <= `SD 1;
         end
         else
             lb2sq_request_valid <= `SD 0;
