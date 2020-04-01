@@ -104,7 +104,7 @@ module proc_testbench;
     logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx;
 
     // Outputs of cdb
-    logic [3:0]           module_select;
+    logic [4:0]           module_select;
     logic                 cdb_broadcast_valid;
     logic [`XLEN-1:0]     cdb_result;
     logic [`PRF_LEN-1:0]  cdb_dest_preg_idx;
@@ -462,7 +462,7 @@ task print_predict;
 endtask
 
 task print_cdb;
-    input logic [3:0]           module_select;
+    input logic [4:0]           module_select;
     input logic                 cdb_broadcast_valid;
     input logic [`XLEN-1:0]     cdb_result;
     input logic [`PRF_LEN-1:0]  cdb_dest_preg_idx;
@@ -477,10 +477,11 @@ task print_cdb;
 
     $display("========================= CDB =========================");
     case(module_select)
-        4'b1000:  $display("module_select: ALU");
-        4'b0100:  $display("module_select: MUL");
-        4'b0010:  $display("module_select: MEM");
-        4'b0001:  $display("module_select: BRANCH");
+        5'b10000:  $display("module_select: ALU");
+        5'b01000:  $display("module_select: MUL");
+        5'b00100:  $display("module_select: BRANCH");
+        5'b00010:  $display("module_select: DCACHE");
+        5'b00001:  $display("module_select: SQ");
         default:  $display("module_select: EMPTY!!!");
     endcase
     $display("cdb_broadcast_inst_PC: %d", cdb_broadcast_inst_PC); 

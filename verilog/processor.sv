@@ -95,7 +95,7 @@ module processor (
     , output logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx
 
     // Outputs of cdb
-    , output logic [3:0]           module_select
+    , output logic [4:0]           module_select
     , output logic                 cdb_broadcast_valid
     , output logic [`XLEN-1:0]     cdb_result
     , output logic [`PRF_LEN-1:0]  cdb_dest_preg_idx
