@@ -344,7 +344,7 @@ module dcache(
             if (lb2cache_request_valid && !load_cache_hit) begin
                 load_buffer[load_buffer_tail_ptr].valid       <= `SD 1;
                 load_buffer[load_buffer_tail_ptr].PC          <= `SD lb2cache_request_entry.PC;
-                load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.prf_idx;
+                load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.rd_preg;
                 load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx;
 
                 load_buffer[load_buffer_tail_ptr].address     <= `SD lb2cache_request_entry.rob_idx.addr;
