@@ -67,40 +67,40 @@ module top_level (
     , output logic [`XLEN-1:0]               fu_opb_value
     , output logic [`XLEN-1:0]               fu_offset
 
-    , output RS_ALU_PACKET [`RS_ALU_SIZE-1:0] rs_alu_packets
-    , output logic [`RS_ALU_LEN:0] rs_alu_counter
-    , output logic [`RS_ALU_SIZE-1:0] rs_alu_ex    // goes to priority selector (data ready && FU free) 
-    , output logic [`RS_ALU_SIZE-1:0] rs_alu_free
-    , output logic [`RS_ALU_LEN-1:0] rs_alu_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_ALU_LEN-1:0] rs_alu_ex_idx 
+    , output RS_ALU_PACKET [`RS_ALU_SIZE-1:0]   rs_alu_packets
+    , output logic         [`RS_ALU_LEN:0]      rs_alu_counter
+    , output logic         [`RS_ALU_SIZE-1:0]   rs_alu_ex
+    , output logic         [`RS_ALU_SIZE-1:0]   rs_alu_free
+    , output logic         [`RS_ALU_LEN-1:0]    rs_alu_free_idx
+    , output logic         [`RS_ALU_LEN-1:0]    rs_alu_ex_idx 
 
     , output RS_BRANCH_PACKET [`RS_BR_SIZE-1:0] rs_branch_packets
-    , output logic [`RS_BR_LEN:0] rs_branch_counter
-    , output logic [`RS_BR_SIZE-1:0] rs_branch_ex     // goes to priority selector (data ready && FU free) 
-    , output logic [`RS_BR_SIZE-1:0] rs_branch_free
-    , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
+    , output logic            [`RS_BR_LEN:0]    rs_branch_counter
+    , output logic            [`RS_BR_SIZE-1:0] rs_branch_ex
+    , output logic            [`RS_BR_SIZE-1:0] rs_branch_free
+    , output logic            [`RS_BR_LEN-1:0]  rs_branch_free_idx
+    , output logic            [`RS_BR_LEN-1:0]  rs_branch_ex_idx
 
-    // , output RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
-    // , output logic [`RS_MEM_LEN:0] rs_mem_counter
-    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex 
-    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
-    // , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
-    // , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
-
-    , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
-    , output logic [`RS_MUL_LEN:0] rs_mul_counter
-    , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex     // goes to priority selector (data ready && FU free)
-    , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
-    , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+    , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0]   rs_mul_packets
+    , output logic         [`RS_MUL_LEN:0]      rs_mul_counter
+    , output logic         [`RS_MUL_SIZE-1:0]   rs_mul_ex
+    , output logic         [`RS_MUL_SIZE-1:0]   rs_mul_free
+    , output logic         [`RS_MUL_LEN-1:0]    rs_mul_free_idx
+    , output logic         [`RS_MUL_LEN-1:0]    rs_mul_ex_idx
     
     , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
-    , output logic [`RS_LB_LEN:0]               rs_lb_counter
-    , output logic [`RS_LB_SIZE-1:0]            rs_lb_ex     // goes to priority selector (data ready && FU free)
-    , output logic [`RS_LB_SIZE-1:0]            rs_lb_free
-    , output logic [`RS_LB_LEN-1:0]             rs_lb_free_idx // the rs idx that is selected for the dispatched instr
-    , output logic [`RS_LB_LEN-1:0]             rs_lb_ex_idx
+    , output logic        [`RS_LB_LEN:0]        rs_lb_counter
+    , output logic        [`RS_LB_SIZE-1:0]     rs_lb_ex
+    , output logic        [`RS_LB_SIZE-1:0]     rs_lb_free
+    , output logic        [`RS_LB_LEN-1:0]      rs_lb_free_idx
+    , output logic        [`RS_LB_LEN-1:0]      rs_lb_ex_idx
+
+    , output RS_SQ_PACKET [`RS_SQ_SIZE-1:0]     rs_sq_packets
+    , output logic        [`RS_SQ_LEN:0]        rs_sq_counter
+    , output logic        [`RS_SQ_SIZE-1:0]     rs_sq_ex
+    , output logic        [`RS_SQ_SIZE-1:0]     rs_sq_free
+    , output logic        [`RS_SQ_LEN-1:0]      rs_sq_free_idx
+    , output logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx
 
     // Outputs of cdb
     , output logic [3:0]           module_select
@@ -122,6 +122,32 @@ module top_level (
     , output logic [`XLEN-1:0]       opa_value
     , output logic                   opb_ready
     , output logic [`XLEN-1:0]       opb_value
+
+    // Outputs of load store queue
+    , output STORE_QUEUE            SQ
+    , output LOAD_BUFFER            LB
+    , output logic                  sq_all_rsvd
+    , output logic [`SQ_LEN-1:0]    sq_head
+    , output logic [`SQ_LEN-1:0]    secure_age
+    , output logic                  lb2sq_request_valid
+    , output LB_ENTRY               lb2sq_request_entry
+    , output logic [`SQ_LEN-1:0]    sq_counter
+    , output logic                  sq_empty
+    , output logic                  forward_match
+    , output logic [`XLEN-1:0]      forward_data   
+    , output logic [`SQ_LEN-1:0]    forward_match_idx
+    , output logic [`XLEN-1:0]      forward_addr
+    , output logic [`SQ_LEN-1:0]    forward_age
+    , output logic MEM_SIZE         forward_mem_size
+    , output logic                      none_selected
+    , output logic [`LB_CAPACITY-1:0]   psel_gnt
+    , output logic [`LB_LEN-1:0]        lq_free_idx
+    , output logic                      lq_conflict
+    , output logic [`LB_LEN-1:0]        lq_issue_idx
+
+    // Outputs of  dcache
+    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
+    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
 `endif
 );
 
@@ -179,10 +205,30 @@ module top_level (
     logic [`XLEN-1:0]         mul_PC;                  // alu->cdb
     logic                     mul_free;                // mult2cdb->rs_mul
 
-    // RS_MEM OUTPUTS
+    // RS_LB OUTPUTS
+    logic RS_LB_PACKET        rs_lb_packet;
+    logic                     rs_lb_out_valid;
 
-    // // MEM OUTPUTS
-  
+    // RS_SQ OUTPUTS
+    RS_SQ_PACKET              rs_sq_packet;
+    logic                     rs_sq_out_valid;
+
+    // LB&SQ OUTPUTS
+    logic                     lb_full;
+    logic [`LB_LEN-1:0]       assigned_lb_idx;
+    logic                     sq_head_rsvd;
+    logic                     sq_full;
+    logic [`SQ_LEN-1:0]       sq_tail;
+    logic                     sq_valid;
+    logic [`XLEN-1:0]         sq_value;
+    logic [`PRF_LEN-1:0]      sq_prf_idx;
+    logic [`ROB_LEN-1:0]      sq_rob_idx;
+    logic [`XLEN-1:0]         sq_PC;
+    logic                     lb2cache_request_valid;
+    LB_ENTRY                  lb2cache_request_entry;
+    logic                     sq2cache_request_valid;
+    SQ_ENTRY                  sq2cache_request_entry;
+
     //RS_BRANCH OUTPUTS
     RS_BRANCH_PACKET          rs_branch_packet;         // rs_branch->branch
     logic                     rs_branch_out_valid;      // rs_branch->cdb
@@ -223,13 +269,28 @@ module top_level (
     logic                     cdb_mis_pred;             // cdb->rob
     logic                     cdb_local_pred_direction; // cdb->bp
     logic                     cdb_global_pred_direction;// cdb->bp
+
+    STORE_QUEUE            SQ;
+    LOAD_BUFFER            LB;
+    logic                  sq_all_rsvd;
+    logic [`SQ_LEN-1:0]    sq_head;
+    logic [`SQ_LEN-1:0]    secure_age;
+    logic                  lb2sq_request_valid;
+    LB_ENTRY               lb2sq_request_entry;
+    logic [`SQ_LEN-1:0]    sq_counter;
+    logic                  sq_empty;
+    logic                  forward_match;
+    logic [`XLEN-1:0]      forward_data; 
+    logic [`SQ_LEN-1:0]    forward_match_idx;
+    logic [`XLEN-1:0]      forward_addr;
+    logic [`SQ_LEN-1:0]    forward_age;
+    logic MEM_SIZE         forward_mem_size;
+    logic                      none_selected;
+    logic [`LB_CAPACITY-1:0]   psel_gnt;
+    logic [`LB_LEN-1:0]        lq_free_idx;
+    logic                      lq_conflict;
+    logic [`LB_LEN-1:0]        lq_issue_idx;
 `endif
-    // CDB OUTPUTS for mem
-    // logic [`XLEN-1:0]         mem_PC;
-    // logic                     mem_valid;
-    // logic [`XLEN-1:0]         mem_value;
-    // logic [`PRF_LEN-1:0]      mem_prf_idx;
-    // logic [`ROB_LEN-1:0]      mem_rob_idx;
 
     // ROB INPUTS
 
@@ -624,31 +685,6 @@ module top_level (
 
     //////////////////////////////////////////////////
     //                                              //
-    //                     L B                      //
-    //                                              //
-    //////////////////////////////////////////////////
-
-
-    load_buffer lb0(
-        .clock(clock),
-        .reset(reset),
-        .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
-        .rs_lb_out_valid(rs_lb_out_valid),
-        .rs_lb_packet(rs_lb_packet),
-        .sq_all_rsvd(sq_all_rsvd),
-        .sq_head(sq_head),
-        .sq_tail(sq_tail),
-        .secure_age(secure_age),
-
-        // outputs
-        .lb_full(lb_full),
-        .assigned_lb_idx(assigned_lb_idx),    
-        .lb_request_valid(lb_request_valid),
-        .lb_request_entry(lb_request_entry)
-    );
-
-    //////////////////////////////////////////////////
-    //                                              //
     //                  R S _ S Q                   //
     //                                              //
     //////////////////////////////////////////////////
@@ -691,38 +727,62 @@ module top_level (
 
     //////////////////////////////////////////////////
     //                                              //
-    //                     S Q                      //
+    //                   L B & S Q                  //
     //                                              //
     //////////////////////////////////////////////////
 
-
-    // directly copy from qyj history commit
-    store_queue sq0(
+    load_store_queue load_store_queue0(
         .clock(clock),
         .reset(reset),
-        .sq_enable(id_packet.valid &&id_packet.wr_mem==`TRUE),
+        .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
+        .rs_lb_out_valid(rs_lb_out_valid),
+        .rs_lb_packet(rs_lb_packet),  
+        .sq_enable(id_packet.valid && id_packet.fu_type == STORE && id_packet.wr_mem==`TRUE),
         .rs_sq_out_valid(rs_sq_out_valid),
         .rs_sq_packet(rs_sq_packet),
-        .lb2sq_request_valid(lb_request_valid),
-        .lb2sq_request_entry(lb_request_entry),
         .store_enable(store_enable),
 
         // outputs
-        .sq_head_rsvd(sq_head_rsvd),
+        .lb_full(lb_full),
+        .assigned_lb_idx(assigned_lb_idx),
+        .sq_head_rsvd(sq_head_rsvd), 
         .sq_full(sq_full),
-        .sq_all_rsvd(sq_all_rsvd),
-        .sq_tail(sq_tail),    
-        .sq_head(sq_head), 
-        .secure_age(secure_age),
-        .forward_valid(forward_valid),
-        .forward_pack(forward_pack),     // To CDB
-    
+        .sq_tail(sq_tail),
+        // to CDB
+        .sq_valid(sq_valid),
+        .sq_value(sq_value),
+        .sq_prf_idx(sq_prf_idx),
+        .sq_rob_idx(sq_rob_idx),
+        .sq_PC(sq_PC),
+        
         .lb2cache_request_valid(lb2cache_request_valid),
         .lb2cache_request_entry(lb2cache_request_entry),
         .sq2cache_request_valid(sq2cache_request_valid),
         .sq2cache_request_entry(sq2cache_request_entry)
-    );
 
+    `ifdef DEBUG
+        , .SQ(SQ)
+        , .LB(LB)
+        , .sq_all_rsvd(sq_all_rsvd)
+        , .sq_head(sq_head)
+        , .secure_age(secure_age)
+        , .lb2sq_request_valid(lb2sq_request_valid)
+        , .lb2sq_request_entry(lb2sq_request_entry)
+        , .sq_counter(sq_counter)
+        , .sq_empty(sq_empty)
+        , .forward_match(forward_match)
+        , .forward_data(forward_data)   
+        , .forward_match_idx(forward_match_idx)
+        , .forward_addr(forward_addr)
+        , .forward_age(forward_age)
+        , .forward_mem_size(forward_mem_size)
+        , .none_selected(none_selected)
+        , .psel_gnt(psel_gnt)
+        , .lq_free_idx(lq_free_idx)
+        , .lq_conflict(lq_conflict)
+        , .lq_issue_idx(lq_issue_idx)
+    `endif
+    );
 
     //////////////////////////////////////////////////
     //                                              //
@@ -824,12 +884,7 @@ module top_level (
         .mul_value(mul_value),
         .mul_prf_idx(mul_prf_idx),
         .mul_rob_idx(mul_rob_idx),
-        // MEM
-        // .mem_PC(mem_PC),
-        // .mem_valid(mem_valid),
-        // .mem_value(mem_value),
-        // .mem_prf_idx(mem_prf_idx),
-        // .mem_rob_idx(mem_rob_idx),
+    
         // BRANCH
         .br_PC(br_PC),
         .br_valid(br_valid),
@@ -841,6 +896,18 @@ module top_level (
         .br_rob_idx(br_rob_idx),
         .br_local_pred_direction(br_local_pred_direction),
         .br_global_pred_direction(br_global_pred_direction),
+        //SQ 
+        .sq_valid(sq_valid),
+        .sq_value(sq_value),
+        .sq_prf_idx(sq_prf_idx),
+        .sq_rob_idx(sq_rob_idx),
+        .sq_PC(sq_PC), 
+        //DCACHE
+        .dcache_valid(dcache_valid),
+        .dcache_value(dcache_value),
+        .dcache_prf_idx(dcache_prf_idx),
+        .dcache_rob_idx(dcache_rob_idx),
+        .dcache_PC(dcache_PC), 
 
         // output
         .cdb_broadcast_valid(cdb_broadcast_valid),         
@@ -893,13 +960,76 @@ module top_level (
         .dcache_prf_idx(dcache_prf_idx),
         .dcache_rob_idx(dcache_rob_idx),
 
-
         // Main Memory
         .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
         .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
         .Dcache2mem_size(Dcache2mem_size),
         .Dcache2mem_data(Dcache2mem_data)
+
+        `ifdef DEBUG
+            , .dcache_blocks(dcache_blocks)
+            , .load_buffer(load_buffer)
+        `endif
 );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                     L B                      //
+    //         old version (not delete!)            //
+    //////////////////////////////////////////////////
+
+
+    // load_buffer lb0(
+    //     .clock(clock),
+    //     .reset(reset),
+    //     .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
+    //     .rs_lb_out_valid(rs_lb_out_valid),
+    //     .rs_lb_packet(rs_lb_packet),
+    //     .sq_all_rsvd(sq_all_rsvd),
+    //     .sq_head(sq_head),
+    //     .sq_tail(sq_tail),
+    //     .secure_age(secure_age),
+
+    //     // outputs
+    //     .lb_full(lb_full),
+    //     .assigned_lb_idx(assigned_lb_idx),    
+    //     .lb_request_valid(lb_request_valid),
+    //     .lb_request_entry(lb_request_entry)
+    // );
+
+    //////////////////////////////////////////////////
+    //                                              //
+    //                     S Q                      //
+    //         old version (not delete!)            //
+    //////////////////////////////////////////////////
+
+
+    // directly copy from qyj history commit
+    // store_queue sq0(
+    //     .clock(clock),
+    //     .reset(reset),
+    //     // .sq_enable(id_packet.valid &&id_packet.wr_mem==`TRUE),
+    //     .rs_sq_out_valid(rs_sq_out_valid),
+    //     .rs_sq_packet(rs_sq_packet),
+    //     .lb2sq_request_valid(lb_request_valid),
+    //     .lb2sq_request_entry(lb_request_entry),
+    //     .store_enable(store_enable),
+
+    //     // outputs
+    //     .sq_head_rsvd(sq_head_rsvd),
+    //     .sq_full(sq_full),
+    //     .sq_all_rsvd(sq_all_rsvd),
+    //     .sq_tail(sq_tail),    
+    //     .sq_head(sq_head), 
+    //     .secure_age(secure_age),
+    //     .forward_valid(forward_valid),
+    //     .forward_pack(forward_pack),     // To CDB
+    
+    //     .lb2cache_request_valid(lb2cache_request_valid),
+    //     .lb2cache_request_entry(lb2cache_request_entry),
+    //     .sq2cache_request_valid(sq2cache_request_valid),
+    //     .sq2cache_request_entry(sq2cache_request_entry)
+    // );
 
 
 endmodule

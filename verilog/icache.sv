@@ -1,3 +1,8 @@
+`ifndef DEBUG
+`define DEBUG
+`endif
+`ifndef __ICACHE_V__
+`define __ICACHE_V__
 typedef union packed {
     logic [63:0] double;
     logic [1:0][31:0] words;
@@ -48,6 +53,7 @@ module icache(
     input           [3:0]           mem2Icache_response,         // Tag from memory about current request
 	input           [63:0]          mem2Icache_data,             // Data coming back from memory
 	input           [3:0]           mem2Icache_tag,    
+    input                           mem2Icache_response_valid,    
 
     //outputs
     output logic  	[`XLEN-1:0] 	Icache2proc_data,
@@ -74,7 +80,7 @@ module icache(
     wire changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
 
     wire unanswered_miss = changed_addr ? !Icache2proc_valid :
-                            miss_outstanding & (mem2Icache_response==0);
+                            miss_outstanding & (mem2Icache_response==0 || !mem2Icache_response_valid);
 
     assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0);
     wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable;
@@ -83,7 +89,7 @@ module icache(
     assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
     assign Icache2mem_command = (miss_outstanding && !changed_addr);
     
-    // synopsys sync_set_reset "reset"
+    
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;
@@ -105,7 +111,7 @@ module icache(
                     curr_mem_tag <= `SD 4'b0;
                 end
                 else if (miss_outstanding) begin
-                    curr_mem_tag <= `SD mem2Icache_response;
+                    curr_mem_tag <= `SD mem2Icache_response_valid? mem2Icache_response : 4'b0;
                 end
                 else if (data_write_enable) begin
                     curr_mem_tag <= `SD 4'b0;
@@ -123,3 +129,4 @@ module icache(
 
 
 endmodule
+`endif

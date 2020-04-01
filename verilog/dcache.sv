@@ -1,3 +1,12 @@
+`ifndef DEBUG
+`define DEBUG    
+`endif
+
+`ifndef __DCACHE_V__
+`define __DCACHE_V__
+
+// TODO: Victim Cache
+
 typedef union packed {
     logic [63:0] double;
     logic [1:0][31:0] words;
@@ -23,8 +32,7 @@ typedef union packed {
 } ADDR; //now we can pass around a common data type
 
 typedef struct packed {
-    logic [7:0]     tag;
-    logic           valid;
+    logic [9:0]     tag;
     CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
 } DCACHE_BLOCK;
 
@@ -39,11 +47,14 @@ typedef struct packed {
     logic [`PRF_LEN-1:0]  prf_idx;
     logic [`ROB_LEN-1:0]  rob_idx;  
     logic [`XLEN-1:0] address;
-    logic MEM_SIZE mem_size;
+    MEM_SIZE mem_size;
     logic load_signed;
     logic [3:0] mem_tag;
     logic done;
     logic [`XLEN-1:0] data; 
+
+    logic [`SET_LEN-1:0] set_idx;
+    logic [`WAY_LEN-1:0] way_idx;
 } LOAD_BUFFER_ENTRY;
 
 typedef struct packed {
@@ -60,20 +71,6 @@ typedef struct packed {
  - One victim cache of two 8-byte blocks (16 bytes of data)
         - Does not include whatever metadata you need for each block    */
 
-parameter WAY_WIDTH = 2;
-parameter DCACHE_CAPACITY = 32;
-parameter SET_SIZE = 8;
-parameter SET_LEN = 3;
-parameter WAY_SIZE = 4;
-parameter SET_LEN = 2;
-
-parameter LOAD_BUFFER_SIZE = 16;
-parameter LOAD_BUFFER_LEN = 4;
-
-parameter STORE_BUFFER_SIZE = 16;
-parameter STORE_BUFFER_LEN = 4;
-
-
 /*  Tree Structure - Pseudo LRU
              Idx:0
             /    \
@@ -83,44 +80,71 @@ parameter STORE_BUFFER_LEN = 4;
 
        3'b: {Idx:2, Idx:1, Idx:0}
 */
+    // tree_plru tree_plru_0(
+    //     .load_set_idx_lookup(load_set),
+
+    //     .load_update_enable(),
+    //     .load_set_idx_hit(load_set),
+    //     .load_way_idx_hit(),
+        
+    //     .store_update_enable(),
+    //     .store_set_idx_hit(),
+    //     .store_way_idx_hit(),
+
+    //     .load_lru_way_idx(block_index_lru)
+    // );
 
 module tree_plru(
-    // Look for LRU block of the set
-    input [2:0] set_index_lookup,
+    // Load instruction: Look for LRU block of the set
+    input [2:0] load_set_idx_lookup,
 
     // Update the bit of the block
-    input [2:0] set_index_mru,
-    input [1:0] block_index_mru,
-    input update_enable,
+    input load_update_enable,
+    input [2:0] load_set_idx_hit,
+    input [1:0] load_way_idx_hit,
 
-    output logic [WAY_WIDTH-1:0] lru_block_index
+    input store_update_enable,
+    input [2:0] store_set_idx_hit,
+    input [1:0] store_way_idx_hit,
+    
+    output logic [`WAY_WIDTH-1:0] load_lru_way_idx
 );
 
     // logic [2:0][2:0] status_bit_table;
-    logic [NUM_SETS-1:0][2:0] status_bit_table;
+    logic [`NUM_SETS-1:0][2:0] status_bit_table;
 
     always_comb begin
-        case(status_bit_table[set_index_lookup]) begin
-            3'b000: lru_block_index = 0;
-            3'b001: lru_block_index = 2;
-            3'b010: lru_block_index = 1;
-            3'b011: lru_block_index = 2;
-            3'b100: lru_block_index = 0;
-            3'b101: lru_block_index = 3;
-            3'b110: lru_block_index = 1;
-            3'b111: lru_block_index = 3;
-        end
+
+        case(status_bit_table[load_set_idx_lookup]) 
+            3'b000: load_lru_way_idx = 0;
+            3'b001: load_lru_way_idx = 2;
+            3'b010: load_lru_way_idx = 1;
+            3'b011: load_lru_way_idx = 2;
+            3'b100: load_lru_way_idx = 0;
+            3'b101: load_lru_way_idx = 3;
+            3'b110: load_lru_way_idx = 1;
+            3'b111: load_lru_way_idx = 3;
+        endcase
     end
 
 
     always_ff @(posedge clock) begin
-        if(update_enable) begin
-            case (block_index_mru) begin
-                2'b00: status_bit_table[set_index_mru] <= `SD {status_bit_table[set_index_mru][2], 2'b11};
-                2'b01: status_bit_table[set_index_mru] <= `SD {status_bit_table[set_index_mru][2], 2'b10};
-                2'b10: status_bit_table[set_index_mru] <= `SD {1'b1, status_bit_table[set_index_mru][1], 1'b0};
-                2'b11: status_bit_table[set_index_mru] <= `SD {1'b0, status_bit_table[set_index_mru][1], 1'b0};
-            end
+        if(load_update_enable) begin
+            case (load_way_idx_hit)
+                2'b00: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b11};
+                2'b01: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b10};
+                2'b10: status_bit_table[load_set_idx_hit] <= `SD {1'b1, status_bit_table[load_set_idx_hit][1], 1'b0};
+                2'b11: status_bit_table[load_set_idx_hit] <= `SD {1'b0, status_bit_table[load_set_idx_hit][1], 1'b0};
+            endcase
+        end
+
+        else if(store_update_enable) begin
+            case (store_way_idx_hit)
+                2'b00: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b11};
+                2'b01: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b10};
+                2'b10: status_bit_table[store_set_idx_hit] <= `SD {1'b1, status_bit_table[store_set_idx_hit][1], 1'b0};
+                2'b11: status_bit_table[store_set_idx_hit] <= `SD {1'b0, status_bit_table[store_set_idx_hit][1], 1'b0};
+            endcase
         end
     end
 
@@ -159,152 +183,102 @@ module dcache(
     output logic    [`PRF_LEN-1:0]  dcache_prf_idx,
     output logic    [`ROB_LEN-1:0]  dcache_rob_idx,
 
- 
-
     // Main Memory
-    output logic    [1:0]           Dcache2mem_command,      // Issue a bus load
+    output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
-    output MEM_SIZE                 Dcache2mem_size,
+    output MEM_SIZE                 Dcache2mem_size,         // load: always cache block; store: depends
     output logic    [`XLEN-1:0]     Dcache2mem_data 
+    `ifdef DEBUG
+        , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
+        , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer
 );
-
-
-    DCACHE_BLOCK [SET_SIZE-1:0][WAY_SIZE-1:0] dcache_blocks;
+    `ifndef DEBUG
+        // dcache
+        DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
+        // Load Buffer Table
+        LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer;
+    `endif
 
     logic [9:0] load_tag;                            // Unique identifier of a specific block
     logic [2:0] load_set;                            // Decides the position in the cache
     assign { load_tag, load_set } = lb2cache_request_entry.addr[31:3];
 
-    logic current_store_hit;
-
+    // load instruction
     logic load_cache_hit;
-    logic [SET_LEN-1:0] load_cache_hit_set;
-    logic [WAY_LEN-1:0] load_cache_hit_way;
+    logic [`SET_LEN-1:0] load_cache_hit_set;
+    logic [`WAY_LEN-1:0] load_cache_hit_way;
 
-    logic store_buffer_hit;
-    logic [STORE_BUFFER_LEN-1:0] store_buffer_hit_idx;
- 
+    // store instruction
+    logic [9:0] store_tag;                            // Unique identifier of a specific block
+    logic [2:0] store_set;                            // Decides the position in the cache
+    assign { store_tag, store_set } = sq2cache_request_entry.addr[31:3];
 
+    logic store_cache_hit;
+    logic [`SET_LEN-1:0] store_cache_hit_set;
+    logic [`WAY_LEN-1:0] store_cache_hit_way;
 
-    // Load Buffer Table & Store Buffer Table
-    LOAD_BUFFER_ENTRY [LOAD_BUFFER_SIZE-1:0] load_buffer;
-    logic [LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
-    logic [LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
-    logic [LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
+    // Load Buffer Table
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
     logic load_buffer_full;
 
-    STORE_BUFFER_ENTRY [STORE_BUFFER_SIZE-1:0] store_buffer;
-    logic [STORE_BUFFER_LEN-1:0] store_buffer_head_ptr;
-    logic [STORE_BUFFER_LEN-1:0] store_buffer_send_ptr;
-    logic [STORE_BUFFER_LEN-1:0] store_buffer_tail_ptr;
-    logic store_buffer_full;
-    logic store_buffer_empty;
-
-    //TODO
-    assign load_buffer_full = (load_buffer_head_ptr == load_buffer_tail_ptr) && load_buffer[load_buffer_head_ptr].valid;
-    assign load_buffer_empty = (load_buffer_head_ptr == load_buffer_tail_ptr) && (!load_buffer[load_buffer_head_ptr].valid);
-    assign store_buffer_full = (store_buffer_head_ptr == store_buffer_tail_ptr) && store_buffer[store_buffer_head_ptr].valid;
-    assign store_buffer_empty = (store_buffer_head_ptr == store_buffer_tail_ptr) && (!store_buffer[store_buffer_head_ptr].valid);
-
-
-
-
     always_comb begin
-
-        current_store_hit = 0;
-        
         load_cache_hit = 0;
         load_cache_hit_set = load_set;
         load_cache_hit_way = 0;
 
-        store_buffer_hit = 0;
-        store_buffer_hit_idx = 0;
-
+        // check cache hit/miss
         if (lb2cache_request_valid) begin
-            if (sq2cache_request_valid && sq2cache_request_entry.addr <= lb2cache_request_entry.addr &&  sq2cache_request_entry.addr + 1'b1<<sq2cache_request_entry.mem_size >= lb2cache_request_entry.addr + 1'b1<<lb2cache_request_entry.mem_size) begin
-                current_store_hit = 1;
-            end
-
-            for(int i = 0; i < WAY_SIZE; i++) begin
+            for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[load_set][i].valid && (dcache_blocks[load_set][i].tag == load_tag)) begin
                     load_cache_hit = 1;
                     load_cache_hit_way = i;
                 end
             end
-
-            if (!store_buffer_empty) begin
-                if (store_buffer_head_ptr < store_buffer_tail_ptr) begin
-                    for (int i = store_buffer_head_ptr; i < store_buffer_tail_ptr; i++) begin
-                        if (store_buffer[i].addr <= lb2cache_request_entry.addr && store_buffer[i].addr + 1'b1<<store_buffer[i].mem_size >= lb2cache_request_entry.addr + 1'b1<<lb2cache_request_entry.mem_size ) begin
-                            store_buffer_hit = 1;
-                            store_buffer_hit_idx = i;
-                        end
-                    end
-                end
-
-                else begin
-                    for (int i = store_buffer_head_ptr; i < STORE_BUFFER_LEN; i++) begin
-                        if (store_buffer[i].addr <= lb2cache_request_entry.addr && store_buffer[i].addr + 1'b1<<store_buffer[i].mem_size >= lb2cache_request_entry.addr + 1'b1<<lb2cache_request_entry.mem_size ) begin
-                            store_buffer_hit = 1;
-                            store_buffer_hit_idx = i;
-                        end
-                    end
-
-                    for (int i = 0; i < store_buffer_tail_ptr; i++) begin
-                        if (store_buffer[i].addr <= lb2cache_request_entry.addr && store_buffer[i].addr + 1'b1<<store_buffer[i].mem_size >= lb2cache_request_entry.addr + 1'b1<<lb2cache_request_entry.mem_size ) begin
-                            store_buffer_hit = 1;
-                            store_buffer_hit_idx = i;
-                        end
-                    end
-                end
-            end
         end
     end
 
+    assign load_buffer_full = (load_buffer_head_ptr == load_buffer_tail_ptr) && load_buffer[load_buffer_head_ptr].valid;
+    assign load_buffer_empty = (load_buffer_head_ptr == load_buffer_tail_ptr) && (!load_buffer[load_buffer_head_ptr].valid);
 
 
+    // 1st/2nd 8 byte of cache hit block data
+    logic [31:0] cache_hit_data_select;
+    assign cache_hit_data_select = lb2cache_request_entry.addr[2] ? dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[63:32] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[31:0];
 
-typedef struct packed {            
-	logic [`XLEN-1:0]       PC;                
-    logic [`XLEN-1:0]       addr;
-    logic [`XLEN-1:0]       data;
-    logic                   rob_idx;
-    logic                   rsvd;
-	MEM_SIZE                mem_size;
-} SQ_ENTRY;
-
-    output logic  	[`XLEN-1:0]     dcache_PC,
-    output logic                    dcache_valid,
-    output logic    [`XLEN-1:0]     dcache_value,
-    output logic    [`PRF_LEN-1:0]  dcache_prf_idx,
-    output logic    [`ROB_LEN-1:0]  dcache_rob_idx,
+    // 1st/2nd 8 byte of load_buffer_head_data
+    logic [31:0] load_buffer_head_data_select; // [63:32] or [31:0] of the cache line
+    assign load_buffer_head_data_select = load_buffer[load_buffer_head_ptr].addr[2] ? load_buffer[load_buffer_head_ptr].data[63:32] : load_buffer[load_buffer_head_ptr].data[31:0];
 
 
+    // Outputs: CDB assignments
     always_comb begin
-        dcache_valid = current_store_hit || load_cache_hit || store_buffer_hit || (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done);
+        dcache_valid = load_cache_hit || (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done);
 
-        if (current_store_hit) begin
-            dcache_value = sq2cache_request_entry.data[8 * (1<<lb2cache_request_entry.mem_size) + 8 * (lb2cache_request_entry.addr - sq2cache_request_entry.addr) - 1 : 8 * (lb2cache_request_entry.addr - sq2cache_request_entry.addr)];
-            dcache_PC = sq2cache_request_entry.PC;
-            dcache_prf_idx = sq2cache_request_entry.rd_preg;
-            dcache_rob_idx = sq2cache_request_entry.rob_idx;
-        end
+        // cache hit
+        if (load_cache_hit) begin
+            case(lb2cache_request_entry.mem_size) 
+                BYTE: dcache_value = b2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select[7:0] } : cache_hit_data_select[7:0];
+                HALF: dcache_value = b2cache_request_entry.load_signed ? { {16{cache_hit_data_select[7]}}, cache_hit_data_select[15:0] } : cache_hit_data_select[15:0];
+                WORD: dcache_value = cache_hit_data_select;
+            endcase
 
-        else if (load_cache_hit) begin
-            dcache_value = dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[8 * (1<<lb2cache_request_entry.mem_size) +  8 * lb2cache_request_entry.addr[2:0] - 1 : 8 * lb2cache_request_entry.addr[2:0]];
+            //dcache_value = dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[8 * (1<<lb2cache_request_entry.mem_size) +  8 * lb2cache_request_entry.addr[2:0] - 1 : 8 * lb2cache_request_entry.addr[2:0]];
+            
             dcache_PC = lb2cache_request_entry.PC;
             dcache_prf_idx = lb2cache_request_entry.rd_preg;
             dcache_rob_idx = lb2cache_request_entry.rob_idx;
         end
-        else if (store_buffer_hit) begin
-            dcache_value = store_buffer[store_buffer_hit_idx].data[8 * (1<<lb2cache_request_entry.mem_size) + 8 * (lb2cache_request_entry.addr - store_buffer[store_buffer_hit_idx].addr) - 1 : 8 * (lb2cache_request_entry.addr - store_buffer[store_buffer_hit_idx].addr)];
-            dcache_PC = lb2cache_request_entry.PC;
-            dcache_prf_idx = lb2cache_request_entry.rd_preg;
-            dcache_rob_idx = lb2cache_request_entry.rob_idx;
-        end
+
+        // cache miss & load_buffer_head is done
         else if (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done) begin
-            //TO BE EDITED
-            dcache_value = load_buffer[load_buffer_head_ptr].data;
+            case (load_buffer[load_buffer_head_ptr].mem_size) 
+                BYTE: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {24{load_buffer_head_data_select[7]} },  load_buffer_head_data_select[7:0] } : load_buffer_head_data_select[7:0];
+                HALF: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {16{load_buffer_head_data_select[15]} }, load_buffer_head_data_select[15:0]} : load_buffer_head_data_select[15:0];
+                WORD: dcache_value = load_buffer_head_data_select;
+            endcase
+
             dcache_PC = load_buffer[load_buffer_head_ptr].PC;
             dcache_prf_idx = load_buffer[load_buffer_head_ptr].prf_idx;
             dcache_rob_idx = load_buffer[load_buffer_head_ptr].rob_idx;
@@ -316,73 +290,66 @@ typedef struct packed {
             dcache_prf_idx = 0;
             dcache_rob_idx = 0;
         end
-
-
     end
 
-    // TODO
-    assign Dcache2mem_command = ;
-    assign Dcache2mem_addr = ;
+
+    always_comb begin
+        if (sq2cache_request_valid) begin
+            store_cache_hit = 0;
+            store_cache_hit_set = store_set;
+            store_cache_hit_way = 0;
+
+            for(int i = 0; i < `WAY_SIZE; i++) begin
+                if (dcache_blocks[store_set][i].valid && (dcache_blocks[store_set][i].tag == store_tag)) begin
+                    store_cache_hit = 1;
+                    store_cache_hit_way = i;
+                end
+            end
+        end
+    end
+
+    // Outputs: Main Memory
+    assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
+                                (load_buffer[store_buffer_send_ptr].valid && ~load_buffer[store_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
+    assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
+                                (load_buffer[store_buffer_send_ptr].valid && ~load_buffer[store_buffer_send_ptr].done) ? load_buffer[store_buffer_send_ptr].addr : 0;
+    assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : 0;
+    assign Dcache2mem_data = sq2cache_request_valid ? sq2cache_request_entry.data : 0;
 
 
-
-    logic [2:0] set_index_mru;
-    logic [1:0] block_index_mru;
-    logic update_enable;
-    logic [1:0] block_index_lru;
-
-    assign set_index_mru = current_set;
-    assign block_index_mru = current_hit? current_block : block_index_lru;
-    assign update_enable = proc2Dcache_addr_enable;
-
+    logic [`WAY_LEN-1:0] current_load_assigned_way;
 
     tree_plru tree_plru_0(
-        .set_index_lookup(load_buffer[load_buffer_head_ptr]),
-        .set_index_mru(set_index_mru),
-        .block_index_mru(block_index_mru),
-        .update_enable(update_enable),
+        .load_set_idx_lookup(load_set),
 
-        .lru_block_index(block_index_lru)
+        .load_update_enable(lb2cache_request_valid && load_cache_hit),
+        .load_set_idx_hit(load_cache_hit_set),
+        .load_way_idx_hit(load_cache_hit_way),
+        
+        .store_update_enable(sq2cache_request_valid && store_cache_hit),
+        .store_set_idx_hit(store_cache_hit_set),
+        .store_way_idx_hit(store_cache_hit_way),
+
+        .load_lru_way_idx(current_load_assigned_way)
     );
 
 
     always_ff @(posedge clock) begin
-        if(reset) begin
-            for(i = 0; i < LOAD_BUFFER_SIZE; i++) begin
+        if(reset || commit_mis_pred) begin
+            for(i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
                 load_buffer[i].valid <= `SD 0;
             end
-
-            for(i = 0; i < STORE_BUFFER_SIZE; i++) begin
-                store_buffer[i].valid <= `SD 0;
-            end
-
-            load_buffer_head_ptr <= `SD 0;
-            load_buffer_send_ptr <= `SD 0;
-            load_buffer_tail_ptr <= `SD 0;
-
-            store_buffer_head_ptr <= `SD 0;
-            store_buffer_send_ptr <= `SD 0;
-            store_buffer_tail_ptr <= `SD 0;
-        end
-
-        else if (commit_mis_pred) begin
-            for(i = 0; i < LOAD_BUFFER_SIZE; i++) begin
-                load_buffer[i].valid <= `SD 0;
-            end
-
             load_buffer_head_ptr <= `SD 0;
             load_buffer_send_ptr <= `SD 0;
             load_buffer_tail_ptr <= `SD 0;
         end
-
         else begin
-
-            if (lb2cache_request_valid && !load_cache_hit && !store_buffer_hit && !current_store_hit ) begin
+            // Update: load buffer tail ptr
+            if (lb2cache_request_valid && !load_cache_hit) begin
                 load_buffer[load_buffer_tail_ptr].valid       <= `SD 1;
                 load_buffer[load_buffer_tail_ptr].PC          <= `SD lb2cache_request_entry.PC;
-                load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.prd_idx;
+                load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.prf_idx;
                 load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx;
-
 
                 load_buffer[load_buffer_tail_ptr].address     <= `SD lb2cache_request_entry.rob_idx.addr;
                 load_buffer[load_buffer_tail_ptr].mem_size    <= `SD lb2cache_request_entry.rob_idx.mem_size;
@@ -391,97 +358,58 @@ typedef struct packed {
                 load_buffer[load_buffer_tail_ptr].done        <= `SD 0;
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
 
+                load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
+                load_buffer[load_buffer_tail_ptr].way_idx     <= `SD current_load_assigned_way;
 
-                load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
+                load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end
 
-            if (!current_store_hit && !load_cache_hit && !store_buffer_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
+            // Update: load buffer head ptr
+            if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
                 load_buffer[load_buffer_head_ptr].valid   <= `SD 0;
-                load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
+                load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
+
+                // update cache block data
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].data <= `SD load_buffer[load_buffer_head_ptr].data;
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].tag <= `SD load_buffer[load_buffer_head_ptr].addr[15:6];
             end
 
-    input                           mem2Dcache_response_valid,
-    input           [3:0]           mem2Dcache_response,     // Tag from memory about current request
 
-    // Main Memory
-	input           [63:0]          mem2Dcache_data,         // Data coming back from memory
-	input           [3:0]           mem2Dcache_tag,  
-
-
+            // Update: accept data from Main Memory
             if (!load_buffer_empty) begin
                 if (load_buffer_head_ptr < load_buffer_tail_ptr) begin
                     for(i = load_buffer_head_ptr; i < load_buffer_tail_ptr; i++) begin
-                        if (load_buffer[i].valid && !load_buffer[i].done && load_buffer[i].mem_tag == mem2Dcache_tag && mem2Dcache_tag != 0) begin
+                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
                             load_buffer[i].done <= `SD 1;
                             load_buffer[i].data <= `SD mem2Dcache_data;
-
-
                         end
                     end
                 end
                 else begin
+                    for(i = load_buffer_head_ptr; i < `LOAD_BUFFER_SIZE; i++) begin
+                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
+                            load_buffer[i].done <= `SD 1;
+                            load_buffer[i].data <= `SD mem2Dcache_data;
+                        end
+                    end
 
+                    for(i = 0; i < load_buffer_tail_ptr; i++) begin
+                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
+                            load_buffer[i].done <= `SD 1;
+                            load_buffer[i].data <= `SD mem2Dcache_data;
+                        end
+                    end
                 end
             end
 
-
-            if (load_buffer[load_buffer_head_ptr].valid && !load_buffer[load_buffer_head_ptr].done && mem2Dcache_tag == load_buffer[load_buffer_head_ptr].mem_tag && mem2Dcache_tag != 0) begin
-                load_buffer[load_buffer_head_ptr]
+            // Update: load buffer send ptr
+            if (mem2Dcache_response != 0 && mem2Dcache_response_valid) begin
+                load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
+                load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
-                
-
-                mem2Dcache_tag == mshrs_table[head_ptr].mem_tag && mshrs_table[head_ptr].mem_tag != 4'b0) begin
-                mshrs_table[head_ptr].done   <= `SD 1;
-                mshrs_table[head_ptr].data   <= `SD mem2Dcache_data;
-                // 这边应该是修改dcache_block里面的data成员吧？tag和valid要改吗？
-                dcache_blocks[mshrs_table[head_ptr].set_index][mshrs_table[head_ptr].way_index]  <= `SD mem2Dcache_data;
-            end
-
-
-            if (mem_request_last_cycle && mem2Dcache_response != 0 && mem2Dcache_response_valid) begin
-                mshrs_table[send_ptr].mem_tag   <= `SD mem2Dcache_response;
-                send_ptr                        <= `SD (send_ptr == MSHRS_SIZE-1)? 0: (send_ptr + 1);
-            end
-
-
-
-
-typedef struct packed {          
-	logic [`XLEN-1:0]       PC;       
-    logic [`XLEN-1:0]       addr;
-    logic [4:0]             rd_preg;
-    logic                   rob_idx;
-    logic [`SQ_LEN-1:0]     age;
-    logic                   rsvd;   //  Load address is resolved
-	MEM_SIZE                mem_size;
-	logic                   load_signed;
-} LB_ENTRY;
-
-typedef struct packed {          
-	logic [`XLEN-1:0]       PC;       
-    logic [`XLEN-1:0]       addr;
-    logic [4:0]             rd_preg;
-    logic                   rob_idx;
-    logic [`SQ_LEN-1:0]     age;
-    logic                   rsvd;   //  Load address is resolved
-    logic                   issue;
-    logic  [2:0]            load_type; // 000 LB  - 001 LH - 010 LW
-									   // 100 LBU - 101 LHU
-} LB_ENTRY;
-
-
-
-
-
-
-
-
-
-
         end
     end
 
-
-
 endmodule
 
+`endif

@@ -1,3 +1,9 @@
+
+`ifndef DEBUG
+`define DEBUG
+`endif
+`ifndef __CACHE_ARBITER_V__
+`define __CACHE_ARBITER_V__
 module cache_arbiter(
     // Main Memory
     input BUS_COMMAND     Dcache2mem_command,      // Issue a bus load
@@ -38,3 +44,4 @@ module cache_arbiter(
     assign cache2mem_data =  Dcache2mem_command!=0 ? Dcache2mem_data : 0; 
 
 endmodule
+`endif

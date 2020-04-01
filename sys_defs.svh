@@ -22,6 +22,21 @@
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
 
+////////////////////////////////////////////////
+//
+// Dcache attribute definitions
+//
+////////////////////////////////////////////////
+
+`define DCACHE_CAPACITY        32
+`define SET_SIZE               8
+`define SET_LEN                3
+`define WAY_SIZE               4 
+`define SET_LEN                2
+
+`define LOAD_BUFFER_SIZE       16
+`define LOAD_BUFFER_LEN        4
+
 //you can change the clock period to whatever, 10 is just fine
 `define VERILOG_CLOCK_PERIOD   10.0
 

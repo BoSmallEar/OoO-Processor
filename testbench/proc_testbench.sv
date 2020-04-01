@@ -82,19 +82,26 @@ module proc_testbench;
     logic [`RS_BR_LEN-1:0] rs_branch_free_idx; // the rs idx that is selected for the dispatched instr
     logic [`RS_BR_LEN-1:0] rs_branch_ex_idx;
 
-    // RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
-    // logic [`RS_MEM_LEN:0] rs_mem_counter
-    // logic [`RS_MEM_SIZE-1:0] rs_mem_ex 
-    // logic [`RS_MEM_SIZE-1:0] rs_mem_free
-    // logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
-    // logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
-
     RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets;
     logic [`RS_MUL_LEN:0] rs_mul_counter;
     logic [`RS_MUL_SIZE-1:0] rs_mul_ex;     // goes to priority selector (data ready && FU free)
     logic [`RS_MUL_SIZE-1:0] rs_mul_free;
     logic [`RS_MUL_LEN-1:0] rs_mul_free_idx; // the rs idx that is selected for the dispatched instr
     logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx;
+
+    RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets;
+    logic        [`RS_LB_LEN:0]        rs_lb_counter;
+    logic        [`RS_LB_SIZE-1:0]     rs_lb_ex;
+    logic        [`RS_LB_SIZE-1:0]     rs_lb_free;
+    logic        [`RS_LB_LEN-1:0]      rs_lb_free_idx;
+    logic        [`RS_LB_LEN-1:0]      rs_lb_ex_idx;
+
+    RS_SQ_PACKET [`RS_SQ_SIZE-1:0]     rs_sq_packets;
+    logic        [`RS_SQ_LEN:0]        rs_sq_counter;
+    logic        [`RS_SQ_SIZE-1:0]     rs_sq_ex;
+    logic        [`RS_SQ_SIZE-1:0]     rs_sq_free;
+    logic        [`RS_SQ_LEN-1:0]      rs_sq_free_idx;
+    logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx;
 
     // Outputs of cdb
     logic [3:0]           module_select;
@@ -119,6 +126,32 @@ module proc_testbench;
     logic [`XLEN-1:0]       opa_value;
     logic                   opb_ready;
     logic [`XLEN-1:0]       opb_value;
+
+    // Outputs of load store queue
+    STORE_QUEUE            SQ;
+    LOAD_BUFFER            LB;
+    logic                  sq_all_rsvd;
+    logic [`SQ_LEN-1:0]    sq_head;
+    logic [`SQ_LEN-1:0]    secure_age;
+    logic                  lb2sq_request_valid;
+    LB_ENTRY               lb2sq_request_entry;
+    logic [`SQ_LEN-1:0]    sq_counter;
+    logic                  sq_empty;
+    logic                  forward_match;
+    logic [`XLEN-1:0]      forward_data; 
+    logic [`SQ_LEN-1:0]    forward_match_idx;
+    logic [`XLEN-1:0]      forward_addr;
+    logic [`SQ_LEN-1:0]    forward_age;
+    logic MEM_SIZE         forward_mem_size;
+    logic                      none_selected;
+    logic [`LB_CAPACITY-1:0]   psel_gnt;
+    logic [`LB_LEN-1:0]        lq_free_idx;
+    logic                      lq_conflict;
+    logic [`LB_LEN-1:0]        lq_issue_idx;
+
+    // Outputs of dcache
+    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
+    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
 
     logic [63:0] debug_counter;
 
@@ -185,6 +218,20 @@ module proc_testbench;
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx) 
 
+        , .rs_lb_packets(rs_lb_packets)
+        , .rs_lb_counter(rs_lb_counter)
+        , .rs_lb_ex(rs_lb_ex)
+        , .rs_lb_free(rs_lb_free)
+        , .rs_lb_free_idx(rs_lb_free_idx)
+        , .rs_lb_ex_idx(rs_lb_ex_idx)
+
+        , .rs_sq_packets(rs_sq_packets)
+        , .rs_sq_counter(rs_sq_counter)
+        , .rs_sq_ex(rs_sq_ex)
+        , .rs_sq_free(rs_sq_free)
+        , .rs_sq_free_idx(rs_sq_free_idx)
+        , .rs_sq_ex_idx(rs_sq_ex_idx)
+
         // cdb output
         , .cdb_broadcast_valid(cdb_broadcast_valid)         
         , .module_select(module_select)               
@@ -208,6 +255,32 @@ module proc_testbench;
         , .opa_value(opa_value)
         , .opb_ready(opb_ready)
         , .opb_value(opb_value)
+
+        // Outputs of load store queue
+        , .SQ(SQ)
+        , .LB(LB)
+        , .sq_all_rsvd(sq_all_rsvd)
+        , .sq_head(sq_head)
+        , .secure_age(secure_age)
+        , .lb2sq_request_valid(lb2sq_request_valid)
+        , .lb2sq_request_entry(lb2sq_request_entry)
+        , .sq_counter(sq_counter)
+        , .sq_empty(sq_empty)
+        , .forward_match(forward_match)
+        , .forward_data(forward_data)   
+        , .forward_match_idx(forward_match_idx)
+        , .forward_addr(forward_addr)
+        , .forward_age(forward_age)
+        , .forward_mem_size(forward_mem_size)
+        , .none_selected(none_selected)
+        , .psel_gnt(psel_gnt)
+        , .lq_free_idx(lq_free_idx)
+        , .lq_conflict(lq_conflict)
+        , .lq_issue_idx(lq_issue_idx)
+
+        // Outputs of dcache
+        , .dcache_blocks(dcache_blocks)
+        , .load_buffer(load_buffer)
     `endif
     );
 
@@ -299,6 +372,10 @@ task print_rs;
     input logic [`RS_BR_SIZE-1:0]            rs_branch_free;
     input RS_MUL_PACKET [`RS_MUL_SIZE-1:0]   rs_mul_packets;
     input logic [`RS_MUL_SIZE-1:0]           rs_mul_free;
+    input RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets;
+    input logic        [`RS_LB_SIZE-1:0]     rs_lb_free;
+    input RS_SQ_PACKET [`RS_SQ_SIZE-1:0]     rs_sq_packets;
+    input logic        [`RS_SQ_SIZE-1:0]     rs_sq_free;
 
     $display("======================================= RS-ALU ========================================");
     $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |dest_preg_idx |rob_idx |free |");
@@ -339,6 +416,36 @@ task print_rs;
         rs_branch_packets[i].br_pred_direction,
         rs_branch_packets[i].rob_idx,
         rs_branch_free[i]);
+    end
+    $display("================================================= RS-LB =================================================");
+    $display("|rs_idx  |PC      |base_ready|base_value|offset  |lb_idx  |dest_preg_idx |rob_idx |mem_size|signed|free |");
+    for (int i = 0; i < `RS_LB_SIZE; i++) begin
+        $display("|%8d|%8d|%10d|%10d|%8d|%8d|%14d|%8d|%8d|%6d|%5d|", i,
+        rs_lb_packets[i].PC,
+        rs_lb_packets[i].base_ready,
+        rs_lb_packets[i].base_value,
+        rs_lb_packets[i].offset,
+        rs_lb_packets[i].lb_idx,
+        rs_lb_packets[i].dest_preg_idx,
+        rs_lb_packets[i].rob_idx,
+        rs_lb_packets[i].mem_size,
+        rs_lb_packets[i].load_signed,
+        rs_lb_free[i]);
+    end
+    $display("=============================================== RS-SQ ================================================");
+    $display("|rs_idx  |PC      |base_ready|base_value|offset  |src_ready |src_value |sq_idx|rob_idx |mem_size|free |");
+    for (int i = 0; i < `RS_SQ_SIZE; i++) begin
+        $display("|%8d|%8d|%10d|%10d|%8d|%10d|%10d|%6d|%8d|%8d|%5d|", i,
+        rs_sq_packets[i].PC,
+        rs_sq_packets[i].base_ready,
+        rs_sq_packets[i].base_value,
+        rs_sq_packets[i].offset,
+        rs_sq_packets[i].src_ready,
+        rs_sq_packets[i].src_value,
+        rs_sq_packets[i].sq_idx,
+        rs_sq_packets[i].rob_idx,
+        rs_sq_packets[i].mem_size,
+        rs_sq_free[i]);
     end
     $display("==================================================================================================");
 endtask
@@ -461,6 +568,91 @@ task print_rs_in_opab;
     $display("================================");
 endtask
 
+task print_lsq;
+    input STORE_QUEUE            SQ;
+    input LOAD_BUFFER            LB;
+    input logic                  sq_all_rsvd;
+    input logic [`SQ_LEN-1:0]    sq_head;
+    input logic [`SQ_LEN-1:0]    secure_age;
+    input logic                  lb2sq_request_valid;
+    input LB_ENTRY               lb2sq_request_entry;
+    input logic [`SQ_LEN-1:0]    sq_counter;
+    input logic                  sq_empty;
+
+    input logic                  forward_match;
+    input logic [`XLEN-1:0]      forward_data; 
+    input logic [`SQ_LEN-1:0]    forward_match_idx;
+    input logic [`XLEN-1:0]      forward_addr;
+    input logic [`SQ_LEN-1:0]    forward_age;
+    input logic MEM_SIZE         forward_mem_size;
+
+    input logic                      none_selected;
+    input logic [`LB_CAPACITY-1:0]   psel_gnt;
+    input logic [`LB_LEN-1:0]        lq_free_idx;
+    input logic                      lq_conflict;
+    input logic [`LB_LEN-1:0]        lq_issue_idx;
+
+    $display("lb2sq_request_valid: %d", lb2sq_request_valid);
+    if (lb2sq_request_valid) begin
+        $display("-------------------------------------------------------------------------------");
+        $display("|PC      |addr    |rob_idx |age     |read_preg |resolved|mem_size|load_signed |");
+        $display("|%8d|%8d|%8d|%8d|%10d|%8d|%8d|%12d|",
+                lb2sq_request_entry.PC, 
+                lb2sq_request_entry.addr, 
+                lb2sq_request_entry.rob_idx,
+                lb2sq_request_entry.age,
+                lb2sq_request_entry.rd_preg,
+                lb2sq_request_entry.rsvd,
+                lb2sq_request_entry.mem_size,
+                lb2sq_request_entry.load_signed);
+    end
+    $display("secure_age: %d", secure_age);
+    $display("none_selected: %d", none_selected);
+    $display("psel_gnt: %d", psel_gnt);
+    $display("lq_free_idx: %d", lq_free_idx);
+    $display("lq_conflict: %d", lq_conflict);
+    $display("lq_issue_idx: %d", lq_issue_idx);
+    $display("forward_match: %d", forward_match);
+    if (forward_match) begin
+        $display("forward_data: %d", forward_data);
+        $display("forward_match_idx: %d", forward_match_idx);
+        $display("forward_addr: %d", forward_addr);
+        $display("forward_age: %d", forward_age);
+        $display("forward_mem_size: %d", forward_mem_size);
+    end
+    $display("============================================ L B ============================================");
+    $display("|PC      |addr    |rob_idx |age     |read_preg |resolved|mem_size|load_signed |free  |issue |");
+    for (int i=0; i<`LB_CAPACITY; i++) begin
+        $display("|%8d|%8d|%8d|%8d|%10d|%8d|%8d|%12d|%6d|%6d|",
+                LB.entries[i].PC, 
+                LB.entries[i].addr, 
+                LB.entries[i].rob_idx,
+                LB.entries[i].age,
+                LB.entries[i].rd_preg,
+                LB.entries[i].rsvd,
+                LB.entries[i].mem_size,
+                LB.entries[i].load_signed,
+                LB.free_list[i],
+                LB.issue_list[i]);
+    end
+    $display("sq_all_rsvd: %d", sq_all_rsvd);
+    $display("sq_counter: %d", sq_counter);
+    $display("sq_empty: %d", sq_empty);
+    $display("======================= S Q =============================");
+    $display("|PC      |addr    |rob_idx |data      |resolved|mem_size|");
+    for (int i=0; i<`SQ_CAPACITY; i++) begin
+        if (SQ.head == i && SSQ.tail == i)
+            $display("|%8d|%8d|%8d|%10d|%8d|%8d| <- HEAD & TAIL", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
+        else if (SQ.head == i)
+            $display("|%8d|%8d|%8d|%10d|%8d|%8d| <- HEAD", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
+        else if (SQ.tail == i)
+            $display("|%8d|%8d|%8d|%10d|%8d|%8d| <- TAIL", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
+        else
+            $display("|%8d|%8d|%8d|%10d|%8d|%8d|", SQ.entries[i].PC, SQ.entries[i].addr, SQ.entries[i].rob_idx, SQ.entries[i].data, SQ.entries[i].rsvd, SQ.entries[i].mem_size);
+    end
+    $display("=========================================================");
+endtask
+
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
     // so the actual period of the clock is 10, not 5.
     always begin
@@ -528,7 +720,12 @@ endtask
                 rs_branch_packets, 
                 rs_branch_free,
                 rs_mul_packets,
-                rs_mul_free);
+                rs_mul_free,
+                rs_lb_packets,
+                rs_lb_free,
+                rs_sq_packets,
+                rs_sq_free);
+            print_lsq(SQ, LB, sq_all_rsvd, sq_head, secure_age, lb2sq_request_valid, lb2sq_request_entry, sq_counter, sq_empty, forward_match, forward_data;, forward_match_idx, forward_addr, forward_age, forward_mem_size, none_selected, psel_gnt, lq_free_idx, lq_conflict, lq_issue_idx);
             print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin

@@ -88,16 +88,18 @@ module store_queue (
     // This is not a perfect match which needs overwritten in D$/Memory
     logic [`XLEN-1:0]       load_addr;
     logic [`SQ_LEN-1:0]     load_age;
+    logic MEM_SIZE          load_mem_size;
     logic [`SQ_LEN-1:0]     forward_match_idx;
     always_comb begin
         load_addr = lb2sq_request_entry.addr;
         load_age = lb2sq_request_entry.age;
+        mem_size = lb2sq_request_entry.MEM_SIZE;
         if (sq_empty) begin
             forward_match = 0;
         end
         else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < load_age) begin
             for (int i=SQ.head; i < load_age; i++) begin
-                if (load_addr == SQ.entries[i].addr) begin
+                if (load_addr >= SQ.entries[i].addr && load_addr+1'b1<<load_mem_size<=SQ.entries + ) begin
                     forward_match = 1;
                     forward_match_idx = i;
                 end

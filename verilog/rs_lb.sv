@@ -8,6 +8,10 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+`ifndef DEBUG
+`define DEBUG    
+`endif
+
 `ifndef __RS_LB_V__
 `define __RS_LB_V__
 

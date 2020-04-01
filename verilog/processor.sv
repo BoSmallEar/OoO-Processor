@@ -19,14 +19,14 @@ module processor (
 
 	input         clock,                     // System clock
 	input         reset,                     // System reset
-	input [3:0]   mem2proc_response,         // Tag from memory about current request
-	input [63:0]  mem2proc_data,             // Data coming back from memory
-	input [3:0]   mem2proc_tag,              // Tag from memory about current reply
+	input [3:0]   mem2cache_response,         // Tag from memory about current request
+	input [63:0]  mem2cache_data,             // Data coming back from memory
+	input [3:0]   mem2cache_tag,              // Tag from memory about current reply
 	
-	output logic [1:0]  proc2mem_command,    // command sent to memory
-	output logic [`XLEN-1:0] proc2mem_addr,  // Address sent to memory
-	output logic [63:0] proc2mem_data,       // Data sent to memory
-	output MEM_SIZE proc2mem_size,           // data size sent to memory
+	output logic [1:0]  cache2mem_command,    // command sent to memory
+	output logic [`XLEN-1:0] cache2mem_addr,  // Address sent to memory
+	output logic [63:0] cache2mem_data,       // Data sent to memory
+	output MEM_SIZE cache2mem_size,           // data size sent to memory
 
     output EXCEPTION_CODE processor_error_status
 `ifdef DEBUG
@@ -73,19 +73,26 @@ module processor (
     , output logic [`RS_BR_LEN-1:0] rs_branch_free_idx // the rs idx that is selected for the dispatched instr
     , output logic [`RS_BR_LEN-1:0] rs_branch_ex_idx
 
-    // , output RS_FU_PACKET [`RS_MEM_SIZE-1:0] rs_mem_packets
-    // , output logic [`RS_MEM_LEN:0] rs_mem_counter
-    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_ex 
-    // , output logic [`RS_MEM_SIZE-1:0] rs_mem_free
-    // , output logic [`RS_MEM_LEN-1:0] rs_mem_free_idx
-    // , output logic [`RS_MEM_LEN-1:0] rs_mem_ex_idx
-
     , output RS_MUL_PACKET [`RS_MUL_SIZE-1:0] rs_mul_packets
     , output logic [`RS_MUL_LEN:0] rs_mul_counter
     , output logic [`RS_MUL_SIZE-1:0] rs_mul_ex     // goes to priority selector (data ready && FU free)
     , output logic [`RS_MUL_SIZE-1:0] rs_mul_free
     , output logic [`RS_MUL_LEN-1:0] rs_mul_free_idx // the rs idx that is selected for the dispatched instr
     , output logic [`RS_MUL_LEN-1:0] rs_mul_ex_idx
+
+    , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
+    , output logic        [`RS_LB_LEN:0]        rs_lb_counter
+    , output logic        [`RS_LB_SIZE-1:0]     rs_lb_ex
+    , output logic        [`RS_LB_SIZE-1:0]     rs_lb_free
+    , output logic        [`RS_LB_LEN-1:0]      rs_lb_free_idx
+    , output logic        [`RS_LB_LEN-1:0]      rs_lb_ex_idx
+
+    , output RS_SQ_PACKET [`RS_SQ_SIZE-1:0]     rs_sq_packets
+    , output logic        [`RS_SQ_LEN:0]        rs_sq_counter
+    , output logic        [`RS_SQ_SIZE-1:0]     rs_sq_ex
+    , output logic        [`RS_SQ_SIZE-1:0]     rs_sq_free
+    , output logic        [`RS_SQ_LEN-1:0]      rs_sq_free_idx
+    , output logic        [`RS_SQ_LEN-1:0]      rs_sq_ex_idx
 
     // Outputs of cdb
     , output logic [3:0]           module_select
@@ -110,6 +117,32 @@ module processor (
     , output logic [`XLEN-1:0]       opa_value
     , output logic                   opb_ready
     , output logic [`XLEN-1:0]       opb_value
+
+    // Outputs of load store queue
+    , output STORE_QUEUE            SQ
+    , output LOAD_BUFFER            LB
+    , output logic                  sq_all_rsvd
+    , output logic [`SQ_LEN-1:0]    sq_head
+    , output logic [`SQ_LEN-1:0]    secure_age
+    , output logic                  lb2sq_request_valid
+    , output LB_ENTRY               lb2sq_request_entry
+    , output logic [`SQ_LEN-1:0]    sq_counter
+    , output logic                  sq_empty
+    , output logic                  forward_match
+    , output logic [`XLEN-1:0]      forward_data   
+    , output logic [`SQ_LEN-1:0]    forward_match_idx
+    , output logic [`XLEN-1:0]      forward_addr
+    , output logic [`SQ_LEN-1:0]    forward_age
+    , output logic MEM_SIZE         forward_mem_size
+    , output logic                      none_selected
+    , output logic [`LB_CAPACITY-1:0]   psel_gnt
+    , output logic [`LB_LEN-1:0]        lq_free_idx
+    , output logic                      lq_conflict
+    , output logic [`LB_LEN-1:0]        lq_issue_idx
+
+    // Outputs of dcache
+    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
+    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
 `endif
 );
 
@@ -123,6 +156,11 @@ module processor (
     logic                    Icache2proc_valid;
     logic   [1:0]            Icache2mem_command;    // command sent to memory
 	logic   [`XLEN-1:0]      Icache2mem_addr;  // Address sent to memory
+
+    logic    [1:0]           Dcache2mem_command,      // Issue a bus load
+	logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
+    MEM_SIZE                 Dcache2mem_size,
+    logic    [`XLEN-1:0]     Dcache2mem_data
 
 
     //toplevel_outputs
@@ -210,6 +248,7 @@ module processor (
         .mem2Icache_response(mem2proc_response),         // Tag from memory about current request
         .mem2Icache_data(mem2proc_data),             // Data coming back from memory
         .mem2Icache_tag(mem2proc_tag),    
+        .mem2Icache_response_valid(mem2Icache_response_valid),
 
         // outputs
         .Icache2proc_data(Icache2proc_data),
@@ -225,7 +264,7 @@ module processor (
 //                                              //
 //////////////////////////////////////////////////
 
-    module cache_arbiter(
+    cache_arbiter cache_arbiter_0(
         // Main Memory
         .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
         .Dcache2mem_size(Dcache2mem_size),
@@ -290,7 +329,11 @@ module processor (
 	    .result_branch_direction(result_taken),
 	    .result_mis_pred(result_mis_pred),
         .commit_halt(commit_halt),
-        .commit_illegal(commit_illegal)
+        .commit_illegal(commit_illegal),
+        .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
+	    .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
+        .Dcache2mem_size(Dcache2mem_size),
+        .Dcache2mem_data(Dcache2mem_data)
 
     `ifdef DEBUG
         , .prf_values(prf_values)
@@ -334,7 +377,21 @@ module processor (
         , .rs_branch_free(rs_branch_free)
         , .rs_branch_free_idx(rs_branch_free_idx) // the rs idx that is selected for the dispatched instr
         , .rs_branch_ex_idx(rs_branch_ex_idx)
-    
+
+        , .rs_lb_packets(rs_lb_packets)
+        , .rs_lb_counter(rs_lb_counter)
+        , .rs_lb_ex(rs_lb_ex)
+        , .rs_lb_free(rs_lb_free)
+        , .rs_lb_free_idx(rs_lb_free_idx)
+        , .rs_lb_ex_idx(rs_lb_ex_idx)
+
+        , .rs_sq_packets(rs_sq_packets)
+        , .rs_sq_counter(rs_sq_counter)
+        , .rs_sq_ex(rs_sq_ex)
+        , .rs_sq_free(rs_sq_free)
+        , .rs_sq_free_idx(rs_sq_free_idx)
+        , .rs_sq_ex_idx(rs_sq_ex_idx)
+
         // output
         , .cdb_broadcast_valid(cdb_broadcast_valid)         
         , .module_select(module_select)               
@@ -355,6 +412,32 @@ module processor (
         , .opa_value(opa_value)
         , .opb_ready(opb_ready)
         , .opb_value(opb_value)
+
+        // Outputs of load store queue
+        , .SQ(SQ)
+        , .LB(LB)
+        , .sq_all_rsvd(sq_all_rsvd)
+        , .sq_head(sq_head)
+        , .secure_age(secure_age)
+        , .lb2sq_request_valid(lb2sq_request_valid)
+        , .lb2sq_request_entry(lb2sq_request_entry)
+        , .sq_counter(sq_counter)
+        , .sq_empty(sq_empty)
+        , .forward_match(forward_match)
+        , .forward_data(forward_data)   
+        , .forward_match_idx(forward_match_idx)
+        , .forward_addr(forward_addr)
+        , .forward_age(forward_age)
+        , .forward_mem_size(forward_mem_size)
+        , .none_selected(none_selected)
+        , .psel_gnt(psel_gnt)
+        , .lq_free_idx(lq_free_idx)
+        , .lq_conflict(lq_conflict)
+        , .lq_issue_idx(lq_issue_idx)
+
+        // Outputs of dcache
+        , .dcache_blocks(dcache_blocks)
+        , .load_buffer(load_buffer)
     `endif
     );
 
