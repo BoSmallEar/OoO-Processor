@@ -133,8 +133,10 @@ module cdb(
         
             cdb_br_queue_head         <= `SD `BR_QUEUE_LEN'b0;
             cdb_br_queue_tail         <= `SD `BR_QUEUE_LEN'b0;
-            cdb_dcache_queue_head         <= `SD `BR_QUEUE_LEN'b0;
-            cdb_dcache_queue_tail         <= `SD `BR_QUEUE_LEN'b0;
+            cdb_dcache_queue_head     <= `SD `DCACHE_QUEUE_LEN'b0;
+            cdb_dcache_queue_tail     <= `SD `DCACHE_QUEUE_LEN'b0;
+            cdb_sq_queue_head         <= `SD `SQ_QUEUE_LEN'b0;
+            cdb_sq_queue_tail         <= `SD `SQ_QUEUE_LEN'b0;
         end
         else begin
             // results from FU, store in queue
@@ -232,7 +234,7 @@ module cdb(
                     cdb_broadcast_inst_PC   <= `SD cdb_dcache_queue_empty ? dcache_PC      : cdb_dcache_queue[cdb_dcache_queue_head].dcache_PC;
                     cdb_mis_pred            <= `SD 1'b0;
                     cdb_br_direction        <= `SD 1'b0;
-                    cdb_dcache_queue_head      <= `SD (cdb_dcache_queue_head == `DCACHE_QUEUE_SIZE-1) ? 0 : cdb_dcache_queue_head + 1;
+                    cdb_dcache_queue_head   <= `SD (cdb_dcache_queue_head == `DCACHE_QUEUE_SIZE-1) ? 0 : cdb_dcache_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 5'b00001: begin
@@ -242,7 +244,7 @@ module cdb(
                     cdb_broadcast_inst_PC   <= `SD cdb_sq_queue_empty ? sq_PC      : cdb_sq_queue[cdb_sq_queue_head].sq_PC;
                     cdb_mis_pred            <= `SD 1'b0;
                     cdb_br_direction        <= `SD 1'b0;
-                    cdb_sq_queue_head      <= `SD (cdb_sq_queue_head == `SQ_QUEUE_SIZE-1) ? 0 : cdb_sq_queue_head + 1;
+                    cdb_sq_queue_head       <= `SD (cdb_sq_queue_head == `SQ_QUEUE_SIZE-1) ? 0 : cdb_sq_queue_head + 1;
                     cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 default: begin 
