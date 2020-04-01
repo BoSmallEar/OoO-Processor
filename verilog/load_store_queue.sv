@@ -336,8 +336,6 @@ module load_store_queue(
                 LB.entries[i].rsvd <= `SD 1'b0;
             end 
             LB.free_list <= `SD {`LB_CAPACITY{1'b1}};
-            LB.rsvd_list <= `SD {`LB_CAPACITY{1'b0}};
-            LB.issue_list <= `SD {`LB_CAPACITY{1'b0}};
         end
         
         if (lb_enable) begin  
@@ -348,7 +346,6 @@ module load_store_queue(
             LB.entries[lq_free_idx].rsvd       <= `SD 0;
             // Update the list - this entry no longer free/resolved
             LB.free_list[lq_free_idx]          <= `SD 0;    
-            LB.rsvd_list[lq_free_idx]          <= `SD 0;
         end 
         
         // RS fills information into specific entry when it's ready
