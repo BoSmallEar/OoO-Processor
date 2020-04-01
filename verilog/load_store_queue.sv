@@ -280,10 +280,10 @@ module load_store_queue(
         addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
-                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[addr_diff+7]}},  SQ.entries[forward_match_idx].data[addr_diff+6 :addr_diff}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[addr_diff+7 : addr_diff};
-                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff+14:addr_diff}
-                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff+15 : addr_diff};
+                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[addr_diff+7]}},  SQ.entries[forward_match_idx].data[addr_diff+6 :addr_diff]}
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[addr_diff+7 : addr_diff]};
+                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff+14:addr_diff]}
+                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff+15 : addr_diff]};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
                 default: forward_data = SQ.entries[forward_match_idx].data;
             endcase 
