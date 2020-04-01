@@ -61,7 +61,7 @@ module load_store_queue(
         , output logic [`SQ_LEN-1:0]    forward_match_idx
         , output logic [`XLEN-1:0]      forward_addr
         , output logic [`SQ_LEN-1:0]    forward_age
-        , output logic MEM_SIZE         forward_mem_size
+        , output MEM_SIZE               forward_mem_size
         , output logic                      none_selected
         , output logic [`LB_CAPACITY-1:0]   psel_gnt
         , output logic [`LB_LEN-1:0]        lq_free_idx
@@ -87,7 +87,7 @@ module load_store_queue(
         logic [`SQ_LEN-1:0]         forward_match_idx; 
         logic [`XLEN-1:0]           forward_addr;
         logic [`SQ_LEN-1:0]         forward_age;
-        logic MEM_SIZE              forward_mem_size;
+        MEM_SIZE                    forward_mem_size;
 
         //load combinational
         logic                       none_selected;

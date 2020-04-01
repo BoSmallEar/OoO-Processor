@@ -142,7 +142,7 @@ module proc_testbench;
     logic [`SQ_LEN-1:0]    forward_match_idx;
     logic [`XLEN-1:0]      forward_addr;
     logic [`SQ_LEN-1:0]    forward_age;
-    logic MEM_SIZE         forward_mem_size;
+    MEM_SIZE               forward_mem_size;
     logic                      none_selected;
     logic [`LB_CAPACITY-1:0]   psel_gnt;
     logic [`LB_LEN-1:0]        lq_free_idx;
@@ -150,8 +150,8 @@ module proc_testbench;
     logic [`LB_LEN-1:0]        lq_issue_idx;
 
     // Outputs of dcache
-    , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
-    , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
+    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
+    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
 
     logic [63:0] debug_counter;
 
