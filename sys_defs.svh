@@ -586,10 +586,13 @@ typedef struct packed {
     logic       [`LB_CAPACITY-1:0]   issue_list;   
 } LOAD_BUFFER;
 
+ 
+
+
 typedef struct packed {            
 	logic [`XLEN-1:0]       PC;                
     logic [`XLEN-1:0]       addr;
-    logic [`XLEN-1:0]       data;
+    logic [`XLEN-1:0]                data;
     logic                   rob_idx;
     logic                   rsvd;
 	MEM_SIZE                mem_size;
@@ -675,7 +678,7 @@ typedef struct packed {
     logic load_signed;
     logic [3:0] mem_tag;
     logic done;
-    logic [`XLEN-1:0] data; 
+    logic [2*`XLEN-1:0] data; 
 
     logic [`SET_LEN-1:0] set_idx;
     logic [`WAY_LEN-1:0] way_idx;

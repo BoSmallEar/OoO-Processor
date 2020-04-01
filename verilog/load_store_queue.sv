@@ -244,8 +244,7 @@ module load_store_queue(
     // We should find the matching address
     // Also we need to consider such cases:
     // STORE 1 byte in the address but the load instruction loads 1 word
-    // This is not a perfect match which needs overwritten in D$/Memory
-    logic [`XLEN-1:0] addr_diff;
+    // This is not a perfect match which needs overwritten in D$/Memory 
 
     always_comb begin
         forward_addr = lb2sq_request_entry.addr;
@@ -277,7 +276,7 @@ module load_store_queue(
             end
         end
         // don't forward if load instr needs more data
-        addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
+        int addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
                 BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[addr_diff+7]}},  SQ.entries[forward_match_idx].data[addr_diff+6 :addr_diff]}
