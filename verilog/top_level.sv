@@ -40,10 +40,10 @@ module top_level (
     output logic                    result_mis_pred,
     output                          commit_halt,
     output                          commit_illegal,
-    output logic    [1:0]           Dcache2mem_command,      // Issue a bus load
+    output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
     output MEM_SIZE                 Dcache2mem_size,
-    output logic    [`XLEN-1:0]     Dcache2mem_data
+    output logic    [2*`XLEN-1:0]     Dcache2mem_data
     
 `ifdef DEBUG
     , output logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values

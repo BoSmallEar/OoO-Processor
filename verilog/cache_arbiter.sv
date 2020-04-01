@@ -9,7 +9,7 @@ module cache_arbiter(
     input BUS_COMMAND     Dcache2mem_command,      // Issue a bus load
     input MEM_SIZE        Dcache2mem_size,
 	input [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
-    input [`XLEN-1:0]     Dcache2mem_data, 
+    input [2*`XLEN-1:0]     Dcache2mem_data, 
     input BUS_COMMAND     Icache2mem_command,    // command sent to memory
 	input [`XLEN-1:0]     Icache2mem_addr,  // Address sent to memor 
     
@@ -29,7 +29,7 @@ module cache_arbiter(
     output MEM_SIZE                       cache2mem_size,  
 
 	output logic          [`XLEN-1:0]     cache2mem_addr,         // Address sent to memory
-    output logic          [`XLEN-1:0]     cache2mem_data 
+    output logic          [2*`XLEN-1:0]     cache2mem_data 
 );
     assign mem2Dcache_response = mem2cache_response;
     assign mem2Icache_response = mem2cache_response;

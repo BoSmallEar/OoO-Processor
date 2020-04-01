@@ -32,7 +32,7 @@ module icache(
     //outputs
     output logic  	[`XLEN-1:0] 	Icache2proc_data,
     output logic                    Icache2proc_valid,
-    output logic    [1:0]           Icache2mem_command,    // command sent to memory
+    output BUS_COMMAND              Icache2mem_command,    // command sent to memory
 	output logic    [`XLEN-1:0]     Icache2mem_addr  // Address sent to memory
 );
 

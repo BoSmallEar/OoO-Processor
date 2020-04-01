@@ -179,7 +179,7 @@ module dcache(
     output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
     output MEM_SIZE                 Dcache2mem_size,         // load: always cache block; store: depends
-    output logic    [`XLEN-1:0]     Dcache2mem_data 
+    output logic    [2*`XLEN-1:0]     Dcache2mem_data 
     `ifdef DEBUG
         , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
         , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer

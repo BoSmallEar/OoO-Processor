@@ -154,13 +154,23 @@ module processor (
 
     logic  	[`XLEN-1:0] 	 Icache2proc_data;
     logic                    Icache2proc_valid;
-    logic   [1:0]            Icache2mem_command;    // command sent to memory
+    BUS_COMMAND              Icache2mem_command;    // command sent to memory
 	logic   [`XLEN-1:0]      Icache2mem_addr;  // Address sent to memory
 
-    logic    [1:0]           Dcache2mem_command;      // Issue a bus load
+    BUS_COMMAND              Dcache2mem_command;      // Issue a bus load
 	logic    [`XLEN-1:0]     Dcache2mem_addr;         // Address sent to memory
     MEM_SIZE                 Dcache2mem_size;
-    logic    [`XLEN-1:0]     Dcache2mem_data;
+    logic    [2*`XLEN-1:0]     Dcache2mem_data;
+
+    
+    logic          [3:0]           mem2Dcache_response;     // Tag from memory about current request
+	logic          [63:0]          mem2Dcache_data;        // Data coming back from memory
+	logic          [3:0]           mem2Dcache_tag;   
+    logic                          mem2Dcache_response_valid;      
+    logic          [3:0]           mem2Icache_response;     // Tag from memory about current request
+	logic          [63:0]          mem2Icache_data;         // Data coming back from memory
+	logic          [3:0]           mem2Icache_tag;        
+    logic                          mem2Icache_response_valid;     
 
 
     //toplevel_outputs
@@ -183,11 +193,6 @@ module processor (
     logic commit_illegal;
     logic commit_halt;
 
-	
-	assign proc2mem_command = Icache2mem_command;
-	assign proc2mem_addr = Icache2mem_addr; 
-	assign proc2mem_size = DOUBLE;
-	assign proc2mem_data = 64'b0;
 
 	assign processor_error_status = commit_illegal             ? ILLEGAL_INST :
 	                                commit_halt                ? HALTED_ON_WFI :
