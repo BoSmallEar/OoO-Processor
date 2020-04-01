@@ -258,8 +258,8 @@ module dcache(
         // cache hit
         if (load_cache_hit) begin
             case(lb2cache_request_entry.mem_size) 
-                BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select_byte } : cache_hit_data_select_byte;
-                HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : cache_hit_data_select_;
+                BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select_byte[7]}}, cache_hit_data_select_byte } : cache_hit_data_select_byte;
+                HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : cache_hit_data_select_half;
                 WORD: dcache_value = cache_hit_data_select_word;
             endcase
 
