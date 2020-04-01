@@ -282,7 +282,7 @@ module load_store_queue(
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
                 BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff+ :7]};
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
                 HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
                                                                         : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
