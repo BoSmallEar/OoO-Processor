@@ -252,8 +252,8 @@ module dcache(
         // cache hit
         if (load_cache_hit) begin
             case(lb2cache_request_entry.mem_size) 
-                BYTE: dcache_value = b2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select[7:0] } : cache_hit_data_select[7:0];
-                HALF: dcache_value = b2cache_request_entry.load_signed ? { {16{cache_hit_data_select[7]}}, cache_hit_data_select[15:0] } : cache_hit_data_select[15:0];
+                BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select[7:0] } : cache_hit_data_select[7:0];
+                HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select[7]}}, cache_hit_data_select[15:0] } : cache_hit_data_select[15:0];
                 WORD: dcache_value = cache_hit_data_select;
             endcase
 
@@ -305,7 +305,7 @@ module dcache(
     assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
-                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].addr : 0;
+                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].address : 0;
     assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : 0;
     assign Dcache2mem_data = sq2cache_request_valid ? sq2cache_request_entry.data : 0;
 
