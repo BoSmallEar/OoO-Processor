@@ -246,6 +246,8 @@ module load_store_queue(
     // STORE 1 byte in the address but the load instruction loads 1 word
     // This is not a perfect match which needs overwritten in D$/Memory 
 
+    logic [`XLEN-1:0] addr_diff; 
+
     always_comb begin
         forward_addr = lb2sq_request_entry.addr;
         forward_age = lb2sq_request_entry.age;
@@ -276,13 +278,13 @@ module load_store_queue(
             end
         end
         // don't forward if load instr needs more data
-        int addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
+        assign addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
         if (forward_match) begin
             case (lb2sq_request_entry.mem_size)
-                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[addr_diff+7]}},  SQ.entries[forward_match_idx].data[addr_diff+6 :addr_diff]}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[addr_diff+7 : addr_diff]};
-                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff+14:addr_diff]}
-                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff+15 : addr_diff]};
+                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff : +6]}
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff : +7]};
+                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8: +14]}
+                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 : +15]};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
                 default: forward_data = SQ.entries[forward_match_idx].data;
             endcase 

@@ -237,14 +237,20 @@ module dcache(
 
 
     // 1st/2nd 4 byte of cache hit block data
-    logic [31:0] cache_hit_data_select;
-    assign cache_hit_data_select = lb2cache_request_entry.addr[2] ? dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[63:32] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[31:0];
+    logic [31:0] cache_hit_data_select_word;
+    logic [15:0] cache_hit_data_select_half;
+    logic [7:0] cache_hit_data_select_byte;
+    assign cache_hit_data_select_word =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.words[lb2cache_request_entry.addr[2]];
+    assign cache_hit_data_select_half =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.halves[lb2cache_request_entry.addr[2:1]];
+    assign cache_hit_data_select_byte =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.bytes[lb2cache_request_entry.addr[2:0]];
 
     // 1st/2nd 4 byte of load_buffer_head_data
-    logic [31:0] load_buffer_head_data_select; // [63:32] or [31:0] of the cache line
-    assign load_buffer_head_data_select = load_buffer[load_buffer_head_ptr].address[2] ? load_buffer[load_buffer_head_ptr].data[63:32] : load_buffer[load_buffer_head_ptr].data[31:0];
-
-
+    logic [31:0] load_buffer_head_data_select_word; // [63:32] or [31:0] of the cache line
+    logic [15:0] load_buffer_head_data_select_half;
+    logic [7:0]  load_buffer_head_data_select_byte;
+    assign load_buffer_head_data_select_word =  load_buffer[load_buffer_head_ptr].data.words[load_buffer[load_buffer_head_ptr].address[2]];
+    assign load_buffer_head_data_select_half =  load_buffer[load_buffer_head_ptr].data.halves[load_buffer[load_buffer_head_ptr].address[2:1]];
+    assign load_buffer_head_data_select_byte =  load_buffer[load_buffer_head_ptr].data.bytes[load_buffer[load_buffer_head_ptr].address[2:0]];
     // Outputs: CDB assignments
     always_comb begin
         dcache_valid = load_cache_hit || (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done);
@@ -252,9 +258,9 @@ module dcache(
         // cache hit
         if (load_cache_hit) begin
             case(lb2cache_request_entry.mem_size) 
-                BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select[7:0] } : cache_hit_data_select[7:0];
-                HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select[7]}}, cache_hit_data_select[15:0] } : cache_hit_data_select[15:0];
-                WORD: dcache_value = cache_hit_data_select;
+                BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select[7]}}, cache_hit_data_select_byte } : cache_hit_data_select_byte;
+                HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : cache_hit_data_select_;
+                WORD: dcache_value = cache_hit_data_select_word;
             endcase
 
             //dcache_value = dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[8 * (1<<lb2cache_request_entry.mem_size) +  8 * lb2cache_request_entry.addr[2:0] - 1 : 8 * lb2cache_request_entry.addr[2:0]];
@@ -267,9 +273,9 @@ module dcache(
         // cache miss & load_buffer_head is done
         else if (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done) begin
             case (load_buffer[load_buffer_head_ptr].mem_size) 
-                BYTE: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {24{load_buffer_head_data_select[7]} },  load_buffer_head_data_select[7:0] } : load_buffer_head_data_select[7:0];
-                HALF: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {16{load_buffer_head_data_select[15]} }, load_buffer_head_data_select[15:0]} : load_buffer_head_data_select[15:0];
-                WORD: dcache_value = load_buffer_head_data_select;
+                BYTE: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {24{load_buffer_head_data_select_byte[7]} },  load_buffer_head_data_select_byte } : load_buffer_head_data_select_byte;
+                HALF: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {16{load_buffer_head_data_select_half[15]} }, load_buffer_head_data_select_half } : load_buffer_head_data_select_half;
+                WORD: dcache_value = load_buffer_head_data_select_word;
             endcase
 
             dcache_PC = load_buffer[load_buffer_head_ptr].PC;
