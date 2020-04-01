@@ -206,7 +206,7 @@ module top_level (
     logic                     mul_free;                // mult2cdb->rs_mul
 
     // RS_LB OUTPUTS
-    logic RS_LB_PACKET        rs_lb_packet;
+    RS_LB_PACKET              rs_lb_packet;
     logic                     rs_lb_out_valid;
 
     // RS_SQ OUTPUTS

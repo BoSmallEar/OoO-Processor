@@ -125,7 +125,7 @@ module rs_lb(
             
             // issue
             if (!no_rs_selected) begin
-                rs_fu_packet <= `SD rs_lb_packets[rs_lb_ex_idx];
+                rs_lb_packet <= `SD rs_lb_packets[rs_lb_ex_idx];
                 rs_lb_out_valid <= `SD 1'b1;
                 rs_lb_free[rs_lb_ex_idx] <= `SD 1'b1; 
             end

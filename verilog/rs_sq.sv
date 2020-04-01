@@ -26,7 +26,7 @@ module rs_sq(
     input   [`PRF_LEN-1:0]          base_preg_idx,
     input   [`PRF_LEN-1:0]          src_preg_idx,
     input   [`XLEN-1:0]             offset,
-    input   MEM_SZIE                mem_size,
+    input   MEM_SIZE                mem_size,
     // From PRF or CDB
 	input 				            base_ready,
 	input   [`XLEN-1:0]        	    base_value,
@@ -114,7 +114,7 @@ module rs_sq(
         else begin
             rs_sq_counter <= `SD rs_sq_counter + enable - (!no_rs_selected);
             // dispatch 
-            if (enable && !halt &&!illegal) begin
+            if (enable) begin
                 rs_sq_packets[rs_sq_free_idx].NPC           <= `SD NPC;
                 rs_sq_packets[rs_sq_free_idx].PC            <= `SD PC;
                 rs_sq_packets[rs_sq_free_idx].base_ready    <= `SD base_ready;
