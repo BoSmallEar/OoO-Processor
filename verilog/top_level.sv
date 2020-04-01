@@ -16,10 +16,10 @@ module top_level (
 	input                           clock,        
 	input                           reset,
     //dcache
-    input                           mem2Dcache_data,
-    input                           mem2Dcache_tag,
+    input      [63:0]               mem2Dcache_data,
+    input      [3:0]                mem2Dcache_tag,
     input                           mem2Dcache_response_valid,
-    input                           mem2Dcache_response,
+    input      [3:0]                mem2Dcache_response,
 
     input ID_PACKET                 id_packet,              // Output of ID stage - decoded 
     // Outputs

@@ -40,8 +40,8 @@ module rs_lb(
     input [`XLEN-1:0]                           cdb_value,
 
     output RS_LB_PACKET                         rs_lb_packet,     // overwrite base value, if needed
-    output                                      rs_lb_out_valid,
-    output                                      rs_lb_full           // sent rs_lb_full signal to if stage
+    output logic                                rs_lb_out_valid,
+    output logic                                rs_lb_full           // sent rs_lb_full signal to if stage
     `ifdef DEBUG
         , output RS_LB_PACKET [`RS_LB_SIZE-1:0]     rs_lb_packets
         , output logic [`RS_LB_LEN:0]               rs_lb_counter

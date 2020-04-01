@@ -41,8 +41,8 @@ module rs_sq(
     input   [`XLEN-1:0]             cdb_value,
 
     output RS_SQ_PACKET             rs_sq_packet,     // overwrite base and src value, if needed
-    output                          rs_sq_out_valid,
-    output                          rs_sq_full       // sent rs_sq_full signal to if stage
+    output  logic                        rs_sq_out_valid,
+    output  logic                        rs_sq_full       // sent rs_sq_full signal to if stage
 
     `ifdef DEBUG
         , output RS_SQ_PACKET [`RS_SQ_SIZE-1:0] rs_sq_packets

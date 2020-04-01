@@ -306,7 +306,7 @@ module dcache(
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].address : 0;
-    assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : 0;
+    assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : BYTE;
     assign Dcache2mem_data = sq2cache_request_valid ? sq2cache_request_entry.data : 0;
 
 

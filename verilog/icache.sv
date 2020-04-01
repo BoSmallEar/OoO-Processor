@@ -61,7 +61,7 @@ module icache(
                             
     assign {current_tag, current_index} = proc2Icache_addr[31:3];
     assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
-    assign Icache2mem_command = (miss_outstanding && !changed_addr);
+    assign Icache2mem_command = {1'b0,(miss_outstanding && !changed_addr)};
     
     
     always_ff @(posedge clock) begin
