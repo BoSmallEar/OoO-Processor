@@ -505,7 +505,8 @@ task print_id_packet;
     case(id_packet_out.fu_type)
         ALU:  $display("fu_type: ALU");
         MUL:  $display("fu_type: MUL");
-        MEM:  $display("fu_type: MEM");
+        LOAD:  $display("fu_type: LOAD");
+        STORE:  $display("fu_type: STORE");
         BRANCH:  $display("fu_type: BRANCH");
         default:  $display("fu_type: EMPTY!!!");
     endcase
@@ -584,7 +585,7 @@ task print_lsq;
     input logic [`SQ_LEN-1:0]    forward_match_idx;
     input logic [`XLEN-1:0]      forward_addr;
     input logic [`SQ_LEN-1:0]    forward_age;
-    input logic MEM_SIZE         forward_mem_size;
+    input MEM_SIZE               forward_mem_size;
 
     input logic                      none_selected;
     input logic [`LB_CAPACITY-1:0]   psel_gnt;
