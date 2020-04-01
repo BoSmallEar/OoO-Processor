@@ -22,71 +22,6 @@
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
 
-////////////////////////////////////////////////
-//
-// Dcache attribute definitions
-//
-////////////////////////////////////////////////
-
-`define DCACHE_CAPACITY        32
-`define SET_SIZE               8
-`define SET_LEN                3
-`define WAY_SIZE               4 
-`define WAY_LEN                2
-
-`define LOAD_BUFFER_SIZE       16
-`define LOAD_BUFFER_LEN        4
-
-typedef union packed {
-    logic [63:0] double;
-    logic [1:0][31:0] words;
-    logic [3:0][15:0] halves;
-    logic [7:0][7:0] bytes;
-} CACHE_BLOCK;
-
-typedef struct packed {
-    logic [7:0] tag;
-    logic [4:0] block_num;
-    logic [2:0] block_offset;
-} DMAP_ADDR; //address breakdown for a direct-mapped cache
-
-typedef struct packed {
-    logic [9:0] tag;
-    logic [2:0] set_index;
-    logic [2:0] block_offset;
-} SASS_ADDR; //address breakdown for a set associative cache
-
-typedef union packed {
-    DMAP_ADDR d; //for direct mapped
-    SASS_ADDR s; //for set associative
-} ADDR; //now we can pass around a common data type
-
-typedef struct packed {
-    logic [9:0]     tag;
-    CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
-} DCACHE_BLOCK;
-
-typedef struct packed {
-    logic [63:0]    data1;
-    logic [63:0]    data2;  
-} VICTIM;
-
-typedef struct packed {
-    logic valid;
-    logic [`XLEN-1:0] PC;
-    logic [`PRF_LEN-1:0]  prf_idx;
-    logic [`ROB_LEN-1:0]  rob_idx;  
-    logic [`XLEN-1:0] address;
-    MEM_SIZE mem_size;
-    logic load_signed;
-    logic [3:0] mem_tag;
-    logic done;
-    logic [`XLEN-1:0] data; 
-
-    logic [`SET_LEN-1:0] set_idx;
-    logic [`WAY_LEN-1:0] way_idx;
-} LOAD_BUFFER_ENTRY;
-
 
 //you can change the clock period to whatever, 10 is just fine
 `define VERILOG_CLOCK_PERIOD   10.0
@@ -675,5 +610,71 @@ typedef struct packed {
     logic [4:0]             rd_preg;
     logic                   rob_idx;    
 } FORWARD_PACKET;
+
+
+////////////////////////////////////////////////
+//
+// Dcache attribute definitions
+//
+////////////////////////////////////////////////
+
+`define DCACHE_CAPACITY        32
+`define SET_SIZE               8
+`define SET_LEN                3
+`define WAY_SIZE               4 
+`define WAY_LEN                2
+
+`define LOAD_BUFFER_SIZE       16
+`define LOAD_BUFFER_LEN        4
+
+typedef union packed {
+    logic [63:0] double;
+    logic [1:0][31:0] words;
+    logic [3:0][15:0] halves;
+    logic [7:0][7:0] bytes;
+} CACHE_BLOCK;
+
+typedef struct packed {
+    logic [7:0] tag;
+    logic [4:0] block_num;
+    logic [2:0] block_offset;
+} DMAP_ADDR; //address breakdown for a direct-mapped cache
+
+typedef struct packed {
+    logic [9:0] tag;
+    logic [2:0] set_index;
+    logic [2:0] block_offset;
+} SASS_ADDR; //address breakdown for a set associative cache
+
+typedef union packed {
+    DMAP_ADDR d; //for direct mapped
+    SASS_ADDR s; //for set associative
+} ADDR; //now we can pass around a common data type
+
+typedef struct packed {
+    logic [9:0]     tag;
+    CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
+} DCACHE_BLOCK;
+
+typedef struct packed {
+    logic [63:0]    data1;
+    logic [63:0]    data2;  
+} VICTIM;
+
+typedef struct packed {
+    logic valid;
+    logic [`XLEN-1:0] PC;
+    logic [`PRF_LEN-1:0]  prf_idx;
+    logic [`ROB_LEN-1:0]  rob_idx;  
+    logic [`XLEN-1:0] address;
+    MEM_SIZE mem_size;
+    logic load_signed;
+    logic [3:0] mem_tag;
+    logic done;
+    logic [`XLEN-1:0] data; 
+
+    logic [`SET_LEN-1:0] set_idx;
+    logic [`WAY_LEN-1:0] way_idx;
+} LOAD_BUFFER_ENTRY;
 
 `endif // __SYS_DEFS_VH__
