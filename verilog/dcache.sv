@@ -183,6 +183,7 @@ module dcache(
     `ifdef DEBUG
         , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
         , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer
+    `endif
 );
     `ifndef DEBUG
         // dcache
