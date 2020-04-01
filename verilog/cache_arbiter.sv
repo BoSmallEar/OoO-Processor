@@ -25,8 +25,8 @@ module cache_arbiter(
 	output logic          [63:0]          mem2Icache_data,         // Data coming back from memory
 	output logic          [3:0]           mem2Icache_tag,        
     output logic                          mem2Icache_response_valid,     
-    output logic          BUS_COMMAND     cache2mem_command,      // Issue a bus load
-    output logic          MEM_SIZE        cache2mem_size,  
+    output BUS_COMMAND                    cache2mem_command,      // Issue a bus load
+    output MEM_SIZE                       cache2mem_size,  
 
 	output logic          [`XLEN-1:0]     cache2mem_addr,         // Address sent to memory
     output logic          [`XLEN-1:0]     cache2mem_data, 
@@ -41,6 +41,7 @@ module cache_arbiter(
     assign mem2Icache_response_valid =  (Dcache2mem_command == 0) && (Icache2mem_command!=0);
     assign cache2mem_command = Dcache2mem_command!=0 ? Dcache2mem_command : Icache2mem_command;
     assign cache2mem_addr =  Dcache2mem_command!=0 ? Dcache2mem_addr : Icache2mem_addr;
+    assign cache2mem_size =  Dcache2mem_command!=0 ? Dcache2mem_size : DOUBLE;
     assign cache2mem_data =  Dcache2mem_command!=0 ? Dcache2mem_data : 0; 
 
 endmodule

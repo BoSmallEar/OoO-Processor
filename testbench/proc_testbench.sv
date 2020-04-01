@@ -163,10 +163,10 @@ module proc_testbench;
         .mem2proc_data(mem2proc_data),             // Data coming back from memory
         .mem2proc_tag(mem2proc_tag),              // Tag from memory about current reply
         
-        .proc2mem_command(proc2mem_command),    // command sent to memory
-        .proc2mem_addr(proc2mem_addr),  // Address sent to memory
-        .proc2mem_data(proc2mem_data),       // Data sent to memory
-        .proc2mem_size(proc2mem_size),           // data size sent to memory
+        .cache2mem_command(proc2mem_command),    // command sent to memory
+        .cache2mem_addr(proc2mem_addr),  // Address sent to memory
+        .cache2mem_data(proc2mem_data),       // Data sent to memory
+        .cache2mem_size(proc2mem_size),           // data size sent to memory
         .processor_error_status(processor_error_status)
     `ifdef DEBUG
         , .btb_taken(btb_taken)
