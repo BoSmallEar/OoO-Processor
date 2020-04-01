@@ -678,8 +678,8 @@ typedef struct packed {
     logic load_signed;
     logic [3:0] mem_tag;
     logic done;
-    logic [2*`XLEN-1:0] data; 
-
+    // logic [2*`XLEN-1:0] data; 
+	CACHE_BLOCK data;
     logic [`SET_LEN-1:0] set_idx;
     logic [`WAY_LEN-1:0] way_idx;
 } LOAD_BUFFER_ENTRY;
