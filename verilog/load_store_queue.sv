@@ -277,14 +277,14 @@ module load_store_queue(
         end
         // don't forward if load instr needs more data
         if (forward_match) begin
-            case (lb2sq_request_entry.mem_size) begin
+            case (lb2sq_request_entry.mem_size)
                 BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7]}},  SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+6 :forward_addr-SQ.entries[forward_match_idx].addr]}
                                                                         : {24'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+7: forward_addr-SQ.entries[forward_match_idx].addr]};
                 HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15]}}, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+14:forward_addr-SQ.entries[forward_match_idx].addr]};
                                                                         : {16'b0, SQ.entries[forward_match_idx].data[forward_addr-SQ.entries[forward_match_idx].addr+15:forward_addr-SQ.entries[forward_match_idx].addr]};
                 WORD: forward_data = SQ.entries[forward_match_idx].data;
                 default: forward_data = SQ.entries[forward_match_idx].data;
-            end 
+            endcase 
         end      
     end
 
