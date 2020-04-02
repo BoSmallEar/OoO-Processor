@@ -184,9 +184,9 @@ module load_store_queue(
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                        BYTE: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
                                                                                                 : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                        HALF: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
                                                                                                 : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
@@ -212,9 +212,9 @@ module load_store_queue(
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                        BYTE: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
                                                                                                 : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                        HALF: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
                                                                                                 : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
@@ -240,9 +240,9 @@ module load_store_queue(
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                        BYTE: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
                                                                                                 : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                        HALF: LB.entries[j].forward_data = LB_entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
                                                                                                 : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
