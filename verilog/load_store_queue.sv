@@ -48,16 +48,13 @@ module load_store_queue(
     output SQ_ENTRY                    sq2cache_request_entry
     `ifdef DEBUG
         , output STORE_QUEUE            SQ
-        , output LOAD_BUFFER            LB
-        , output logic                  sq_all_rsvd
+        , output LOAD_BUFFER            LB 
         , output logic [`SQ_LEN-1:0]    sq_head
         //, output logic [`SQ_LEN-1:0]    secure_age
         , output logic                  lb2sq_request_valid
         , output LB_ENTRY               lb2sq_request_entry
         , output logic [`SQ_LEN-1:0]    sq_counter
-        , output logic                  sq_empty    
-        , output logic                      none_selected
-        , output logic [`LB_CAPACITY-1:0]   psel_gnt
+        , output logic                  sq_empty      
         , output logic [`LB_LEN-1:0]        lq_free_idx
         , output logic                      lq_conflict
         , output logic [`LB_LEN-1:0]        lq_issue_idx
@@ -68,8 +65,7 @@ module load_store_queue(
     `ifndef DEBUG
         STORE_QUEUE                 SQ;
         LOAD_BUFFER                 LB;          
-        // internal signals between SQ and LB
-        logic                       sq_all_rsvd;
+        // internal signals between SQ and LB 
         logic [`SQ_LEN-1:0]         sq_head;
         //logic [`SQ_LEN-1:0]         secure_age;
         logic                       lb2sq_request_valid;
@@ -77,26 +73,21 @@ module load_store_queue(
         // store combinational
         logic [`SQ_LEN-1:0]         sq_counter;
         logic                       sq_empty;   
-        //load combinational
-        logic                       none_selected;
-        logic [`LB_CAPACITY-1:0]    psel_gnt;
+        //load combinational  
         logic [`LB_LEN-1:0]         lq_free_idx;
         logic                       lq_conflict;
         logic [`LB_LEN-1:0]         lq_issue_idx;
         logic [`LB_LEN-1:0]         lq_forward_idx;
     `endif 
-    
-    logic                       all_rsvd;
-    logic [`LB_CAPACITY-1:0]    gnt_bus; 
-    logic [`SQ_LEN-1:0]         sq_unkwn_idx;
+     
 
     logic [`LB_CAPACITY-1:0]    issue_psel_gnt;
     logic [`LB_CAPACITY-1:0]    issue_gnt_bus;
-    logic                       issue_non_selected;
+    logic                       issue_none_selected;
 
     logic [`LB_CAPACITY-1:0]    forward_psel_gnt;
     logic [`LB_CAPACITY-1:0]    forward_gnt_bus;
-    logic                       forward_non_selected;
+    logic                       forward_none_selected;
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////////// store combinational //////////////////////////
@@ -347,6 +338,22 @@ module load_store_queue(
     //     end      
     // end
 
+    
+    // Choose an issuable entry to issue with the given selector
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
+        .req(LB.issue_list),
+        .gnt(issue_psel_gnt),
+        .gnt_bus(issue_gnt_bus),
+        .empty(issue_none_selected)
+    );
+    // Choose an issuable entry to forward with the given selector
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
+        .req(LB.forward_list),
+        .gnt(forward_psel_gnt),
+        .gnt_bus(forward_gnt_bus),
+        .empty(forward_none_selected)
+    );
+
     // module outputs to  CDB
     assign sq_valid        = !forward_none_selected;
     assign sq_PC           = LB.entries[lq_forward_idx].PC;
@@ -365,21 +372,6 @@ module load_store_queue(
 //////////////////////////// load combinational //////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-    // Choose an issuable entry to issue with the given selector
-   
-    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
-        .req(LB.issue_list),
-        .gnt(issue_psel_gnt),
-        .gnt_bus(issue_gnt_bus),
-        .empty(issue_none_selected)
-    );
-
-    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
-        .req(LB.forward_list),
-        .gnt(forward_psel_gnt),
-        .gnt_bus(forward_gnt_bus),
-        .empty(forward_none_selected)
-    );
 
 
     always_comb begin
@@ -499,8 +491,6 @@ module load_store_queue(
             //     end
             // end
             // else    lb2cache_request_valid  <= `SD 0;
-
-            sq_all_rsvd <= `SD all_rsvd;
         end    
     end
 endmodule
