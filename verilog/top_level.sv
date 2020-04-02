@@ -938,47 +938,47 @@ module top_level (
     //                                              //
     //////////////////////////////////////////////////
     
-//     dcache dcache0(
-//         // Inputs
-//         .clock(clock),
-//         .reset(reset),
+    dcache dcache0(
+        // Inputs
+        .clock(clock),
+        .reset(reset),
 
-//         // Load buffer
-//         .lb2cache_request_entry(lb2cache_request_entry),
-//         .lb2cache_request_valid(lb2cache_request_valid),
+        // Load buffer
+        .lb2cache_request_entry(lb2cache_request_entry),
+        .lb2cache_request_valid(lb2cache_request_valid),
 
-//         // Store queue
-//         .sq2cache_request_entry(sq2cache_request_entry),
-//         .sq2cache_request_valid(sq2cache_request_valid),
+        // Store queue
+        .sq2cache_request_entry(sq2cache_request_entry),
+        .sq2cache_request_valid(sq2cache_request_valid),
 
-//         // Main Memory
-//         .mem2Dcache_data(mem2Dcache_data),         // Data coming back from memory
-//         .mem2Dcache_tag(mem2Dcache_tag),          
+        // Main Memory
+        .mem2Dcache_data(mem2Dcache_data),         // Data coming back from memory
+        .mem2Dcache_tag(mem2Dcache_tag),          
 
-//         // D-cache/I-cache arbiter
-//         .mem2Dcache_response_valid(mem2Dcache_response_valid),
-//         .mem2Dcache_response(mem2Dcache_response),     // Tag from memory about current request
-//         .commit_mis_pred(mis_pred_is_head),
+        // D-cache/I-cache arbiter
+        .mem2Dcache_response_valid(mem2Dcache_response_valid),
+        .mem2Dcache_response(mem2Dcache_response),     // Tag from memory about current request
+        .commit_mis_pred(mis_pred_is_head),
 
-//         // Outputs
-//         // CDB
-//         .dcache_PC(dcache_PC),
-//         .dcache_valid(dcache_valid),
-//         .dcache_value(dcache_value),
-//         .dcache_prf_idx(dcache_prf_idx),
-//         .dcache_rob_idx(dcache_rob_idx),
+        // Outputs
+        // CDB
+        .dcache_PC(dcache_PC),
+        .dcache_valid(dcache_valid),
+        .dcache_value(dcache_value),
+        .dcache_prf_idx(dcache_prf_idx),
+        .dcache_rob_idx(dcache_rob_idx),
 
-//         // Main Memory
-//         .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
-//         .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
-//         .Dcache2mem_size(Dcache2mem_size),
-//         .Dcache2mem_data(Dcache2mem_data)
+        // Main Memory
+        .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
+        .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
+        .Dcache2mem_size(Dcache2mem_size),
+        .Dcache2mem_data(Dcache2mem_data)
 
-//         `ifdef DEBUG
-//             , .dcache_blocks(dcache_blocks)
-//             , .load_buffer(load_buffer)
-//         `endif
-// );
+        `ifdef DEBUG
+            , .dcache_blocks(dcache_blocks)
+            , .load_buffer(load_buffer)
+        `endif
+);
 
     //////////////////////////////////////////////////
     //                                              //

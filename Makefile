@@ -99,6 +99,7 @@ SIMFILES =	verilog/alu.sv	\
 		verilog/cache_arbiter.sv	\
 		verilog/cdb.sv	\
 		verilog/decoder.sv	\
+		verilog/dcache.sv   \
 		verilog/icache.sv	\
 		verilog/if_id_stage.sv	\
 		verilog/predictor.sv	\
