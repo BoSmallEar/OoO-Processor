@@ -675,9 +675,10 @@ endtask
         reset = 1'b1;
         @(posedge clock);
         @(posedge clock);
-
+	    $display("aaa");
         $readmemh("program.mem", memory.unified_memory);
 
+	    $display("bbb");
         @(posedge clock);
         @(posedge clock);
         `SD;

@@ -335,7 +335,7 @@ module dcache(
         .load_lru_way_idx(current_load_assigned_way)
     );
 
-
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if(reset || commit_mis_pred) begin
             for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
