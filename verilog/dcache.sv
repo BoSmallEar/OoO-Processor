@@ -350,11 +350,6 @@ module dcache(
             load_buffer_head_ptr <= `SD 0;
             load_buffer_send_ptr <= `SD 0;
             load_buffer_tail_ptr <= `SD 0;
-            dcache_PC <= `SD `XLEN'hfacebeec;
-            dcache_valid <= `SD 1'b0;
-            dcache_value <= `SD 0;
-            dcache_prf_idx <= `SD 0;
-            dcache_rob_idx <= `SD 0;
 
         end
         else if(commit_mis_pred) begin
@@ -364,11 +359,7 @@ module dcache(
             load_buffer_head_ptr <= `SD 0;
             load_buffer_send_ptr <= `SD 0;
             load_buffer_tail_ptr <= `SD 0;
-            dcache_PC <= `SD `XLEN'hfacebeec;
-            dcache_valid <= `SD 1'b0;
-            dcache_value <= `SD 0;
-            dcache_prf_idx <= `SD 0;
-            dcache_rob_idx <= `SD 0;
+
         end
         else begin
             // Update: load buffer tail ptr
