@@ -399,26 +399,22 @@ module dcache(
             // Update: accept data from Main Memory
             if (!load_buffer_empty) begin
                 if (load_buffer_head_ptr < load_buffer_tail_ptr) begin
-                    for(int i = load_buffer_head_ptr; i < load_buffer_tail_ptr; i++) begin
-                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
-                            load_buffer[i].done <= `SD 1;
-                            load_buffer[i].data <= `SD mem2Dcache_data;
+                    for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
+                        if (i >= load_buffer_head_ptr && i < load_buffer_tail_ptr) begin
+                            if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
+                                load_buffer[i].done <= `SD 1;
+                                load_buffer[i].data <= `SD mem2Dcache_data;
+                            end
                         end
                     end
                 end
                 else begin
-                    for(int i = load_buffer_head_ptr; i < `LOAD_BUFFER_SIZE; i++) begin
-                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
-                            load_buffer[i].done <= `SD 1;
-                            load_buffer[i].data <= `SD mem2Dcache_data;
-                        end
-                    end
-
-                    for(int i = 0; i < load_buffer_tail_ptr; i++) begin
-                        if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
-                            load_buffer[i].done <= `SD 1;
-                            load_buffer[i].data <= `SD mem2Dcache_data;
-                        end
+                    for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
+                        if ((i >= load_buffer_head_ptr) || (i < load_buffer_tail_ptr))
+                            if (load_buffer[i].valid && !load_buffer[i].done && (load_buffer[i].mem_tag == mem2Dcache_tag) && (mem2Dcache_tag != 0)) begin
+                                load_buffer[i].done <= `SD 1;
+                                load_buffer[i].data <= `SD mem2Dcache_data;
+                            end
                     end
                 end
             end
