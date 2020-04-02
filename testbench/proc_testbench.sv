@@ -250,7 +250,6 @@ module proc_testbench;
         , .sq_head(sq_head)
         , .sq_counter(sq_counter)
         , .sq_empty(sq_empty)
-        , .forward_match(forward_match)
         , .lq_free_idx(lq_free_idx) 
         , .lq_issue_idx(lq_issue_idx)
         , .lq_forward_idx(lq_forward_idx)
