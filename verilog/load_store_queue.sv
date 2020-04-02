@@ -51,22 +51,17 @@ module load_store_queue(
         , output LOAD_BUFFER            LB
         , output logic                  sq_all_rsvd
         , output logic [`SQ_LEN-1:0]    sq_head
-        , output logic [`SQ_LEN-1:0]    secure_age
+        //, output logic [`SQ_LEN-1:0]    secure_age
         , output logic                  lb2sq_request_valid
         , output LB_ENTRY               lb2sq_request_entry
         , output logic [`SQ_LEN-1:0]    sq_counter
-        , output logic                  sq_empty
-        , output logic                  forward_match
-        , output logic [`XLEN-1:0]      forward_data   
-        , output logic [`SQ_LEN-1:0]    forward_match_idx
-        , output logic [`XLEN-1:0]      forward_addr
-        , output logic [`SQ_LEN-1:0]    forward_age
-        , output MEM_SIZE               forward_mem_size
+        , output logic                  sq_empty    
         , output logic                      none_selected
         , output logic [`LB_CAPACITY-1:0]   psel_gnt
         , output logic [`LB_LEN-1:0]        lq_free_idx
         , output logic                      lq_conflict
         , output logic [`LB_LEN-1:0]        lq_issue_idx
+        , output logic [`LB_LEN-1:0]        lq_forward_idx
     `endif
 );
 
@@ -76,30 +71,32 @@ module load_store_queue(
         // internal signals between SQ and LB
         logic                       sq_all_rsvd;
         logic [`SQ_LEN-1:0]         sq_head;
-        logic [`SQ_LEN-1:0]         secure_age;
+        //logic [`SQ_LEN-1:0]         secure_age;
         logic                       lb2sq_request_valid;
         LB_ENTRY                    lb2sq_request_entry;
         // store combinational
         logic [`SQ_LEN-1:0]         sq_counter;
-        logic                       sq_empty;
-        logic                       forward_match;
-        logic [`XLEN-1:0]           forward_data;
-        logic [`SQ_LEN-1:0]         forward_match_idx; 
-        logic [`XLEN-1:0]           forward_addr;
-        logic [`SQ_LEN-1:0]         forward_age;
-        MEM_SIZE                    forward_mem_size;
-
+        logic                       sq_empty;   
         //load combinational
         logic                       none_selected;
         logic [`LB_CAPACITY-1:0]    psel_gnt;
         logic [`LB_LEN-1:0]         lq_free_idx;
         logic                       lq_conflict;
         logic [`LB_LEN-1:0]         lq_issue_idx;
+        logic [`LB_LEN-1:0]         lq_forward_idx;
     `endif 
     
     logic                       all_rsvd;
     logic [`LB_CAPACITY-1:0]    gnt_bus; 
     logic [`SQ_LEN-1:0]         sq_unkwn_idx;
+
+    logic [`LB_CAPACITY-1:0]    issue_psel_gnt;
+    logic [`LB_CAPACITY-1:0]    issue_gnt_bus;
+    logic                       issue_non_selected;
+
+    logic [`LB_CAPACITY-1:0]    forward_psel_gnt;
+    logic [`LB_CAPACITY-1:0]    forward_gnt_bus;
+    logic                       forward_non_selected;
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////////// store combinational //////////////////////////
@@ -118,7 +115,7 @@ module load_store_queue(
 //////////////////////////// load combinational //////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-    assign           lb_full = LB.free_list==0;
+    assign   lb_full = LB.free_list==0;
 
     // Choose a free entry to put the new instruction
     always_comb begin
@@ -131,12 +128,20 @@ module load_store_queue(
     // Choose the issue_list from the resolved LB entries
     // They should be older than oldest unresolved store instruction
 
+    
+    logic [`XLEN-1:0] addr_diff; 
+
     always_comb begin
-        for (int j=0; j<`LB_CAPACITY; j++) begin
-            lq_conflict = 0;
-            if (!LB.entries[j].rsvd) 
+        for (int j=0; j<`LB_CAPACITY; j++) begin 
+            addr_diff = 0;
+            if (!LB.entries[j].rsvd) begin
+                LB.forward_list[j] = 0;
                 LB.issue_list[j] = 0; // Unresolved loads are not considered
+            end
             else begin  
+                // default: can issue
+                LB.forward_list[j] = 0;
+                LB.issue_list[j] = 1; // Unresolv
                 // Consider the loads older than the secure_age
                 // E.g. Index 0 - store ...
                 //                load (age: 1)
@@ -147,55 +152,96 @@ module load_store_queue(
                 //                                   leq secure_age
 
                 // from head to LB.entries[j].age
-                if (sq_head <= LB.entries[j].age) begin
-                    for (int i=sq_head; i <= LB.entries[j].age; i++) begin
-                        if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                            SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
-                            && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
-                            // addr lq_conflict
-                            LB.issue_list[j] = 0;
-                            lq_conflict         = 1;
-                        end
-                    end
-                end else begin
-                    for (int i=sq_head; i <= `SQ_CAPACITY-1; i++) begin
-                        if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                            SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
-                            && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
-                            // addr lq_conflict
-                            LB.issue_list[j] = 0;
-                            lq_conflict         = 1;
-                        end
-                    end
-                    for (int i=0; i <= LB.entries[j].age; i++) begin
-                        if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                            SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
-                            && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
-                            // addr lq_conflict
-                            LB.issue_list[j] = 0;
-                            lq_conflict         = 1;
-                        end
-                    end
+                if (LB.entries[j].sq_empty_when_dispatch) begin 
+                    LB.issue_list[j] = 1;
+                    LB.forward_list[j] = 0;
                 end
-
-                if (!lq_conflict) begin
-                    if (sq_all_rsvd)
-                        LB.issue_list[j] = 1;
-                    else begin
-                        if (sq_head <= secure_age) begin
-                        //  START [....... |HEAD ------ SECURE ---|..... ] END
-                        //  Whether TAIL wraps doesn't matter, we only care about the range between H&S
-                            if (LB.entries[j].age >= sq_head && LB.entries[j].age <= secure_age) begin
-                                LB.issue_list[j] = 1;
-                            end
-                            else if (sq_head > secure_age) begin
-                            //  START [|---- SECURE ----| ...... |HEAD ----|] END
-                                if(LB.entries[j].age >= sq_head || LB.entries[j].age <= secure_age) begin
-                                    LB.issue_list[j] = 1;
+                else begin
+                    if (sq_head < LB.entries[j].age) begin
+                        for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
+                            if (i >= sq_head && i < LB.entries[j].age) begin
+                                if (!SQ.entries[i].rsvd) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
+                                end
+                                else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
+                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 1;
+                                    addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
+                                     case (LB.entries[j].mem_size)
+                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
+                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        WORD: LB.entries[j].forward_data = SQ.entries[i].data;
+                                        default: LB.entries[j].forward_data = SQ.entries[i].data;
+                                    endcase 
+                                end
+                                else if (((SQ.entries[i].addr + SQ.entries[i].mem_size)>LB.entries[j].addr) || ((LB.entries[j].addr + LB.entries[j].mem_size)>SQ.entries[i].addr)) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
                                 end
                             end
                         end
-                        else LB.issue_list[j] = 0;
+                    end 
+                    else begin // head > age
+                        for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
+                            if (i >= sq_head) begin
+                                if (!SQ.entries[i].rsvd) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
+                                end
+                                else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
+                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 1;
+                                    addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
+                                     case (LB.entries[j].mem_size)
+                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
+                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        WORD: LB.entries[j].forward_data = SQ.entries[i].data;
+                                        default: LB.entries[j].forward_data = SQ.entries[i].data;
+                                    endcase 
+                                end
+                                else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
+                                    SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
+                                    && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
+                                end
+                            end
+                        end
+                        for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
+                            if (i < LB.entries[j].age) begin
+                                if (!SQ.entries[i].rsvd) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
+                                end
+                                else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
+                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 1;
+                                    addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
+                                     case (LB.entries[j].mem_size)
+                                        BYTE: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
+                                        HALF: LB.entries[j].forward_data = LB_entrie[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        WORD: LB.entries[j].forward_data = SQ.entries[i].data;
+                                        default: LB.entries[j].forward_data = SQ.entries[i].data;
+                                    endcase 
+                                end
+                                else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
+                                    SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
+                                    && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
+                                    LB.issue_list[j] = 0; 
+                                    LB.forward_list[j] = 0;
+                                end
+                            end
+                        end
                     end
                 end
             end 
@@ -211,45 +257,45 @@ module load_store_queue(
     // That is the index of the oldest unresolved store instruction
     // Tell LB secure_age to help her decide which load could be issued
  
-    always_comb begin
-        sq_unkwn_idx = `SQ_CAPACITY-1;
-        all_rsvd = 1;
-        // Default is the max_index
-        // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
-        if (!sq_empty) begin
-            if (SQ.tail == 0) begin
-                for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-                    if (SQ.entries[i].rsvd==0) begin
-                        sq_unkwn_idx = i;
-                        all_rsvd = 0;
-                    end
-                end
-            end
-            else if (SQ.head < SQ.tail) begin 
-                for (int i=SQ.tail-1; i>=SQ.head;i--) begin
-                    if (SQ.entries[i].rsvd==0) begin
-                        sq_unkwn_idx = i;
-                        all_rsvd = 0;
-                    end
-                end 
+    // always_comb begin
+    //     sq_unkwn_idx = `SQ_CAPACITY-1;
+    //     all_rsvd = 1;
+    //     // Default is the max_index
+    //     // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
+    //     if (!sq_empty) begin
+    //         if (SQ.tail == 0) begin
+    //             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
+    //                 if (SQ.entries[i].rsvd==0) begin
+    //                     sq_unkwn_idx = i;
+    //                     all_rsvd = 0;
+    //                 end
+    //             end
+    //         end
+    //         else if (SQ.head < SQ.tail) begin 
+    //             for (int i=SQ.tail-1; i>=SQ.head;i--) begin
+    //                 if (SQ.entries[i].rsvd==0) begin
+    //                     sq_unkwn_idx = i;
+    //                     all_rsvd = 0;
+    //                 end
+    //             end 
 
-            end
-            else if (SQ.head >= SQ.tail ) begin
-                for (int i=SQ.tail-1; i>=0;i--) begin
-                    if (SQ.entries[i].rsvd==0) begin
-                        sq_unkwn_idx = i;
-                        all_rsvd = 0;
-                    end
-                end
-                for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-                    if (SQ.entries[i].rsvd==0) begin
-                        sq_unkwn_idx = i;
-                        all_rsvd = 0;
-                    end
-                end
-            end
-        end
-    end
+    //         end
+    //         else if (SQ.head >= SQ.tail ) begin
+    //             for (int i=SQ.tail-1; i>=0;i--) begin
+    //                 if (SQ.entries[i].rsvd==0) begin
+    //                     sq_unkwn_idx = i;
+    //                     all_rsvd = 0;
+    //                 end
+    //             end
+    //             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
+    //                 if (SQ.entries[i].rsvd==0) begin
+    //                     sq_unkwn_idx = i;
+    //                     all_rsvd = 0;
+    //                 end
+    //             end
+    //         end
+    //     end
+    // end
 
     // To handle the LB forward request
     // We should find the matching address
@@ -257,63 +303,62 @@ module load_store_queue(
     // STORE 1 byte in the address but the load instruction loads 1 word
     // This is not a perfect match which needs overwritten in D$/Memory 
 
-    logic [`XLEN-1:0] addr_diff; 
 
-    always_comb begin
-        forward_addr = lb2sq_request_entry.addr;
-        forward_age = lb2sq_request_entry.age;
-        forward_match = 0; 
-        if (sq_empty) begin
-            forward_match = 0;
-        end
-        else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < forward_age) begin
-            for (int i=SQ.head; i < forward_age; i++) begin    
-            if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-                    forward_match = 1;
-                    forward_match_idx = i; 
-                end
-            end
-        end
-        else begin
-            for (int i=SQ.head; (i < forward_age) && (i < `SQ_CAPACITY); i++) begin
-                if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-                    forward_match = 1;
-                    forward_match_idx = i;
-                end
-            end
-            for (int i=0; (i < forward_age) && (i < SQ.tail); i++) begin
-                if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-                    forward_match = 1;
-                    forward_match_idx = i;
-                end
-            end
-        end
-        // don't forward if load instr needs more data
-        addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
-        if (forward_match) begin
-            case (lb2sq_request_entry.mem_size)
-                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
-                                                                        : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
-                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
-                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
-                WORD: forward_data = SQ.entries[forward_match_idx].data;
-                default: forward_data = SQ.entries[forward_match_idx].data;
-            endcase 
-        end      
-    end
+    // always_comb begin
+    //     forward_addr = lb2sq_request_entry.addr;
+    //     forward_age = lb2sq_request_entry.age;
+    //     forward_match = 0; 
+    //     if (sq_empty) begin
+    //         forward_match = 0;
+    //     end
+    //     else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < forward_age) begin
+    //         for (int i=SQ.head; i < forward_age; i++) begin    
+    //         if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+    //                 forward_match = 1;
+    //                 forward_match_idx = i; 
+    //             end
+    //         end
+    //     end
+    //     else begin
+    //         for (int i=SQ.head; (i < forward_age) && (i < `SQ_CAPACITY); i++) begin
+    //             if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+    //                 forward_match = 1;
+    //                 forward_match_idx = i;
+    //             end
+    //         end
+    //         for (int i=0; (i < forward_age) && (i < SQ.tail); i++) begin
+    //             if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+    //                 forward_match = 1;
+    //                 forward_match_idx = i;
+    //             end
+    //         end
+    //     end
+    //     // don't forward if load instr needs more data
+    //     addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
+    //     if (forward_match) begin
+    //         case (lb2sq_request_entry.mem_size)
+    //             BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
+    //                                                                     : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
+    //             HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
+    //                                                                     : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
+    //             WORD: forward_data = SQ.entries[forward_match_idx].data;
+    //             default: forward_data = SQ.entries[forward_match_idx].data;
+    //         endcase 
+    //     end      
+    // end
 
     // module outputs to  CDB
-    assign sq_valid        = forward_match;
-    assign sq_PC           = lb2sq_request_entry.PC;
-    assign sq_value        = forward_data;
-    assign sq_prf_idx      = lb2sq_request_entry.rd_preg;
-    assign sq_rob_idx      = lb2sq_request_entry.rob_idx;
+    assign sq_valid        = !forward_none_selected;
+    assign sq_PC           = LB.entries[lq_forward_idx].PC;
+    assign sq_value        = LB.entries[lq_forward_idx].forward_data;
+    assign sq_prf_idx      = LB.entries[lq_forward_idx].rd_preg;
+    assign sq_rob_idx      = LB.entries[lq_forward_idx].rob_idx;
 
 
     assign sq2cache_request_valid = store_enable;
     assign sq2cache_request_entry = SQ.entries[SQ.head];
-    assign lb2cache_request_valid = lb2sq_request_valid ? !forward_match : 0;
-    assign lb2cache_request_entry = lb2sq_request_entry;
+    assign lb2cache_request_valid = !issue_none_selected;
+    assign lb2cache_request_entry = LB.entries[lq_issue_idx];
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -322,19 +367,35 @@ module load_store_queue(
 
     // Choose an issuable entry to issue with the given selector
    
-    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel (
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
         .req(LB.issue_list),
-        .gnt(psel_gnt),
-        .gnt_bus(gnt_bus),
-        .empty(none_selected)
+        .gnt(issue_psel_gnt),
+        .gnt_bus(issue_gnt_bus),
+        .empty(issue_none_selected)
     );
+
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
+        .req(LB.forward_list),
+        .gnt(forward_psel_gnt),
+        .gnt_bus(forward_gnt_bus),
+        .empty(forward_none_selected)
+    );
+
 
     always_comb begin
         lq_issue_idx = `LB_CAPACITY'h0; 
         for (int j=0; j<`LB_CAPACITY; j++) begin
-            if (psel_gnt[j]) lq_issue_idx = j; 
+            if (issue_psel_gnt[j]) lq_issue_idx = j; 
         end
     end
+
+    always_comb begin
+        lq_forward_idx = `LB_CAPACITY'h0; 
+        for (int j=0; j<`LB_CAPACITY; j++) begin
+            if (forward_psel_gnt[j]) lq_forward_idx = j; 
+        end
+    end
+
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////// load sequential /////////////////////////////
@@ -356,7 +417,8 @@ module load_store_queue(
             LB.entries[lq_free_idx].age        <= `SD sq_tail;
             LB.entries[lq_free_idx].rsvd       <= `SD 0;
             // Update the list - this entry no longer free/resolved
-            LB.free_list[lq_free_idx]          <= `SD 0;    
+            LB.free_list[lq_free_idx]          <= `SD 0;   
+            LB.entries[lq_free_idx].sq_empty_when_dispatch <= `SD sq_empty;  
         end 
         
         // RS fills information into specific entry when it's ready
@@ -372,13 +434,12 @@ module load_store_queue(
 
         // Some load inst can be issued
         // Once issued; Retire from LB
-        if (!none_selected) begin
-            lb2sq_request_valid         <= `SD 1;
-            lb2sq_request_entry         <= `SD LB.entries[lq_issue_idx];
+        if (!issue_none_selected) begin
             LB.free_list[lq_issue_idx]  <= `SD 1;
         end
-        else
-            lb2sq_request_valid <= `SD 0;
+        if (!forward_none_selected) begin
+            LB.free_list[lq_forward_idx]  <= `SD 1;
+        end
     end
 
 
@@ -395,11 +456,12 @@ module load_store_queue(
             sq_counter <= `SD 0;
             for(int it=0;it<`SQ_CAPACITY;it++) begin
                 SQ.entries[it].rsvd  <= `SD 0;
+                // SQ.entries[it].valid  <= `SD 0;
             end 
-            secure_age              <= `SD 0;
+            // secure_age              <= `SD 0;
         end
         else begin
-            secure_age <= `SD sq_unkwn_idx;
+           //  secure_age <= `SD sq_unkwn_idx;
 
             // To add the new instruction with unknown data and addr
             if (sq_enable) begin 
@@ -420,6 +482,7 @@ module load_store_queue(
             if (sq2cache_request_valid) begin 
                 // Retire the head; Move head pointer
                 SQ.entries[SQ.head].rsvd    <= `SD 0;
+                //SQ.entries[SQ.head].valid    <= `SD 0;
                 SQ.head                     <= `SD (SQ.head == `SQ_CAPACITY-1) ? 0 : SQ.head + 1;
             end
 

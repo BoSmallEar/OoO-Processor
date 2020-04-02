@@ -261,6 +261,7 @@ module dcache(
                 BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select_byte[7]}}, cache_hit_data_select_byte } : cache_hit_data_select_byte;
                 HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : cache_hit_data_select_half;
                 WORD: dcache_value = cache_hit_data_select_word;
+                default: dcache_value = load_buffer_head_data_select_word;
             endcase
 
             //dcache_value = dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[8 * (1<<lb2cache_request_entry.mem_size) +  8 * lb2cache_request_entry.addr[2:0] - 1 : 8 * lb2cache_request_entry.addr[2:0]];
@@ -276,6 +277,7 @@ module dcache(
                 BYTE: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {24{load_buffer_head_data_select_byte[7]} },  load_buffer_head_data_select_byte } : load_buffer_head_data_select_byte;
                 HALF: dcache_value = load_buffer[load_buffer_head_ptr].load_signed ? { {16{load_buffer_head_data_select_half[15]} }, load_buffer_head_data_select_half } : load_buffer_head_data_select_half;
                 WORD: dcache_value = load_buffer_head_data_select_word;
+                default: dcache_value = load_buffer_head_data_select_word;
             endcase
 
             dcache_PC = load_buffer[load_buffer_head_ptr].PC;
@@ -433,6 +435,7 @@ module dcache(
                     BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
                     HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
                     WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                    default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                 endcase
             end
         end

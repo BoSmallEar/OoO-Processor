@@ -573,7 +573,9 @@ typedef struct packed {
     logic [`XLEN-1:0]       addr;
     logic [4:0]             rd_preg;
     logic                   rob_idx;
+	logic  [`XLEN-1:0]      forward_data;
     logic [`SQ_LEN-1:0]     age;
+	logic					sq_empty_when_dispatch;
     logic                   rsvd;   //  Load address is resolved
 	MEM_SIZE                mem_size;
 	logic                   load_signed;
@@ -583,6 +585,7 @@ typedef struct packed {
     LB_ENTRY    [`LB_CAPACITY-1:0]   entries;       
     logic       [`LB_CAPACITY-1:0]   free_list;     // Unoccupied entries
     logic       [`LB_CAPACITY-1:0]   issue_list;   
+	logic		[`LB_CAPACITY-1:0]   forward_list；
 } LOAD_BUFFER;
 
  
@@ -591,10 +594,11 @@ typedef struct packed {
 typedef struct packed {            
 	logic [`XLEN-1:0]       PC;                
     logic [`XLEN-1:0]       addr;
-    logic [`XLEN-1:0]                data;
+    logic [`XLEN-1:0]       data;
     logic                   rob_idx;
     logic                   rsvd;
 	MEM_SIZE                mem_size;
+	// logic                   valid;
 } SQ_ENTRY;
 
 typedef struct packed {
