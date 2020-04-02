@@ -585,7 +585,7 @@ typedef struct packed {
     LB_ENTRY    [`LB_CAPACITY-1:0]   entries;       
     logic       [`LB_CAPACITY-1:0]   free_list;     // Unoccupied entries
     logic       [`LB_CAPACITY-1:0]   issue_list;   
-	logic		[`LB_CAPACITY-1:0]   forward_list；
+	logic		[`LB_CAPACITY-1:0]   forward_list;
 } LOAD_BUFFER;
 
  
