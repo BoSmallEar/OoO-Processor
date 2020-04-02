@@ -113,14 +113,14 @@ module load_store_queue(
     assign sq_head_rsvd = SQ.entries[SQ.head].rsvd;
     assign lb_full = (LB.free_list==`LB_CAPACITY'b0);
 
-    // module outputs to  CDB
+    // module outputs to CDB
     assign sq_valid        = !forward_none_selected;
     assign sq_PC           = LB.entries[lq_forward_idx].PC;
     assign sq_value        = LB.entries[lq_forward_idx].forward_data;
     assign sq_prf_idx      = LB.entries[lq_forward_idx].rd_preg;
     assign sq_rob_idx      = LB.entries[lq_forward_idx].rob_idx;
 
-    // module outputs to  Cache
+    // module outputs to Dcache
     assign sq2cache_request_valid = store_enable;
     assign sq2cache_request_entry = SQ.entries[SQ.head]; 
     assign lb2cache_request_valid = !issue_none_selected;
