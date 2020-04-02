@@ -588,8 +588,6 @@ typedef struct packed {
 	logic		[`LB_CAPACITY-1:0]   forward_list;
 } LOAD_BUFFER;
 
- 
-
 
 typedef struct packed {            
 	logic [`XLEN-1:0]       PC;                

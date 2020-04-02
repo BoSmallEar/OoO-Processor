@@ -49,14 +49,10 @@ module load_store_queue(
     `ifdef DEBUG
         , output STORE_QUEUE            SQ
         , output LOAD_BUFFER            LB 
-        , output logic [`SQ_LEN-1:0]    sq_head
-        //, output logic [`SQ_LEN-1:0]    secure_age
-        , output logic                  lb2sq_request_valid
-        , output LB_ENTRY               lb2sq_request_entry
+        , output logic [`SQ_LEN-1:0]    sq_head 
         , output logic [`SQ_LEN-1:0]    sq_counter
         , output logic                  sq_empty      
         , output logic [`LB_LEN-1:0]        lq_free_idx
-        , output logic                      lq_conflict
         , output logic [`LB_LEN-1:0]        lq_issue_idx
         , output logic [`LB_LEN-1:0]        lq_forward_idx
     `endif
@@ -66,16 +62,12 @@ module load_store_queue(
         STORE_QUEUE                 SQ;
         LOAD_BUFFER                 LB;          
         // internal signals between SQ and LB 
-        logic [`SQ_LEN-1:0]         sq_head;
-        //logic [`SQ_LEN-1:0]         secure_age;
-        logic                       lb2sq_request_valid;
-        LB_ENTRY                    lb2sq_request_entry;
+        logic [`SQ_LEN-1:0]         sq_head; 
         // store combinational
         logic [`SQ_LEN-1:0]         sq_counter;
         logic                       sq_empty;   
         //load combinational  
         logic [`LB_LEN-1:0]         lq_free_idx;
-        logic                       lq_conflict;
         logic [`LB_LEN-1:0]         lq_issue_idx;
         logic [`LB_LEN-1:0]         lq_forward_idx;
     `endif 
@@ -88,11 +80,29 @@ module load_store_queue(
     logic [`LB_CAPACITY-1:0]    forward_psel_gnt;
     logic [`LB_CAPACITY-1:0]    forward_gnt_bus;
     logic                       forward_none_selected;
+        
+    logic [`XLEN-1:0] addr_diff; 
+
+    // Choose an issuable entry to issue with the given selector
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
+        .req(LB.issue_list),
+        .gnt(issue_psel_gnt),
+        .gnt_bus(issue_gnt_bus),
+        .empty(issue_none_selected)
+    );
+    // Choose an issuable entry to forward with the given selector
+    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
+        .req(LB.forward_list),
+        .gnt(forward_psel_gnt),
+        .gnt_bus(forward_gnt_bus),
+        .empty(forward_none_selected)
+    );
 
 //////////////////////////////////////////////////////////////////////////
-/////////////////////////// store combinational //////////////////////////
+/////////////////////////// combinational //////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+    // sq
     assign sq_tail = SQ.tail;
     assign sq_head = SQ.head;
     assign sq_empty = sq_counter==0;
@@ -101,26 +111,39 @@ module load_store_queue(
     // When SQ is full, TAIL won't overlap HEAD; To avoid some age problems
 
     assign sq_head_rsvd = SQ.entries[SQ.head].rsvd;
+    assign lb_full = (LB.free_list==`LB_CAPACITY'b0);
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////// load combinational //////////////////////////
-//////////////////////////////////////////////////////////////////////////
+    // module outputs to  CDB
+    assign sq_valid        = !forward_none_selected;
+    assign sq_PC           = LB.entries[lq_forward_idx].PC;
+    assign sq_value        = LB.entries[lq_forward_idx].forward_data;
+    assign sq_prf_idx      = LB.entries[lq_forward_idx].rd_preg;
+    assign sq_rob_idx      = LB.entries[lq_forward_idx].rob_idx;
 
-    assign   lb_full = LB.free_list==0;
+    // module outputs to  Cache
+    assign sq2cache_request_valid = store_enable;
+    assign sq2cache_request_entry = SQ.entries[SQ.head]; 
+    assign lb2cache_request_valid = !issue_none_selected;
+    assign lb2cache_request_entry = LB.entries[lq_issue_idx];
+
 
     // Choose a free entry to put the new instruction
     always_comb begin
+        lq_issue_idx = `LB_CAPACITY'h0; 
+        lq_forward_idx = `LB_CAPACITY'h0;
         lq_free_idx = `LB_LEN'h0; 
         for (int j=0; j<`LB_CAPACITY; j++) begin
+            if (issue_psel_gnt[j]) lq_issue_idx = j;   
+            if (forward_psel_gnt[j]) lq_forward_idx = j; 
             if (LB.free_list[j]==0) lq_free_idx = j; 
         end
     end
+ 
+
+
 
     // Choose the issue_list from the resolved LB entries
     // They should be older than oldest unresolved store instruction
-
-    
-    logic [`XLEN-1:0] addr_diff; 
 
     always_comb begin
         for (int j=0; j<`LB_CAPACITY; j++) begin 
@@ -240,153 +263,7 @@ module load_store_queue(
     end
 
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////// store combinational /////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
-    // Compute the secure_age [sequential version of sq_unkwn_idx]
-    // That is the index of the oldest unresolved store instruction
-    // Tell LB secure_age to help her decide which load could be issued
- 
-    // always_comb begin
-    //     sq_unkwn_idx = `SQ_CAPACITY-1;
-    //     all_rsvd = 1;
-    //     // Default is the max_index
-    //     // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
-    //     if (!sq_empty) begin
-    //         if (SQ.tail == 0) begin
-    //             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-    //                 if (SQ.entries[i].rsvd==0) begin
-    //                     sq_unkwn_idx = i;
-    //                     all_rsvd = 0;
-    //                 end
-    //             end
-    //         end
-    //         else if (SQ.head < SQ.tail) begin 
-    //             for (int i=SQ.tail-1; i>=SQ.head;i--) begin
-    //                 if (SQ.entries[i].rsvd==0) begin
-    //                     sq_unkwn_idx = i;
-    //                     all_rsvd = 0;
-    //                 end
-    //             end 
-
-    //         end
-    //         else if (SQ.head >= SQ.tail ) begin
-    //             for (int i=SQ.tail-1; i>=0;i--) begin
-    //                 if (SQ.entries[i].rsvd==0) begin
-    //                     sq_unkwn_idx = i;
-    //                     all_rsvd = 0;
-    //                 end
-    //             end
-    //             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-    //                 if (SQ.entries[i].rsvd==0) begin
-    //                     sq_unkwn_idx = i;
-    //                     all_rsvd = 0;
-    //                 end
-    //             end
-    //         end
-    //     end
-    // end
-
-    // To handle the LB forward request
-    // We should find the matching address
-    // Also we need to consider such cases:
-    // STORE 1 byte in the address but the load instruction loads 1 word
-    // This is not a perfect match which needs overwritten in D$/Memory 
-
-
-    // always_comb begin
-    //     forward_addr = lb2sq_request_entry.addr;
-    //     forward_age = lb2sq_request_entry.age;
-    //     forward_match = 0; 
-    //     if (sq_empty) begin
-    //         forward_match = 0;
-    //     end
-    //     else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < forward_age) begin
-    //         for (int i=SQ.head; i < forward_age; i++) begin    
-    //         if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-    //                 forward_match = 1;
-    //                 forward_match_idx = i; 
-    //             end
-    //         end
-    //     end
-    //     else begin
-    //         for (int i=SQ.head; (i < forward_age) && (i < `SQ_CAPACITY); i++) begin
-    //             if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-    //                 forward_match = 1;
-    //                 forward_match_idx = i;
-    //             end
-    //         end
-    //         for (int i=0; (i < forward_age) && (i < SQ.tail); i++) begin
-    //             if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-    //                 forward_match = 1;
-    //                 forward_match_idx = i;
-    //             end
-    //         end
-    //     end
-    //     // don't forward if load instr needs more data
-    //     addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
-    //     if (forward_match) begin
-    //         case (lb2sq_request_entry.mem_size)
-    //             BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
-    //                                                                     : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
-    //             HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
-    //                                                                     : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
-    //             WORD: forward_data = SQ.entries[forward_match_idx].data;
-    //             default: forward_data = SQ.entries[forward_match_idx].data;
-    //         endcase 
-    //     end      
-    // end
-
-    
-    // Choose an issuable entry to issue with the given selector
-    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
-        .req(LB.issue_list),
-        .gnt(issue_psel_gnt),
-        .gnt_bus(issue_gnt_bus),
-        .empty(issue_none_selected)
-    );
-    // Choose an issuable entry to forward with the given selector
-    psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
-        .req(LB.forward_list),
-        .gnt(forward_psel_gnt),
-        .gnt_bus(forward_gnt_bus),
-        .empty(forward_none_selected)
-    );
-
-    // module outputs to  CDB
-    assign sq_valid        = !forward_none_selected;
-    assign sq_PC           = LB.entries[lq_forward_idx].PC;
-    assign sq_value        = LB.entries[lq_forward_idx].forward_data;
-    assign sq_prf_idx      = LB.entries[lq_forward_idx].rd_preg;
-    assign sq_rob_idx      = LB.entries[lq_forward_idx].rob_idx;
-
-
-    assign sq2cache_request_valid = store_enable;
-    assign sq2cache_request_entry = SQ.entries[SQ.head];
-    assign lb2cache_request_valid = !issue_none_selected;
-    assign lb2cache_request_entry = LB.entries[lq_issue_idx];
-
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////// load combinational //////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
-
-    always_comb begin
-        lq_issue_idx = `LB_CAPACITY'h0; 
-        for (int j=0; j<`LB_CAPACITY; j++) begin
-            if (issue_psel_gnt[j]) lq_issue_idx = j; 
-        end
-    end
-
-    always_comb begin
-        lq_forward_idx = `LB_CAPACITY'h0; 
-        for (int j=0; j<`LB_CAPACITY; j++) begin
-            if (forward_psel_gnt[j]) lq_forward_idx = j; 
-        end
-    end
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -481,16 +358,6 @@ module load_store_queue(
             if (sq_enable && ~(store_enable && SQ.entries[SQ.head].rsvd)) sq_counter <= `SD sq_counter + 1;
             if (~sq_enable && (store_enable && SQ.entries[SQ.head].rsvd)) sq_counter <= `SD sq_counter - 1;
 
-            // if (lb2sq_request_valid) begin
-            //     if (forward_match) begin
-            //         lb2cache_request_valid  <= `SD 0;
-            //     end
-            //     else begin
-            //         lb2cache_request_valid  <= `SD 1;
-            //         lb2cache_request_entry  <= `SD lb2sq_request_entry;
-            //     end
-            // end
-            // else    lb2cache_request_valid  <= `SD 0;
         end    
     end
 endmodule

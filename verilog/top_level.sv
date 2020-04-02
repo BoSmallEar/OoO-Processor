@@ -125,25 +125,13 @@ module top_level (
 
     // Outputs of load store queue
     , output STORE_QUEUE            SQ
-    , output LOAD_BUFFER            LB
-    , output logic                  sq_all_rsvd
-    , output logic [`SQ_LEN-1:0]    sq_head
-    , output logic [`SQ_LEN-1:0]    secure_age
-    , output logic                  lb2sq_request_valid
-    , output LB_ENTRY               lb2sq_request_entry
+    , output LOAD_BUFFER            LB 
+    , output logic [`SQ_LEN-1:0]    sq_head 
     , output logic [`SQ_LEN-1:0]    sq_counter
-    , output logic                  sq_empty
-    , output logic                  forward_match
-    , output logic [`XLEN-1:0]      forward_data   
-    , output logic [`SQ_LEN-1:0]    forward_match_idx
-    , output logic [`XLEN-1:0]      forward_addr
-    , output logic [`SQ_LEN-1:0]    forward_age
-    , output MEM_SIZE               forward_mem_size
-    , output logic                      none_selected
-    , output logic [`LB_CAPACITY-1:0]   psel_gnt
-    , output logic [`LB_LEN-1:0]        lq_free_idx
-    , output logic                      lq_conflict
-    , output logic [`LB_LEN-1:0]        lq_issue_idx
+    , output logic                  sq_empty  
+    , output logic [`LB_LEN-1:0]    lq_free_idx 
+    , output logic [`LB_LEN-1:0]    lq_issue_idx
+    , output logic [`LB_LEN-1:0]    lq_forward_idx
 
     // Outputs of  dcache
     , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
@@ -274,27 +262,6 @@ module top_level (
     logic                     cdb_mis_pred;             // cdb->rob
     logic                     cdb_local_pred_direction; // cdb->bp
     logic                     cdb_global_pred_direction;// cdb->bp
-
-    STORE_QUEUE            SQ;
-    LOAD_BUFFER            LB;
-    logic                  sq_all_rsvd;
-    logic [`SQ_LEN-1:0]    sq_head;
-    logic [`SQ_LEN-1:0]    secure_age;
-    logic                  lb2sq_request_valid;
-    LB_ENTRY               lb2sq_request_entry;
-    logic [`SQ_LEN-1:0]    sq_counter;
-    logic                  sq_empty;
-    logic                  forward_match;
-    logic [`XLEN-1:0]      forward_data; 
-    logic [`SQ_LEN-1:0]    forward_match_idx;
-    logic [`XLEN-1:0]      forward_addr;
-    logic [`SQ_LEN-1:0]    forward_age;
-    MEM_SIZE               forward_mem_size;
-    logic                      none_selected;
-    logic [`LB_CAPACITY-1:0]   psel_gnt;
-    logic [`LB_LEN-1:0]        lq_free_idx;
-    logic                      lq_conflict;
-    logic [`LB_LEN-1:0]        lq_issue_idx;
 `endif
 
     // ROB INPUTS
@@ -768,24 +735,13 @@ module top_level (
     `ifdef DEBUG
         , .SQ(SQ)
         , .LB(LB)
-        , .sq_all_rsvd(sq_all_rsvd)
         , .sq_head(sq_head)
-        , .secure_age(secure_age)
-        , .lb2sq_request_valid(lb2sq_request_valid)
-        , .lb2sq_request_entry(lb2sq_request_entry)
         , .sq_counter(sq_counter)
         , .sq_empty(sq_empty)
         , .forward_match(forward_match)
-        , .forward_data(forward_data)   
-        , .forward_match_idx(forward_match_idx)
-        , .forward_addr(forward_addr)
-        , .forward_age(forward_age)
-        , .forward_mem_size(forward_mem_size)
-        , .none_selected(none_selected)
-        , .psel_gnt(psel_gnt)
-        , .lq_free_idx(lq_free_idx)
-        , .lq_conflict(lq_conflict)
+        , .lq_free_idx(lq_free_idx) 
         , .lq_issue_idx(lq_issue_idx)
+        , .lq_forward_idx(lq_forward_idx)
     `endif
     );
 
