@@ -736,58 +736,58 @@ module top_level (
     //                                              //
     //////////////////////////////////////////////////
 
-    load_store_queue load_store_queue0(
-        .clock(clock),
-        .reset(reset),
-        .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
-        .rs_lb_out_valid(rs_lb_out_valid),
-        .rs_lb_packet(rs_lb_packet),  
-        .sq_enable(id_packet.valid && id_packet.fu_type == STORE && id_packet.wr_mem==`TRUE),
-        .rs_sq_out_valid(rs_sq_out_valid),
-        .rs_sq_packet(rs_sq_packet),
-        .store_enable(store_enable),
+    // load_store_queue load_store_queue0(
+    //     .clock(clock),
+    //     .reset(reset),
+    //     .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
+    //     .rs_lb_out_valid(rs_lb_out_valid),
+    //     .rs_lb_packet(rs_lb_packet),  
+    //     .sq_enable(id_packet.valid && id_packet.fu_type == STORE && id_packet.wr_mem==`TRUE),
+    //     .rs_sq_out_valid(rs_sq_out_valid),
+    //     .rs_sq_packet(rs_sq_packet),
+    //     .store_enable(store_enable),
 
-        // outputs
-        .lb_full(lb_full),
-        .assigned_lb_idx(assigned_lb_idx),
-        .sq_head_rsvd(sq_head_rsvd), 
-        .sq_full(sq_full),
-        .sq_tail(sq_tail),
-        // to CDB
-        .sq_valid(sq_valid),
-        .sq_value(sq_value),
-        .sq_prf_idx(sq_prf_idx),
-        .sq_rob_idx(sq_rob_idx),
-        .sq_PC(sq_PC),
+    //     // outputs
+    //     .lb_full(lb_full),
+    //     .assigned_lb_idx(assigned_lb_idx),
+    //     .sq_head_rsvd(sq_head_rsvd), 
+    //     .sq_full(sq_full),
+    //     .sq_tail(sq_tail),
+    //     // to CDB
+    //     .sq_valid(sq_valid),
+    //     .sq_value(sq_value),
+    //     .sq_prf_idx(sq_prf_idx),
+    //     .sq_rob_idx(sq_rob_idx),
+    //     .sq_PC(sq_PC),
         
-        .lb2cache_request_valid(lb2cache_request_valid),
-        .lb2cache_request_entry(lb2cache_request_entry),
-        .sq2cache_request_valid(sq2cache_request_valid),
-        .sq2cache_request_entry(sq2cache_request_entry)
+    //     .lb2cache_request_valid(lb2cache_request_valid),
+    //     .lb2cache_request_entry(lb2cache_request_entry),
+    //     .sq2cache_request_valid(sq2cache_request_valid),
+    //     .sq2cache_request_entry(sq2cache_request_entry)
 
-    `ifdef DEBUG
-        , .SQ(SQ)
-        , .LB(LB)
-        , .sq_all_rsvd(sq_all_rsvd)
-        , .sq_head(sq_head)
-        , .secure_age(secure_age)
-        , .lb2sq_request_valid(lb2sq_request_valid)
-        , .lb2sq_request_entry(lb2sq_request_entry)
-        , .sq_counter(sq_counter)
-        , .sq_empty(sq_empty)
-        , .forward_match(forward_match)
-        , .forward_data(forward_data)   
-        , .forward_match_idx(forward_match_idx)
-        , .forward_addr(forward_addr)
-        , .forward_age(forward_age)
-        , .forward_mem_size(forward_mem_size)
-        , .none_selected(none_selected)
-        , .psel_gnt(psel_gnt)
-        , .lq_free_idx(lq_free_idx)
-        , .lq_conflict(lq_conflict)
-        , .lq_issue_idx(lq_issue_idx)
-    `endif
-    );
+    // `ifdef DEBUG
+    //     , .SQ(SQ)
+    //     , .LB(LB)
+    //     , .sq_all_rsvd(sq_all_rsvd)
+    //     , .sq_head(sq_head)
+    //     , .secure_age(secure_age)
+    //     , .lb2sq_request_valid(lb2sq_request_valid)
+    //     , .lb2sq_request_entry(lb2sq_request_entry)
+    //     , .sq_counter(sq_counter)
+    //     , .sq_empty(sq_empty)
+    //     , .forward_match(forward_match)
+    //     , .forward_data(forward_data)   
+    //     , .forward_match_idx(forward_match_idx)
+    //     , .forward_addr(forward_addr)
+    //     , .forward_age(forward_age)
+    //     , .forward_mem_size(forward_mem_size)
+    //     , .none_selected(none_selected)
+    //     , .psel_gnt(psel_gnt)
+    //     , .lq_free_idx(lq_free_idx)
+    //     , .lq_conflict(lq_conflict)
+    //     , .lq_issue_idx(lq_issue_idx)
+    // `endif
+    // );
 
     //////////////////////////////////////////////////
     //                                              //
