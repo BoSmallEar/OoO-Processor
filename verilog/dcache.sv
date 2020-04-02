@@ -337,13 +337,38 @@ module dcache(
 
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
-        if(reset || commit_mis_pred) begin
-            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
-                load_buffer[i].valid <= `SD 0;
+        if(reset) begin
+            for (int j = 0; j < `SET_SIZE; j++) begin
+                for (int k = 0; k < `WAY_SIZE; k++) begin
+                    dcache_blocks[j][k].valid <= `SD 1'b0;
+                end
             end
+
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++)
+                load_buffer[i].valid <= `SD 0;
+            
             load_buffer_head_ptr <= `SD 0;
             load_buffer_send_ptr <= `SD 0;
             load_buffer_tail_ptr <= `SD 0;
+            dcache_PC <= `SD `XLEN'hfacebeec;
+            dcache_valid <= `SD 1'b0;
+            dcache_value <= `SD 0;
+            dcache_prf_idx <= `SD 0;
+            dcache_rob_idx <= `SD 0;
+
+        end
+        else if(commit_mis_pred) begin
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++)
+                load_buffer[i].valid <= `SD 0;
+        
+            load_buffer_head_ptr <= `SD 0;
+            load_buffer_send_ptr <= `SD 0;
+            load_buffer_tail_ptr <= `SD 0;
+            dcache_PC <= `SD `XLEN'hfacebeec;
+            dcache_valid <= `SD 1'b0;
+            dcache_value <= `SD 0;
+            dcache_prf_idx <= `SD 0;
+            dcache_rob_idx <= `SD 0;
         end
         else begin
             // Update: load buffer tail ptr
