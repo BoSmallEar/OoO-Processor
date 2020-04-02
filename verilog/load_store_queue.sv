@@ -211,34 +211,34 @@ module load_store_queue(
     // That is the index of the oldest unresolved store instruction
     // Tell LB secure_age to help her decide which load could be issued
  
-    always_comb begin
-        sq_unkwn_idx = `SQ_CAPACITY-1;
-        all_rsvd = 1;
-        // Default is the max_index
-        // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
-        if (SQ.head < SQ.tail || SQ.tail==0) begin
-            for (int i=SQ.tail-1; i>=SQ.head;i--) begin
-                if (SQ.entries[i].rsvd==0) begin
-                    sq_unkwn_idx = i;
-                    all_rsvd = 0;
-                end
-            end
-        end
-        else if (SQ.head > SQ.tail ) begin
-            for (int i=SQ.tail-1; i>=0;i--) begin
-                if (SQ.entries[i].rsvd==0) begin
-                    sq_unkwn_idx = i;
-                    all_rsvd = 0;
-                end
-            end
-            for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-                if (SQ.entries[i].rsvd==0) begin
-                    sq_unkwn_idx = i;
-                    all_rsvd = 0;
-                end
-            end
-        end
-    end
+    // always_comb begin
+    //     sq_unkwn_idx = `SQ_CAPACITY-1;
+    //     all_rsvd = 1;
+    //     // Default is the max_index
+    //     // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
+    //     if (SQ.head < SQ.tail || SQ.tail==0) begin
+    //         for (int i=SQ.tail-1; i>=SQ.head;i--) begin
+    //             if (SQ.entries[i].rsvd==0) begin
+    //                 sq_unkwn_idx = i;
+    //                 all_rsvd = 0;
+    //             end
+    //         end
+    //     end
+    //     else if (SQ.head > SQ.tail ) begin
+    //         for (int i=SQ.tail-1; i>=0;i--) begin
+    //             if (SQ.entries[i].rsvd==0) begin
+    //                 sq_unkwn_idx = i;
+    //                 all_rsvd = 0;
+    //             end
+    //         end
+    //         for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
+    //             if (SQ.entries[i].rsvd==0) begin
+    //                 sq_unkwn_idx = i;
+    //                 all_rsvd = 0;
+    //             end
+    //         end
+    //     end
+    // end
 
     // To handle the LB forward request
     // We should find the matching address
