@@ -102,6 +102,7 @@ SIMFILES =	verilog/alu.sv	\
 		verilog/dcache.sv   \
 		verilog/icache.sv	\
 		verilog/if_id_stage.sv	\
+		verilog/load_store_queue.sv   \
 		verilog/predictor.sv	\
 		verilog/prf.sv	\
 		verilog/processor.sv	\
