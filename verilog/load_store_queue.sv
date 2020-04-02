@@ -382,8 +382,8 @@ module load_store_queue(
             SQ.head <= `SD 0;
             SQ.tail <= `SD 0;
             sq_counter <= `SD 0;
-            for(int i=0;i<`SQ_CAPACITY;i++) begin
-                SQ.entries[i].rsvd  <= `SD 0;
+            for(int it=0;it<`SQ_CAPACITY;it++) begin
+                SQ.entries[it].rsvd  <= `SD 0;
             end 
             secure_age              <= `SD 0;
         end
