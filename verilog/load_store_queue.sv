@@ -203,106 +203,106 @@ module load_store_queue(
 //     end
 
 
-// //////////////////////////////////////////////////////////////////////////
-// //////////////////////////// store combinational /////////////////////////
-// //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////// store combinational /////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
-//     // Compute the secure_age [sequential version of sq_unkwn_idx]
-//     // That is the index of the oldest unresolved store instruction
-//     // Tell LB secure_age to help her decide which load could be issued
+    // Compute the secure_age [sequential version of sq_unkwn_idx]
+    // That is the index of the oldest unresolved store instruction
+    // Tell LB secure_age to help her decide which load could be issued
  
-//     always_comb begin
-//         sq_unkwn_idx = `SQ_CAPACITY-1;
-//         all_rsvd = 1;
-//         // Default is the max_index
-//         // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
-//         if (SQ.head < SQ.tail || SQ.tail==0) begin
-//             for (int i=SQ.tail-1; i>=SQ.head;i--) begin
-//                 if (SQ.entries[i].rsvd==0) begin
-//                     sq_unkwn_idx = i;
-//                     all_rsvd = 0;
-//                 end
-//             end
-//         end
-//         else if (SQ.head > SQ.tail ) begin
-//             for (int i=SQ.tail-1; i>=0;i--) begin
-//                 if (SQ.entries[i].rsvd==0) begin
-//                     sq_unkwn_idx = i;
-//                     all_rsvd = 0;
-//                 end
-//             end
-//             for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
-//                 if (SQ.entries[i].rsvd==0) begin
-//                     sq_unkwn_idx = i;
-//                     all_rsvd = 0;
-//                 end
-//             end
-//         end
-//     end
+    always_comb begin
+        sq_unkwn_idx = `SQ_CAPACITY-1;
+        all_rsvd = 1;
+        // Default is the max_index
+        // Because when all addresses are resolved, we need a secure_age that's larger than any forward_age
+        if (SQ.head < SQ.tail || SQ.tail==0) begin
+            for (int i=SQ.tail-1; i>=SQ.head;i--) begin
+                if (SQ.entries[i].rsvd==0) begin
+                    sq_unkwn_idx = i;
+                    all_rsvd = 0;
+                end
+            end
+        end
+        else if (SQ.head > SQ.tail ) begin
+            for (int i=SQ.tail-1; i>=0;i--) begin
+                if (SQ.entries[i].rsvd==0) begin
+                    sq_unkwn_idx = i;
+                    all_rsvd = 0;
+                end
+            end
+            for (int i=`SQ_CAPACITY-1; i>=SQ.head;i--) begin
+                if (SQ.entries[i].rsvd==0) begin
+                    sq_unkwn_idx = i;
+                    all_rsvd = 0;
+                end
+            end
+        end
+    end
 
-//     // To handle the LB forward request
-//     // We should find the matching address
-//     // Also we need to consider such cases:
-//     // STORE 1 byte in the address but the load instruction loads 1 word
-//     // This is not a perfect match which needs overwritten in D$/Memory 
+    // To handle the LB forward request
+    // We should find the matching address
+    // Also we need to consider such cases:
+    // STORE 1 byte in the address but the load instruction loads 1 word
+    // This is not a perfect match which needs overwritten in D$/Memory 
 
-//     logic [`XLEN-1:0] addr_diff; 
+    logic [`XLEN-1:0] addr_diff; 
 
-//     always_comb begin
-//         forward_addr = lb2sq_request_entry.addr;
-//         forward_age = lb2sq_request_entry.age;
-//         forward_match = 0; 
-//         if (sq_empty) begin
-//             forward_match = 0;
-//         end
-//         else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < forward_age) begin
-//             for (int i=SQ.head; i < forward_age; i++) begin    
-//             if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-//                     forward_match = 1;
-//                     forward_match_idx = i; 
-//                 end
-//             end
-//         end
-//         else begin
-//             for (int i=SQ.head; (i < forward_age) && (i < `SQ_CAPACITY); i++) begin
-//                 if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-//                     forward_match = 1;
-//                     forward_match_idx = i;
-//                 end
-//             end
-//             for (int i=0; (i < forward_age) && (i < SQ.tail); i++) begin
-//                 if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
-//                     forward_match = 1;
-//                     forward_match_idx = i;
-//                 end
-//             end
-//         end
-//         // don't forward if load instr needs more data
-//         addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
-//         if (forward_match) begin
-//             case (lb2sq_request_entry.mem_size)
-//                 BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
-//                                                                         : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
-//                 HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
-//                                                                         : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
-//                 WORD: forward_data = SQ.entries[forward_match_idx].data;
-//                 default: forward_data = SQ.entries[forward_match_idx].data;
-//             endcase 
-//         end      
-//     end
+    always_comb begin
+        forward_addr = lb2sq_request_entry.addr;
+        forward_age = lb2sq_request_entry.age;
+        forward_match = 0; 
+        if (sq_empty) begin
+            forward_match = 0;
+        end
+        else if ((SQ.head < SQ.tail || SQ.tail == 0) && SQ.head < forward_age) begin
+            for (int i=SQ.head; i < forward_age; i++) begin    
+            if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+                    forward_match = 1;
+                    forward_match_idx = i; 
+                end
+            end
+        end
+        else begin
+            for (int i=SQ.head; (i < forward_age) && (i < `SQ_CAPACITY); i++) begin
+                if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+                    forward_match = 1;
+                    forward_match_idx = i;
+                end
+            end
+            for (int i=0; (i < forward_age) && (i < SQ.tail); i++) begin
+                if (forward_addr >= SQ.entries[i].addr && forward_addr+1'b1<<forward_mem_size<=SQ.entries + 1'b1<<SQ.entries[i].mem_size) begin
+                    forward_match = 1;
+                    forward_match_idx = i;
+                end
+            end
+        end
+        // don't forward if load instr needs more data
+        addr_diff = forward_addr-SQ.entries[forward_match_idx].addr;
+        if (forward_match) begin
+            case (lb2sq_request_entry.mem_size)
+                BYTE: forward_data = lb2sq_request_entry.load_signed ? {{25{SQ.entries[forward_match_idx].data[8*addr_diff+7]}},  SQ.entries[forward_match_idx].data[8*addr_diff +: 6]}
+                                                                        : {24'b0, SQ.entries[forward_match_idx].data[8*addr_diff +: 7]};
+                HALF: forward_data = lb2sq_request_entry.load_signed ? {{17{SQ.entries[forward_match_idx].data[8*addr_diff+15]}}, SQ.entries[forward_match_idx].data[addr_diff*8 +: 14]}
+                                                                        : {16'b0, SQ.entries[forward_match_idx].data[addr_diff*8 +: 15]};
+                WORD: forward_data = SQ.entries[forward_match_idx].data;
+                default: forward_data = SQ.entries[forward_match_idx].data;
+            endcase 
+        end      
+    end
 
-//     // module outputs to  CDB
-//     assign sq_valid        = forward_match;
-//     assign sq_PC           = lb2sq_request_entry.PC;
-//     assign sq_value        = forward_data;
-//     assign sq_prf_idx      = lb2sq_request_entry.rd_preg;
-//     assign sq_rob_idx      = lb2sq_request_entry.rob_idx;
+    // module outputs to  CDB
+    assign sq_valid        = forward_match;
+    assign sq_PC           = lb2sq_request_entry.PC;
+    assign sq_value        = forward_data;
+    assign sq_prf_idx      = lb2sq_request_entry.rd_preg;
+    assign sq_rob_idx      = lb2sq_request_entry.rob_idx;
 
 
-//     assign sq2cache_request_valid = store_enable;
-//     assign sq2cache_request_entry = SQ.entries[SQ.head];
-//     assign lb2cache_request_valid = lb2sq_request_valid ? !forward_match : 0;
-//     assign lb2cache_request_entry = lb2sq_request_entry;
+    assign sq2cache_request_valid = store_enable;
+    assign sq2cache_request_entry = SQ.entries[SQ.head];
+    assign lb2cache_request_valid = lb2sq_request_valid ? !forward_match : 0;
+    assign lb2cache_request_entry = lb2sq_request_entry;
 
 
 //////////////////////////////////////////////////////////////////////////
