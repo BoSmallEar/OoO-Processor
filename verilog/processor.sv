@@ -131,6 +131,7 @@ module processor (
     // Outputs of dcache
     , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
     , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer
+    , output logic result_valid
 `endif
 );
 
@@ -138,6 +139,7 @@ module processor (
 	logic [`XLEN-1:0]	proc2Icache_addr;
 `ifndef DEBUG
 	ID_PACKET        id_packet_out;
+    logic            result_valid;
 `endif
 
     logic  	[`XLEN-1:0] 	 Icache2proc_data;
@@ -176,7 +178,6 @@ module processor (
     logic result_global_taken;
     logic result_taken;
     // logic result_mis_pred;
-    logic result_valid;
 
     logic commit_illegal;
     logic commit_halt;
