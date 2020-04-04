@@ -17,6 +17,8 @@
 `timescale 1ns/100ps
 
 module proc_testbench;
+    logic [31:0] clock_count;
+	logic [31:0] instr_count;
 
     logic clock;
     logic reset;
@@ -141,6 +143,9 @@ module proc_testbench;
     DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
     LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
 
+    // commit valid
+    logic result_valid;
+
     logic [63:0] debug_counter;
 
     processor processor0(
@@ -257,6 +262,8 @@ module proc_testbench;
         // Outputs of dcache
         , .dcache_blocks(dcache_blocks)
         , .load_buffer(load_buffer)
+
+        , .result_valid(result_valid)
     `endif
     );
 
@@ -626,6 +633,40 @@ task print_lsq;
     $display("=========================================================");
 endtask
 
+
+task show_mem_with_decimal;
+	input [31:0] start_addr;
+	input [31:0] end_addr;
+	int showing_data;
+	begin
+		$display("@@@");
+		showing_data=0;
+		for(int k=start_addr;k<=end_addr; k=k+1)
+			if (memory.unified_memory[k] != 0) begin
+				$display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
+			                                            memory.unified_memory[k]);
+				showing_data=1;
+			end else if(showing_data!=0) begin
+				$display("@@@");
+				showing_data=0;
+			end
+		$display("@@@");
+	end
+endtask  // task show_mem_with_decimal
+
+	// Task to display # of elapsed clock edges
+task show_clk_count;
+	real cpi;
+	
+	begin
+		cpi = (clock_count + 1.0) / instr_count;
+		$display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
+		          clock_count+1, instr_count, cpi);
+		$display("@@  %4.2f ns total time to execute\n@@\n",
+		          clock_count*`VERILOG_CLOCK_PERIOD);
+	end
+endtask  // task show_clk_count 
+
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
     // so the actual period of the clock is 10, not 5.
     always begin
@@ -658,7 +699,18 @@ endtask
 		$display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime); 
     end
     
- 
+ 	// Count the number of posedges and number of instructions completed
+	// till simulation ends
+	always @(posedge clock) begin
+		if(reset) begin
+			clock_count <= `SD 0;
+			instr_count <= `SD 0;
+		end else begin
+			clock_count <= `SD (clock_count + 1);
+			instr_count <= `SD (instr_count + result_valid);
+		end
+	end  
+
  
     always @(negedge clock) begin
         if(reset) begin
@@ -704,7 +756,7 @@ endtask
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");  
-                
+                show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
                 $display("@@  %t : System halted\n@@", $realtime);
                 
                 case(processor_error_status)
@@ -719,6 +771,7 @@ endtask
                             processor_error_status);
                 endcase
                 $display("@@@\n@@"); 
+                show_clk_count;
                 $finish;
             end
             debug_counter <= debug_counter + 1;
