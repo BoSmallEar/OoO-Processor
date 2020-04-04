@@ -18,27 +18,27 @@
 
 module proc_testbench;
     logic [31:0] clock_count;
-	logic [31:0] instr_count;
+    logic [31:0] instr_count;
 
     logic clock;
     logic reset;
-	logic [3:0]   mem2proc_response;         // Tag from memory about current request
-	logic [63:0]  mem2proc_data;             // Data coming back from memory
-	logic [3:0]   mem2proc_tag;              // Tag from memory about current reply
-	
-	logic [1:0]  proc2mem_command;    // command sent to memory
-	logic [`XLEN-1:0] proc2mem_addr;  // Address sent to memory
-	logic [63:0] proc2mem_data;       // Data sent to memory
-	MEM_SIZE proc2mem_size;          // data size sent to memory
+    logic [3:0]   mem2proc_response;         // Tag from memory about current request
+    logic [63:0]  mem2proc_data;             // Data coming back from memory
+    logic [3:0]   mem2proc_tag;              // Tag from memory about current reply
+    
+    logic [1:0]  proc2mem_command;    // command sent to memory
+    logic [`XLEN-1:0] proc2mem_addr;  // Address sent to memory
+    logic [63:0] proc2mem_data;       // Data sent to memory
+    MEM_SIZE proc2mem_size;          // data size sent to memory
 
     logic                                 result_mis_pred;
 
     // from if_id_stage (debug)
-	logic					btb_taken;
-	logic	[`XLEN-1:0]		btb_target_PC;
-	logic					tournament_taken;
-	logic					local_taken;
-	logic					global_taken;
+    logic                   btb_taken;
+    logic   [`XLEN-1:0]     btb_target_PC;
+    logic                   tournament_taken;
+    logic                   local_taken;
+    logic                   global_taken;
 
     // prf outputs (debug)
     logic [`PRF_SIZE-1:0] [`XLEN-1:0]     prf_values;
@@ -268,21 +268,21 @@ module proc_testbench;
     );
 
 
-	// Instantiate the Data Memory
-	mem memory (
-		// Inputs
-		.clk               (clock),
-		.proc2mem_command  (proc2mem_command),
-		.proc2mem_addr     (proc2mem_addr),
-		.proc2mem_data     (proc2mem_data),
+    // Instantiate the Data Memory
+    mem memory (
+        // Inputs
+        .clk               (clock),
+        .proc2mem_command  (proc2mem_command),
+        .proc2mem_addr     (proc2mem_addr),
+        .proc2mem_data     (proc2mem_data),
 `ifndef CACHE_MODE
-		.proc2mem_size     (proc2mem_size),
+        .proc2mem_size     (proc2mem_size),
 `endif
-		// Outputs
-		.mem2proc_response (mem2proc_response),
-		.mem2proc_data     (mem2proc_data),
-		.mem2proc_tag      (mem2proc_tag)
-	);
+        // Outputs
+        .mem2proc_response (mem2proc_response),
+        .mem2proc_data     (mem2proc_data),
+        .mem2proc_tag      (mem2proc_tag)
+    );
 
 
 task print_prf;
@@ -434,11 +434,11 @@ task print_rs;
 endtask
 
 task print_predict;
-	input logic					btb_taken;
-	input logic	[`XLEN-1:0]		btb_target_PC;
-	input logic					tournament_taken;
-	input logic					local_taken;
-	input logic					global_taken;
+    input logic                 btb_taken;
+    input logic [`XLEN-1:0]     btb_target_PC;
+    input logic                 tournament_taken;
+    input logic                 local_taken;
+    input logic                 global_taken;
     $display("|btb_taken | btb_target_PC | tournament_taken | local_taken | global_taken |");
     $display("|%10d|%15d|%18d|%13d|%14d|", btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
     $display("============================================================================");
@@ -498,10 +498,10 @@ task print_id_packet;
     $display("opb_areg_idx: %d", id_packet_out.opb_areg_idx);
     $display("dest_areg_idx: %d", id_packet_out.dest_areg_idx);
     case(id_packet_out.opa_select)
-	    OPA_IS_RS1  : $display("opa_select: OPA_IS_RS1");
-	    OPA_IS_NPC  : $display("opa_select: OPA_IS_NPC");
-	    OPA_IS_PC   : $display("opa_select: OPA_IS_PC");
-	    OPA_IS_ZERO : $display("opa_select: OPA_IS_ZERO");
+        OPA_IS_RS1  : $display("opa_select: OPA_IS_RS1");
+        OPA_IS_NPC  : $display("opa_select: OPA_IS_NPC");
+        OPA_IS_PC   : $display("opa_select: OPA_IS_PC");
+        OPA_IS_ZERO : $display("opa_select: OPA_IS_ZERO");
         default     : $display("opa_select: EMPTY!!!");
     endcase
     case(id_packet_out.opb_select)
@@ -633,38 +633,58 @@ task print_lsq;
     $display("=========================================================");
 endtask
 
+task print_dcache_load_buffer;
+    input LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
+    $display("====================================== DCACHE LOAD BUFFER =================================================");
+    $display("|PC      |prf_idx |rob_idx |address |mem_size|load_signed |mem_tag |done|valid |data    |set_idx |way_idx |");
+    for (int i=0; i<`LOAD_BUFFER_SIZE; i++) begin
+        $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d|",  load_buffer.PC,
+                                                                        load_buffer.prf_idx
+                                                                        load_buffer.rob_idx
+                                                                        load_buffer.address
+                                                                        load_buffer.mem_size
+                                                                        load_buffer.load_signed
+                                                                        load_buffer.mem_tag
+                                                                        load_buffer.done
+                                                                        load_buffer.valid
+                                                                        load_buffer.data
+                                                                        load_buffer.set_idx
+                                                                        load_buffer.way_idx);
+    end
+    $display("==========================================================================================================");
+endtask
 
 task show_mem_with_decimal;
-	input [31:0] start_addr;
-	input [31:0] end_addr;
-	int showing_data;
-	begin
-		$display("@@@");
-		showing_data=0;
-		for(int k=start_addr;k<=end_addr; k=k+1)
-			if (memory.unified_memory[k] != 0) begin
-				$display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
-			                                            memory.unified_memory[k]);
-				showing_data=1;
-			end else if(showing_data!=0) begin
-				$display("@@@");
-				showing_data=0;
-			end
-		$display("@@@");
-	end
+    input [31:0] start_addr;
+    input [31:0] end_addr;
+    int showing_data;
+    begin
+        $display("@@@");
+        showing_data=0;
+        for(int k=start_addr;k<=end_addr; k=k+1)
+            if (memory.unified_memory[k] != 0) begin
+                $display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
+                                                        memory.unified_memory[k]);
+                showing_data=1;
+            end else if(showing_data!=0) begin
+                $display("@@@");
+                showing_data=0;
+            end
+        $display("@@@");
+    end
 endtask  // task show_mem_with_decimal
 
-	// Task to display # of elapsed clock edges
+    // Task to display # of elapsed clock edges
 task show_clk_count;
-	real cpi;
-	
-	begin
-		cpi = (clock_count + 1.0) / instr_count;
-		$display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
-		          clock_count+1, instr_count, cpi);
-		$display("@@  %4.2f ns total time to execute\n@@\n",
-		          clock_count*`VERILOG_CLOCK_PERIOD);
-	end
+    real cpi;
+    
+    begin
+        cpi = (clock_count + 1.0) / instr_count;
+        $display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
+                  clock_count+1, instr_count, cpi);
+        $display("@@  %4.2f ns total time to execute\n@@\n",
+                  clock_count*`VERILOG_CLOCK_PERIOD);
+    end
 endtask  // task show_clk_count 
 
     // Set up the clock to tick, notice that this block inverts clock every 5 ticks,
@@ -677,39 +697,39 @@ endtask  // task show_clk_count
 
     initial begin
 
-		clock = 1'b0;
-		reset = 1'b0;
-		
-		// Pulse the reset signal
-		$display("@@\n@@\n@@  %t  Asserting System reset......", $realtime);
+        clock = 1'b0;
+        reset = 1'b0;
+        
+        // Pulse the reset signal
+        $display("@@\n@@\n@@  %t  Asserting System reset......", $realtime);
 
         //Test Suite 1
         reset = 1'b1;
         @(posedge clock);
         @(posedge clock);
-	    $display("aaa");
+        $display("aaa");
         $readmemh("program.mem", memory.unified_memory);
 
-	    $display("bbb");
+        $display("bbb");
         @(posedge clock);
         @(posedge clock);
         `SD;
 
         reset = 1'b0;
-		$display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime); 
+        $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime); 
     end
     
- 	// Count the number of posedges and number of instructions completed
-	// till simulation ends
-	always @(posedge clock) begin
-		if(reset) begin
-			clock_count <= `SD 0;
-			instr_count <= `SD 0;
-		end else begin
-			clock_count <= `SD (clock_count + 1);
-			instr_count <= `SD (instr_count + result_valid);
-		end
-	end  
+    // Count the number of posedges and number of instructions completed
+    // till simulation ends
+    always @(posedge clock) begin
+        if(reset) begin
+            clock_count <= `SD 0;
+            instr_count <= `SD 0;
+        end else begin
+            clock_count <= `SD (clock_count + 1);
+            instr_count <= `SD (instr_count + result_valid);
+        end
+    end  
 
  
     always @(negedge clock) begin
@@ -753,6 +773,7 @@ endtask  // task show_clk_count
                 rs_sq_free);
             print_lsq(SQ, LB, sq_head, sq_counter, sq_empty, lq_free_idx, lq_issue_idx, lq_forward_idx);
             print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
+            print_dcache_load_buffer(load_buffer);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");  
