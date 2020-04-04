@@ -17,9 +17,9 @@ Disassembly of section .text:
   24:	00a60533          	add	a0,a2,a0
   28:	00b60533          	add	a0,a2,a1
   2c:	00a12023          	sw	a0,0(sp)
-  30:	ff010113          	addi	sp,sp,-16
-  34:	00012503          	lw	a0,0(sp)
-  38:	40a60533          	sub	a0,a2,a0
+  30:	00012683          	lw	a3,0(sp)
+  34:	ff010113          	addi	sp,sp,-16
+  38:	00d12023          	sw	a3,0(sp)
   3c:	00000013          	addi	zero,zero,0
   40:	00000013          	addi	zero,zero,0
   44:	10500073          	wfi
