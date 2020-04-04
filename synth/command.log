@@ -1,7 +1,7 @@
 #@ # 
 #@ # Running dc_shell Version O-2018.06 for linux64 -- May 21, 2018
-#@ # Date:   Fri Mar 27 22:35:47 2020
-#@ # Run by: shiyuliu@caen-vnc-vm11.engin.umich.edu
+#@ # Date:   Sat Apr  4 14:11:29 2020
+#@ # Run by: shiyuliu@caen-vnc-vm09.engin.umich.edu
 #@ 
 
 source /usr/caen/synopsys-synth-2018.06/admin/setup/.synopsys_dc.setup
@@ -6646,7 +6646,7 @@ source -echo -verbose /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/.
 #@ #/* The following five lines must be updated for every      */
 #@ #/* new design                                              */
 #@ #/***********************************************************/
-#@ analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cdb.sv"	 "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
+#@ analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cache_arbiter.sv" "../verilog/cdb.sv"  "../verilog/dcache.sv" "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv" "../verilog/load_store_queue.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/rs_lb.sv" "../verilog/rs_sq.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
 #@ elaborate processor
 #@ set design_name processor
 #@ set clock_name clock

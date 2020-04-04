@@ -40,20 +40,24 @@ suppress_message {"VER-130"}
 #/* The following five lines must be updated for every      */
 #/* new design                                              */
 #/***********************************************************/
-analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cdb.sv"	 "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
+analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cache_arbiter.sv" "../verilog/cdb.sv"  "../verilog/dcache.sv" "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv" "../verilog/load_store_queue.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/rs_lb.sv" "../verilog/rs_sq.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
 Running PRESTO HDLC
 Compiling source file ../sys_defs.svh
 Compiling source file ../ISA.svh
 Compiling source file ../verilog/alu.sv
 Compiling source file ../verilog/branch.sv
 Compiling source file ../verilog/btb.sv
+Compiling source file ../verilog/cache_arbiter.sv
 Compiling source file ../verilog/cdb.sv
+Compiling source file ../verilog/dcache.sv
+Warning:  ../verilog/dcache.sv:236: the undeclared symbol 'load_buffer_empty' assumed to have the default net type, which is 'wire'. (VER-936)
 Compiling source file ../verilog/decoder.sv
-Warning:  ../verilog/decoder.sv:193: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
-Warning:  ../verilog/decoder.sv:198: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
-Warning:  ../verilog/decoder.sv:208: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
+Warning:  ../verilog/decoder.sv:199: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
+Warning:  ../verilog/decoder.sv:204: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
+Warning:  ../verilog/decoder.sv:214: The 'white space before ``' syntax is non-standard. Those spaces are discarded (VER-730)
 Compiling source file ../verilog/icache.sv
 Compiling source file ../verilog/if_id_stage.sv
+Compiling source file ../verilog/load_store_queue.sv
 Compiling source file ../verilog/predictor.sv
 Compiling source file ../verilog/prf.sv
 Compiling source file ../verilog/processor.sv
@@ -64,7 +68,10 @@ Compiling source file ../verilog/rrat.sv
 Compiling source file ../verilog/rs_alu.sv
 Compiling source file ../verilog/rs_branch.sv
 Compiling source file ../verilog/rs_mul.sv
+Compiling source file ../verilog/rs_lb.sv
+Compiling source file ../verilog/rs_sq.sv
 Compiling source file ../verilog/top_level.sv
+Warning:  ../verilog/top_level.sv:379: the undeclared symbol 'store_enable' assumed to have the default net type, which is 'wire'. (VER-936)
 Compiling source file ../verilog/wand_sel.sv
 Compiling source file ../verilog/mul/pipe_mul.v
 Presto compilation completed successfully.
@@ -81,16 +88,16 @@ Elaborated 1 design.
 Current design is now 'processor'.
 Information: Building the design 'if_id_stage'. (HDL-193)
 
-Statistics for case statements in always block at line 140 in file
+Statistics for case statements in always block at line 142 in file
 	'../verilog/if_id_stage.sv'
 ===============================================
 |           Line           |  full/ parallel  |
 ===============================================
-|           141            |    auto/auto     |
+|           143            |    auto/auto     |
 ===============================================
 
 Inferred memory devices in process
-	in routine if_id_stage line 154 in file
+	in routine if_id_stage line 156 in file
 		'../verilog/if_id_stage.sv'.
 ===============================================================================
 |    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
@@ -101,56 +108,54 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-| if_id_stage/131  |   4    |    1    |      2       |
+| if_id_stage/133  |   4    |    1    |      2       |
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'icache'. (HDL-193)
 
 Inferred memory devices in process
-	in routine icache line 87 in file
+	in routine icache line 67 in file
 		'../verilog/icache.sv'.
 ================================================================================
 |    Register Name     |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
 ================================================================================
-|     last_tag_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
-|     last_tag_reg     | Flip-flop |   1   |  N  | N  | N  | N  | N  | Y  | N  |
-|   curr_mem_tag_reg   | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
-|  icache_blocks_reg   | Flip-flop | 2304  |  Y  | N  | N  | N  | N  | N  | N  |
-|  icache_blocks_reg   | Flip-flop |  32   |  Y  | N  | N  | N  | Y  | N  | N  |
-| miss_outstanding_reg | Flip-flop |   1   |  N  | N  | N  | N  | Y  | N  | N  |
-|    last_index_reg    | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
-|    last_index_reg    | Flip-flop |   1   |  N  | N  | N  | N  | N  | Y  | N  |
+|     last_tag_reg     | Flip-flop |   8   |  Y  | N  | N  | N  | N  | N  | N  |
+|   curr_mem_tag_reg   | Flip-flop |   4   |  Y  | N  | N  | N  | N  | N  | N  |
+|  icache_blocks_reg   | Flip-flop | 2336  |  Y  | N  | N  | N  | N  | N  | N  |
+| miss_outstanding_reg | Flip-flop |   1   |  N  | N  | N  | N  | N  | N  | N  |
+|    last_index_reg    | Flip-flop |   5   |  Y  | N  | N  | N  | N  | N  | N  |
 ================================================================================
 Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|    icache/71     |   32   |   64    |      5       |
-|    icache/72     |   32   |    1    |      5       |
-|    icache/72     |   32   |    8    |      5       |
+|    icache/51     |   32   |   64    |      5       |
+|    icache/52     |   32   |    1    |      5       |
+|    icache/52     |   32   |    8    |      5       |
 ======================================================
 Presto compilation completed successfully.
+Information: Building the design 'cache_arbiter'. (HDL-193)
+Presto compilation completed successfully.
 Information: Building the design 'top_level'. (HDL-193)
-Warning:  ../verilog/top_level.sv:459: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
-Warning:  ../verilog/top_level.sv:460: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
-Warning:  ../verilog/top_level.sv:684: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
-Warning:  ../verilog/top_level.sv:488: DEFAULT branch of CASE statement cannot be reached. (ELAB-311)
+Warning:  ../verilog/top_level.sv:439: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
+Warning:  ../verilog/top_level.sv:440: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
+Warning:  ../verilog/top_level.sv:753: Comparison against '?', 'x', or 'z' values is always false. It may cause simulation/synthesis mismatch.  (ELAB-310)
 
-Statistics for case statements in always block at line 449 in file
+Statistics for case statements in always block at line 429 in file
 	'../verilog/top_level.sv'
 ===============================================
 |           Line           |  full/ parallel  |
 ===============================================
-|           452            |    auto/auto     |
+|           432            |    auto/auto     |
 ===============================================
 
-Statistics for case statements in always block at line 466 in file
+Statistics for case statements in always block at line 446 in file
 	'../verilog/top_level.sv'
 ===============================================
 |           Line           |  full/ parallel  |
 ===============================================
-|           472            |     no/auto      |
-|           488            |    auto/auto     |
+|           452            |     no/auto      |
+|           468            |    auto/auto     |
 ===============================================
 Presto compilation completed successfully.
 Information: Building the design 'predictor'. (HDL-193)
@@ -176,12 +181,12 @@ Statistics for MUX_OPs
 Presto compilation completed successfully.
 Information: Building the design 'decoder'. (HDL-193)
 
-Statistics for case statements in always block at line 47 in file
+Statistics for case statements in always block at line 48 in file
 	'../verilog/decoder.sv'
 ===============================================
 |           Line           |  full/ parallel  |
 ===============================================
-|            66            |    auto/auto     |
+|            69            |    auto/auto     |
 ===============================================
 Presto compilation completed successfully.
 Information: Building the design 'rat'. (HDL-193)
@@ -233,16 +238,16 @@ Statistics for MUX_OPs
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'rob'. (HDL-193)
-Warning:  ../verilog/rob.sv:114: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/rob.sv:117: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/rob.sv:120: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/rob.sv:123: signed to unsigned conversion occurs. (VER-318)
 
 Inferred memory devices in process
-	in routine rob line 88 in file
+	in routine rob line 93 in file
 		'../verilog/rob.sv'.
 ===============================================================================
 |    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
 ===============================================================================
-|   rob_packets_reg   | Flip-flop |  664  |  Y  | N  | N  | N  | N  | N  | N  |
+|   rob_packets_reg   | Flip-flop |  672  |  Y  | N  | N  | N  | N  | N  | N  |
 |    rob_head_reg     | Flip-flop |   3   |  Y  | N  | N  | N  | Y  | N  | N  |
 |    rob_tail_reg     | Flip-flop |   3   |  Y  | N  | N  | N  | Y  | N  | N  |
 |   rob_counter_reg   | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
@@ -251,9 +256,9 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|      rob/70      |   8    |    9    |      3       |
-|      rob/71      |   8    |   10    |      3       |
-|      rob/74      |   8    |   64    |      3       |
+|      rob/74      |   8    |   10    |      3       |
+|      rob/76      |   8    |   10    |      3       |
+|      rob/79      |   8    |   64    |      3       |
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'prf'. (HDL-193)
@@ -310,7 +315,7 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|    rs_alu/136    |   8    |   143   |      3       |
+|    rs_alu/135    |   8    |   143   |      3       |
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'alu'. (HDL-193)
@@ -345,7 +350,7 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|    rs_mul/137    |   4    |   143   |      2       |
+|    rs_mul/136    |   4    |   143   |      2       |
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'mult2cdb'. (HDL-193)
@@ -367,6 +372,119 @@ Inferred memory devices in process
 |    mul_free_reg     | Flip-flop |   1   |  N  | N  | N  | N  | N  | Y  | N  |
 ===============================================================================
 Presto compilation completed successfully.
+Information: Building the design 'rs_lb'. (HDL-193)
+Warning:  ../verilog/rs_lb.sv:71: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/rs_lb.sv:97: signed to unsigned assignment occurs. (VER-318)
+
+Inferred memory devices in process
+	in routine rs_lb line 102 in file
+		'../verilog/rs_lb.sv'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|        t_reg        | Flip-flop |   2   |  Y  | N  | N  | N  | N  | N  | N  |
+|   rs_lb_free_reg    | Flip-flop |   4   |  Y  | N  | N  | N  | N  | N  | N  |
+|  rs_lb_counter_reg  | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+| rs_lb_out_valid_reg | Flip-flop |   1   |  N  | N  | N  | N  | N  | N  | N  |
+|  rs_lb_packets_reg  | Flip-flop |  492  |  Y  | N  | N  | N  | N  | N  | N  |
+|  rs_lb_packet_reg   | Flip-flop |  123  |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|    rs_lb/128     |   4    |   123   |      2       |
+|    rs_lb/137     |   4    |    1    |      2       |
+======================================================
+Presto compilation completed successfully.
+Information: Building the design 'rs_sq'. (HDL-193)
+Warning:  ../verilog/rs_sq.sv:77: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/rs_sq.sv:103: signed to unsigned assignment occurs. (VER-318)
+
+Inferred memory devices in process
+	in routine rs_sq line 108 in file
+		'../verilog/rs_sq.sv'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|  rs_sq_packet_reg   | Flip-flop |  150  |  Y  | N  | N  | N  | N  | N  | N  |
+|   rs_sq_free_reg    | Flip-flop |   4   |  Y  | N  | N  | N  | N  | N  | N  |
+|  rs_sq_counter_reg  | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+| rs_sq_out_valid_reg | Flip-flop |   1   |  N  | N  | N  | N  | N  | N  | N  |
+|  rs_sq_packets_reg  | Flip-flop |  600  |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|    rs_sq/134     |   4    |   150   |      2       |
+======================================================
+Presto compilation completed successfully.
+Information: Building the design 'load_store_queue'. (HDL-193)
+Warning:  ../verilog/load_store_queue.sv:109: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:136: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:137: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:138: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:176: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:176: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:204: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:232: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:338: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/load_store_queue.sv:355: signed to unsigned conversion occurs. (VER-318)
+
+Statistics for case statements in always block at line 148 in file
+	'../verilog/load_store_queue.sv'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           186            |    auto/auto     |
+|           214            |    auto/auto     |
+|           242            |    auto/auto     |
+===============================================
+
+Inferred memory devices in process
+	in routine load_store_queue line 148 in file
+		'../verilog/load_store_queue.sv'.
+===========================================================================
+|    Register Name    | Type  | Width | Bus | MB | AR | AS | SR | SS | ST |
+===========================================================================
+|       LB_reg        | Latch |  256  |  Y  | N  | N  | N  | -  | -  | -  |
+===========================================================================
+
+Inferred memory devices in process
+	in routine load_store_queue line 274 in file
+		'../verilog/load_store_queue.sv'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|       LB_reg        | Flip-flop |  632  |  Y  | N  | N  | N  | N  | N  | N  |
+| assigned_lb_idx_reg | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+
+Inferred memory devices in process
+	in routine load_store_queue line 321 in file
+		'../verilog/load_store_queue.sv'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|   sq_counter_reg    | Flip-flop |   3   |  Y  | N  | N  | N  | N  | N  | N  |
+|       SQ_reg        | Flip-flop |  806  |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+==========================================================
+|   block name/line    | Inputs | Outputs | # sel inputs |
+==========================================================
+| load_store_queue/113 |   8    |    1    |      3       |
+| load_store_queue/118 |   8    |   64    |      3       |
+| load_store_queue/120 |   8    |    5    |      3       |
+| load_store_queue/121 |   8    |    1    |      3       |
+| load_store_queue/125 |   8    |   100   |      3       |
+| load_store_queue/127 |   8    |   110   |      3       |
+| load_store_queue/294 |   8    |    1    |      3       |
+| load_store_queue/342 |   8    |    1    |      3       |
+==========================================================
+Warning:  ../verilog/load_store_queue.sv:148: Netlist for always_comb block contains a latch. (ELAB-974)
+Presto compilation completed successfully.
 Information: Building the design 'rs_branch'. (HDL-193)
 Warning:  ../verilog/rs_branch.sv:81: signed to unsigned assignment occurs. (VER-318)
 Warning:  ../verilog/rs_branch.sv:108: signed to unsigned assignment occurs. (VER-318)
@@ -387,30 +505,33 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|  rs_branch/151   |   4    |   211   |      2       |
+|  rs_branch/150   |   4    |   211   |      2       |
 ======================================================
 Presto compilation completed successfully.
 Information: Building the design 'branch'. (HDL-193)
 Presto compilation completed successfully.
 Information: Building the design 'cdb'. (HDL-193)
-Warning:  ../verilog/cdb.sv:137: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/cdb.sv:144: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/cdb.sv:167: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:146: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:153: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:165: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:172: signed to unsigned conversion occurs. (VER-318)
 Warning:  ../verilog/cdb.sv:179: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/cdb.sv:189: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/cdb.sv:203: signed to unsigned conversion occurs. (VER-318)
-Warning:  ../verilog/cdb.sv:225: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:191: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:201: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:223: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:233: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/cdb.sv:243: signed to unsigned conversion occurs. (VER-318)
 
-Statistics for case statements in always block at line 112 in file
+Statistics for case statements in always block at line 118 in file
 	'../verilog/cdb.sv'
 ===============================================
 |           Line           |  full/ parallel  |
 ===============================================
-|           171            |    auto/auto     |
+|           183            |    auto/auto     |
 ===============================================
 
 Inferred memory devices in process
-	in routine cdb line 112 in file
+	in routine cdb line 118 in file
 		'../verilog/cdb.sv'.
 =========================================================================================
 |         Register Name         |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
@@ -429,13 +550,17 @@ Inferred memory devices in process
 |    cdb_alu_queue_tail_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
 |    cdb_mul_queue_head_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
 |    cdb_mul_queue_tail_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
-|    cdb_mem_queue_head_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
-|    cdb_mem_queue_tail_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
 |     cdb_br_queue_head_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
 |     cdb_br_queue_tail_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
+|   cdb_dcache_queue_head_reg   | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
+|   cdb_dcache_queue_tail_reg   | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
+|     cdb_sq_queue_head_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
+|     cdb_sq_queue_tail_reg     | Flip-flop |   7   |  Y  | N  | N  | N  | Y  | N  | N  |
 |       cdb_alu_queue_reg       | Flip-flop | 9216  |  Y  | N  | N  | N  | N  | N  | N  |
 |       cdb_mul_queue_reg       | Flip-flop | 9216  |  Y  | N  | N  | N  | N  | N  | N  |
 |       cdb_br_queue_reg        | Flip-flop | 13824 |  Y  | N  | N  | N  | N  | N  | N  |
+|     cdb_dcache_queue_reg      | Flip-flop | 9216  |  Y  | N  | N  | N  | N  | N  | N  |
+|       cdb_sq_queue_reg        | Flip-flop | 9216  |  Y  | N  | N  | N  | N  | N  | N  |
 |     cdb_dest_preg_idx_reg     | Flip-flop |   5   |  Y  | N  | N  | N  | N  | N  | N  |
 |    cdb_broadcast_value_reg    | Flip-flop |  32   |  Y  | N  | N  | N  | N  | N  | N  |
 =========================================================================================
@@ -443,20 +568,102 @@ Statistics for MUX_OPs
 ======================================================
 | block name/line  | Inputs | Outputs | # sel inputs |
 ======================================================
-|     cdb/173      |  128   |    5    |      7       |
-|     cdb/174      |  128   |   64    |      7       |
-|     cdb/175      |  128   |    3    |      7       |
-|     cdb/183      |  128   |    5    |      7       |
-|     cdb/184      |  128   |   64    |      7       |
-|     cdb/185      |  128   |    3    |      7       |
-|     cdb/193      |  128   |    1    |      7       |
-|     cdb/195      |  128   |    1    |      7       |
-|     cdb/197      |  128   |    1    |      7       |
-|     cdb/207      |  128   |    5    |      7       |
-|     cdb/209      |  128   |   96    |      7       |
-|     cdb/211      |  128   |    3    |      7       |
-|     cdb/215      |  128   |    4    |      7       |
+|     cdb/185      |  128   |    5    |      7       |
+|     cdb/186      |  128   |   64    |      7       |
+|     cdb/187      |  128   |    3    |      7       |
+|     cdb/195      |  128   |    5    |      7       |
+|     cdb/196      |  128   |   64    |      7       |
+|     cdb/197      |  128   |    3    |      7       |
+|     cdb/205      |  128   |    5    |      7       |
+|     cdb/207      |  128   |   96    |      7       |
+|     cdb/209      |  128   |    3    |      7       |
+|     cdb/213      |  128   |    4    |      7       |
+|     cdb/227      |  128   |    5    |      7       |
+|     cdb/228      |  128   |   64    |      7       |
+|     cdb/229      |  128   |    3    |      7       |
+|     cdb/237      |  128   |    5    |      7       |
+|     cdb/238      |  128   |   64    |      7       |
+|     cdb/239      |  128   |    3    |      7       |
 ======================================================
+Presto compilation completed successfully.
+Information: Building the design 'dcache'. (HDL-193)
+Warning:  ../verilog/dcache.sv:229: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:306: signed to unsigned assignment occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:384: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:390: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:403: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:403: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:413: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:413: signed to unsigned conversion occurs. (VER-318)
+Warning:  ../verilog/dcache.sv:425: signed to unsigned conversion occurs. (VER-318)
+
+Statistics for case statements in always block at line 255 in file
+	'../verilog/dcache.sv'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           260            |    auto/auto     |
+|           276            |    auto/auto     |
+===============================================
+
+Statistics for case statements in always block at line 341 in file
+	'../verilog/dcache.sv'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           430            |    auto/auto     |
+===============================================
+
+Inferred memory devices in process
+	in routine dcache line 297 in file
+		'../verilog/dcache.sv'.
+===============================================================================
+|      Register Name      | Type  | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+| store_cache_hit_way_reg | Latch |   2   |  Y  | N  | N  | N  | -  | -  | -  |
+|   store_cache_hit_reg   | Latch |   1   |  N  | N  | N  | N  | -  | -  | -  |
+| store_cache_hit_set_reg | Latch |   3   |  Y  | N  | N  | N  | -  | -  | -  |
+===============================================================================
+
+Inferred memory devices in process
+	in routine dcache line 341 in file
+		'../verilog/dcache.sv'.
+====================================================================================
+|      Register Name       |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+====================================================================================
+| load_buffer_tail_ptr_reg | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
+|    dcache_blocks_reg     | Flip-flop | 2368  |  Y  | N  | N  | N  | N  | N  | N  |
+|    dcache_blocks_reg     | Flip-flop |  32   |  Y  | N  | N  | N  | Y  | N  | N  |
+|     load_buffer_reg      | Flip-flop |  16   |  Y  | N  | N  | N  | Y  | N  | N  |
+|     load_buffer_reg      | Flip-flop | 2384  |  Y  | N  | N  | N  | N  | N  | N  |
+| load_buffer_head_ptr_reg | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
+| load_buffer_send_ptr_reg | Flip-flop |   4   |  Y  | N  | N  | N  | Y  | N  | N  |
+====================================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|    dcache/227    |   8    |    4    |      3       |
+|    dcache/227    |   8    |   40    |      3       |
+|    dcache/236    |   16   |    4    |      4       |
+|    dcache/243    |   4    |   64    |      2       |
+|    dcache/244    |   4    |   16    |      2       |
+|    dcache/245    |   8    |    8    |      3       |
+|    dcache/251    |   16   |   64    |      4       |
+|    dcache/252    |   16   |    6    |      4       |
+|    dcache/252    |   4    |   16    |      2       |
+|    dcache/253    |   16   |    9    |      4       |
+|    dcache/253    |   8    |    8    |      3       |
+|    dcache/283    |   16   |   32    |      4       |
+|    dcache/284    |   16   |    5    |      4       |
+|    dcache/304    |   8    |    4    |      3       |
+|    dcache/304    |   8    |   40    |      3       |
+|    dcache/313    |   16   |    2    |      4       |
+|    dcache/315    |   16   |   32    |      4       |
+|    dcache/394    |   16   |   10    |      4       |
+|    dcache/243    |   8    |   256   |      3       |
+======================================================
+Warning:  ../verilog/dcache.sv:297: Netlist for always_comb block contains a latch. (ELAB-974)
 Presto compilation completed successfully.
 Information: Building the design 'local_predictor' instantiated from design 'predictor' with
 	the parameters "local_offset_length=8,local_offset_pow=256,local_history_length=8,local_history_pow=256". (HDL-193)
@@ -548,6 +755,45 @@ Statistics for case statements in always block at line 12 in file
 |            14            |     no/auto      |
 ===============================================
 Presto compilation completed successfully.
+Information: Building the design 'psel_gen' instantiated from design 'cdb' with
+	the parameters "WIDTH=5,REQS=1". (HDL-193)
+Presto compilation completed successfully.
+Information: Building the design 'tree_plru'. (HDL-193)
+
+Statistics for case statements in always block at line 106 in file
+	'../verilog/dcache.sv'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           107            |    auto/auto     |
+===============================================
+
+Statistics for case statements in always block at line 120 in file
+	'../verilog/dcache.sv'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           126            |    auto/auto     |
+|           134            |    auto/auto     |
+===============================================
+
+Inferred memory devices in process
+	in routine tree_plru line 120 in file
+		'../verilog/dcache.sv'.
+================================================================================
+|    Register Name     |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+================================================================================
+| status_bit_table_reg | Flip-flop |  24   |  Y  | N  | N  | N  | N  | N  | N  |
+================================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|  tree_plru/107   |   8    |    3    |      3       |
+|  tree_plru/127   |   8    |    2    |      3       |
+|  tree_plru/135   |   8    |    2    |      3       |
+======================================================
+Presto compilation completed successfully.
 Information: Building the design 'wand_sel' instantiated from design 'psel_gen_REQS1_WIDTH8' with
 	the parameters "8". (HDL-193)
 Presto compilation completed successfully.
@@ -576,6 +822,9 @@ Inferred memory devices in process
 ===============================================================================
 |      done_reg       | Flip-flop |   1   |  N  | N  | N  | N  | Y  | N  | N  |
 ===============================================================================
+Presto compilation completed successfully.
+Information: Building the design 'wand_sel' instantiated from design 'psel_gen_REQS1_WIDTH5' with
+	the parameters "5". (HDL-193)
 Presto compilation completed successfully.
 1
 set design_name processor
@@ -706,15 +955,17 @@ Current design is 'processor'.
   Linking design 'processor'
   Using the following designs and libraries:
   --------------------------------------------------------------------------
-  * (28 designs)              /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor.db, etc
+  * (36 designs)              /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor.db, etc
   lec25dscc25_TT (library)    /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db
 
 Current design is 'processor'.
-Information: Uniquified 3 instances of design 'psel_gen_REQS1_WIDTH4'. (OPT-1056)
-Information: Uniquified 3 instances of design 'wand_sel_WIDTH4'. (OPT-1056)
+Information: Uniquified 3 instances of design 'psel_gen_REQS1_WIDTH8'. (OPT-1056)
+Information: Uniquified 4 instances of design 'psel_gen_REQS1_WIDTH4'. (OPT-1056)
+Information: Uniquified 3 instances of design 'wand_sel_WIDTH8'. (OPT-1056)
+Information: Uniquified 4 instances of design 'wand_sel_WIDTH4'. (OPT-1056)
 Information: Uniquified 8 instances of design 'mult_stage'. (OPT-1056)
 Information: Updating graph... (UID-83)
-Warning: Design 'processor' contains 22 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+Warning: Design 'processor' contains 219 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
 Information: Evaluating DesignWare library utilization. (UISN-27)
 
 ============================================================================
@@ -725,7 +976,7 @@ Information: Evaluating DesignWare library utilization. (UISN-27)
 ============================================================================
 
 
-Information: There are 470 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
+Information: There are 901 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
 
 
 
@@ -767,6 +1018,77 @@ Information: The register 'top_level0/rs_branch0/rs_branch_packet_reg[NPC][0]' w
 Information: The register 'top_level0/rs_branch0/rs_branch_packet_reg[opa_ready]' will be removed. (OPT-1207)
 Information: The register 'top_level0/rs_branch0/rs_branch_packet_reg[opb_ready]' will be removed. (OPT-1207)
 Information: The register 'top_level0/rs_branch0/rs_branch_packet_reg[br_pred_direction]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][31]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][30]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][29]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][28]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][27]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][26]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][25]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][24]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][23]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][22]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][21]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][20]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][19]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][18]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][17]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][16]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][15]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][14]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][13]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][12]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][11]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][10]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][9]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][8]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][7]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][6]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][5]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][4]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][3]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][2]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][1]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[NPC][0]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[base_ready]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[src_ready]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[rob_idx][2]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_sq0/rs_sq_packet_reg[rob_idx][1]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][31]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][30]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][29]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][28]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][27]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][26]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][25]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][24]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][23]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][22]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][21]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][20]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][19]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][18]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][17]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][16]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][15]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][14]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][13]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][12]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][11]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][10]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][9]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][8]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][7]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][6]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][5]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][4]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][3]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][2]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][1]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[NPC][0]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[base_ready]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[rob_idx][2]' will be removed. (OPT-1207)
+Information: The register 'top_level0/rs_lb0/rs_lb_packet_reg[rob_idx][1]' will be removed. (OPT-1207)
 Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/mplier_out_reg[63]' will be removed. (OPT-1207)
 Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/mplier_out_reg[62]' will be removed. (OPT-1207)
 Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/mplier_out_reg[61]' will be removed. (OPT-1207)
@@ -1187,1212 +1509,3 @@ Information: The register 'top_level0/rs_alu0/rs_alu_packet_reg[NPC][1]' will be
 Information: The register 'top_level0/rs_alu0/rs_alu_packet_reg[NPC][0]' will be removed. (OPT-1207)
 Information: The register 'top_level0/rs_alu0/rs_alu_packet_reg[opa_ready]' will be removed. (OPT-1207)
 Information: The register 'top_level0/rs_alu0/rs_alu_packet_reg[opb_ready]' will be removed. (OPT-1207)
-Information: The register 'top_level0/rrat0/rrat_valid_backup_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rrat0/rrat_free_backup_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/prf0/prf_values_reg[0][31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mcand_out_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/mplier_out_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/prod_in_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/mplier_out_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mcand_out_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/mplier_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mcand_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/mplier_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mcand_out_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/mplier_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mcand_out_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/mplier_out_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/cdb0/cdb_mem_queue_tail_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_branch0/rs_branch_packets_reg[0][is_jalr]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[1][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[3][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[7][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[6][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[2][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[4][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[5][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_alu0/rs_alu_packets_reg[0][alu_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_mul0/rs_mul_packets_reg[2][mul_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_mul0/rs_mul_packets_reg[3][mul_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_mul0/rs_mul_packets_reg[1][mul_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_mul0/rs_mul_packets_reg[0][mul_func][4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_branch0/rs_branch_packets_reg[1][is_jalr]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_branch0/rs_branch_packets_reg[3][is_jalr]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/rs_branch0/rs_branch_packets_reg[2][is_jalr]' is a constant and will be removed. (OPT-1206)
-
-  Updating timing information
-Information: Updating design information... (UID-85)
-
-  Beginning Implementation Selection
-  ----------------------------------
-  Processing 'processor_DW01_inc_0'
-  Processing 'processor_DW01_inc_1'
-  Processing 'processor_DW01_inc_2'
-  Processing 'processor_DW01_inc_3'
-  Processing 'processor_DW01_inc_4'
-  Processing 'processor_DW01_inc_5'
-  Processing 'processor_DW01_inc_6'
-  Processing 'processor_DW01_cmp6_0'
-  Processing 'processor_DW01_cmp6_1'
-  Processing 'processor_DW01_cmp6_2'
-  Processing 'processor_DW01_cmp6_3'
-  Processing 'processor_DW01_cmp6_4'
-  Processing 'processor_DW01_add_0'
-  Processing 'processor_DW01_add_1'
-  Processing 'processor_DW01_cmp6_5'
-  Processing 'processor_DW01_cmp6_6'
-  Processing 'processor_DW01_cmp6_7'
-  Processing 'processor_DW01_cmp6_8'
-  Processing 'processor_DW01_cmp6_9'
-  Processing 'processor_DW01_cmp6_10'
-  Processing 'processor_DW01_cmp6_11'
-  Processing 'processor_DW01_cmp6_12'
-  Processing 'processor_DW01_add_2'
-  Processing 'processor_DW01_add_3'
-  Processing 'processor_DW01_add_4'
-  Processing 'processor_DW01_add_5'
-  Processing 'processor_DW01_add_6'
-  Processing 'processor_DW01_add_7'
-  Processing 'processor_DW01_add_8'
-  Processing 'processor_DW01_inc_7'
-  Processing 'processor_DW01_sub_0'
-  Processing 'processor_DW01_inc_8'
-  Processing 'processor_DW01_sub_1'
-  Processing 'processor_DW01_cmp6_13'
-  Processing 'processor_DW01_cmp6_14'
-  Processing 'processor_DW01_cmp6_15'
-  Processing 'processor_DW01_cmp6_16'
-  Processing 'processor_DW01_cmp6_17'
-  Processing 'processor_DW01_cmp6_18'
-  Processing 'processor_DW01_cmp6_19'
-  Processing 'processor_DW01_cmp6_20'
-  Processing 'processor_DW01_ash_0'
-  Processing 'processor_DW01_cmp2_0'
-  Processing 'processor_DW01_cmp2_1'
-  Processing 'processor_DW01_sub_2'
-  Processing 'processor_DW01_add_9'
-  Processing 'processor_DW01_cmp6_21'
-  Processing 'processor_DW01_cmp6_22'
-  Processing 'processor_DW01_cmp6_23'
-  Processing 'processor_DW01_cmp6_24'
-  Processing 'processor_DW01_cmp6_25'
-  Processing 'processor_DW01_cmp6_26'
-  Processing 'processor_DW01_cmp6_27'
-  Processing 'processor_DW01_cmp6_28'
-  Processing 'processor_DW01_cmp6_29'
-  Processing 'processor_DW01_cmp6_30'
-  Processing 'processor_DW01_cmp6_31'
-  Processing 'processor_DW01_cmp6_32'
-  Processing 'processor_DW01_cmp6_33'
-  Processing 'processor_DW01_cmp6_34'
-  Processing 'processor_DW01_cmp6_35'
-  Processing 'processor_DW01_cmp6_36'
-  Processing 'processor_DW01_cmp6_37'
-  Processing 'processor_DW01_cmp6_38'
-  Processing 'processor_DW01_cmp6_39'
-  Processing 'processor_DW01_cmp6_40'
-  Processing 'processor_DW01_cmp6_41'
-  Processing 'processor_DW01_add_10'
-  Processing 'processor_DW01_cmp2_2'
-  Processing 'processor_DW01_cmp6_42'
-  Processing 'processor_DW_rash_0'
-  Processing 'processor_DW01_add_11'
-  Processing 'processor_DW01_cmp6_43'
-  Processing 'processor_DW02_mult_0'
-  Processing 'processor_DW01_add_12'
-  Processing 'processor_DW02_mult_1'
-  Processing 'processor_DW01_add_13'
-  Processing 'processor_DW02_mult_2'
-  Processing 'processor_DW01_add_14'
-  Processing 'processor_DW02_mult_3'
-  Processing 'processor_DW01_add_15'
-  Processing 'processor_DW02_mult_4'
-  Processing 'processor_DW01_add_16'
-  Processing 'processor_DW02_mult_5'
-  Processing 'processor_DW01_add_17'
-  Processing 'processor_DW02_mult_6'
-  Processing 'processor_DW01_add_18'
-  Processing 'processor_DW01_sub_3'
-  Processing 'processor_DW01_add_19'
-  Processing 'processor_DW01_inc_9'
-  Processing 'processor_DW01_inc_10'
-  Processing 'processor_DW01_sub_4'
-  Processing 'processor_DW01_inc_11'
-  Processing 'processor_DW02_mult_7'
-  Processing 'processor_DW01_inc_12'
-  Processing 'processor_DW02_mult_8'
-  Processing 'processor_DW01_inc_13'
-  Processing 'processor_DW02_mult_9'
-  Processing 'processor_DW01_inc_14'
-  Processing 'processor_DW02_mult_10'
-  Processing 'DW01_add_width3'
-  Processing 'DW01_sub_width3'
-  Processing 'DW01_add_width3'
-  Processing 'DW01_sub_width3'
-  Processing 'DW01_add_width4'
-  Processing 'DW01_sub_width4'
-  Processing 'processor_DW02_mult_11'
-  Processing 'processor_DW01_add_20'
-
-  Beginning Mapping Optimizations  (Medium effort)
-  -------------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:08:00 18414992.0   3561.30 2641678.5 19806476.0                                0.00  
-    0:08:00 18414992.0   3561.30 2641678.5 19806476.0                                0.00  
-    0:08:04 19271860.9   3560.71 2641569.8 19792546.0                                0.00  
-    0:08:08 20099002.8   3560.56 2641565.2 19787634.0                                0.00  
-    0:08:11 21463538.3   3560.16 2640466.8 19766504.0                                0.00  
-    0:08:12 22448248.6   3560.16 2640466.8 19755070.0                                0.00  
-    0:08:13 23295579.0   3560.16 2640466.8 19746048.0                                0.00  
-    0:08:23 25835886.1   3560.16 2640466.8 19523612.0                                0.00  
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[7]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[6]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[41]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[40]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[39]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[38]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[37]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[36]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[35]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[34]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[33]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[32]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[5]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[31]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[30]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[29]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[28]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[27]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[26]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[25]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[24]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[4]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[23]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[22]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[21]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[20]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[19]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[18]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[17]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[16]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[3]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[15]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[14]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[13]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[12]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[11]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[10]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[9]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[8]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[2]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[7]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[6]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[5]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[4]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[3]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[2]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[1]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/partial_prod_reg_reg[0]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[63]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[62]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[61]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[60]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[59]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[58]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[57]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[56]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[55]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[54]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[53]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[52]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[51]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[50]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[49]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[48]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[47]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[46]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[45]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[44]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[43]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[0]/partial_prod_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-Information: The register 'top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[42]' is a constant and will be removed. (OPT-1206)
-    0:09:50 24044269.2      0.00       0.0     107.5                                0.00  
-    0:09:53 24044269.2      0.00       0.0     107.5                                0.00  
-    0:09:53 24044269.2      0.00       0.0     107.5                                0.00  
-    0:09:57 24044269.2      0.00       0.0     107.5                                0.00  
-    0:09:59 24044269.2      0.00       0.0     107.5                                0.00  
-    0:11:05 16696440.7      0.00       0.0      27.3                                0.00  
-    0:11:15 16612161.3      0.00       0.0      27.3                                0.00  
-    0:11:33 16612161.3      0.00       0.0       6.2                                0.00  
-    0:11:36 16612161.3      0.00       0.0       6.2                                0.00  
-    0:11:38 16612161.3      0.00       0.0       6.2                                0.00  
-    0:11:40 16611995.4      0.00       0.0       6.2                                0.00  
-    0:11:40 16611995.4      0.00       0.0       6.2                                0.00  
-    0:11:42 16612421.1      0.00       0.0       2.1                                0.00  
-    0:11:43 16612694.7      0.00       0.0       0.4                                0.00  
-    0:11:44 16613015.4      0.00       0.0       0.0                                0.00  
-    0:11:46 16613090.0      0.00       0.0       0.0                                0.00  
-    0:11:47 16613090.0      0.00       0.0       0.0                                0.00  
-    0:11:47 16613090.0      0.00       0.0       0.0                                0.00  
-    0:11:47 16613090.0      0.00       0.0       0.0                                0.00  
-
-
-
-  Beginning Delay Optimization Phase
-  ----------------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:11:48 16613090.0      0.00       0.0       0.0                                0.00  
-    0:11:48 16613090.0      0.00       0.0       0.0                                0.00  
-    0:11:54 16597811.7      0.00       0.0      13.3                                0.00  
-
-
-  Beginning Design Rule Fixing  (min_path)  (max_transition)
-  ----------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:12:00 16597811.7      0.00       0.0      13.3                              -21.12  
-    0:12:05 16595082.9      0.00       0.0       0.0                              -21.12  
-
-
-  Beginning Critical Range Optimization
-  -------------------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:12:05 16595082.9      0.00       0.0       0.0                              -21.12  
-
-
-  Beginning Area-Recovery Phase  (cleanup)
-  -----------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:12:06 16595082.9      0.00       0.0       0.0                              -21.12  
-    0:12:07 16595082.9      0.00       0.0       0.0                              -21.12  
-    0:12:18 16521207.6      0.00       0.0       0.0                              -21.12  
-    0:12:29 16461421.5      0.00       0.0       0.0                              -21.12  
-    0:12:40 16413388.7      0.00       0.0       0.0                              -21.12  
-    0:12:53 16378792.7      0.00       0.0       0.0                              -21.12  
-    0:13:02 16349911.6      0.00       0.0       0.0                              -21.12  
-    0:13:10 16333662.9      0.00       0.0       0.0                              -21.12  
-    0:13:16 16322142.0      0.00       0.0       0.0                              -21.12  
-    0:13:21 16311093.8      0.00       0.0       0.0                              -21.12  
-    0:13:27 16304508.1      0.00       0.0       0.0                              -21.12  
-    0:13:32 16298743.5      0.00       0.0       0.0                              -21.12  
-    0:13:35 16293932.7      0.00       0.0       0.0                              -21.12  
-    0:13:38 16289122.0      0.00       0.0       0.0                              -21.12  
-    0:13:42 16284725.9      0.00       0.0       0.0                              -21.12  
-    0:13:47 16282262.5      0.00       0.0       0.0                              -21.12  
-    0:13:49 16279898.6      0.00       0.0       0.0                              -21.12  
-    0:13:51 16277667.4      0.00       0.0       0.0                              -21.12  
-    0:13:51 16277667.4      0.00       0.0       0.0                              -21.12  
-    0:13:53 16277642.5      0.00       0.0       0.0                              -21.12  
-    0:13:57 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:13:58 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:13:58 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:13:59 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:13:59 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:13:59 16270346.4      0.00       0.0       0.0                              -21.12  
-    0:14:00 16272320.4      0.00       0.0       0.0 top_level0/mult2cdb0/mult0/mstage[3]/mcand_out_reg[38]/DIN    -16.98  
-    0:14:00 16274319.4      0.00       0.0       0.0 top_level0/mult2cdb0/mult0/mstage[1]/prod_in_reg_reg[25]/DIN    -12.55  
-    0:14:00 16276426.2      0.00       0.0       0.0 top_level0/mult2cdb0/mult0/mstage[2]/mplier_out_reg[3]/DIN     -8.09  
-    0:14:01 16278400.2      0.00       0.0       0.0 top_level0/mult2cdb0/mult0/mstage[1]/mcand_out_reg[32]/DIN     -3.99  
-    0:14:01 16280341.1      0.00       0.0       0.0                                0.00  
-
-
-  Beginning Critical Range Optimization
-  -------------------------------------
-
-                                  TOTAL                                                  
-   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
-    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
-  --------- --------- --------- --------- --------- ------------------------- -----------
-    0:14:01 16280341.1      0.00       0.0       0.0                                0.00  
-    0:14:07 16271532.5      0.00       0.0       0.0                                0.00  
-Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
-
-
-Note: Symbol # after min delay cost means estimated hold TNS across all active scenarios 
-
-
-  Optimization Complete
-  ---------------------
-Warning: Design 'processor' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
-     Net 'clock': 61267 load(s), 1 driver(s)
-Writing verilog file '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor.vg'.
-Warning: Verilog 'assign' or 'tran' statements are written out. (VO-4)
-Warning: Verilog writer has added 30 nets to module processor_DW02_mult_11 using SYNOPSYS_UNCONNECTED_ as prefix.  Please use the change_names command to make the correct changes before invoking the verilog writer.  (VO-11)
-Warning: Verilog writer has added 28 nets to module processor_DW02_mult_6 using SYNOPSYS_UNCONNECTED_ as prefix.  Please use the change_names command to make the correct changes before invoking the verilog writer.  (VO-11)
-Warning: Verilog writer has added 28 nets to module processor_DW02_mult_5 using SYNOPSYS_UNCONNECTED_ as prefix.  Please use the change_names command to make the correct changes before invoking the verilog writer.  (VO-11)
-Warning: Verilog writer has added 30 nets to module processor_DW02_mult_4 using SYNOPSYS_UNCONNECTED_ as prefix.  Please use the change_names command to make the correct changes before invoking the verilog writer.  (VO-11)
-Warning: Verilog writer has added 178 nets to module processor using SYNOPSYS_UNCONNECTED_ as prefix.  Please use the change_names command to make the correct changes before invoking the verilog writer.  (VO-11)
-Writing ddc file './processor.ddc'.
-Removing design 'processor'
-Removing design 'processor_DW01_inc_0'
-Removing design 'processor_DW01_inc_1'
-Removing design 'processor_DW01_inc_2'
-Removing design 'processor_DW01_inc_3'
-Removing design 'processor_DW01_inc_4'
-Removing design 'processor_DW01_inc_5'
-Removing design 'processor_DW01_inc_6'
-Removing design 'processor_DW01_cmp6_4'
-Removing design 'processor_DW01_add_0'
-Removing design 'processor_DW01_add_1'
-Removing design 'processor_DW01_add_2'
-Removing design 'processor_DW01_add_3'
-Removing design 'processor_DW01_add_4'
-Removing design 'processor_DW01_add_5'
-Removing design 'processor_DW01_add_6'
-Removing design 'processor_DW01_add_7'
-Removing design 'processor_DW01_inc_7'
-Removing design 'processor_DW01_inc_8'
-Removing design 'processor_DW01_ash_0'
-Removing design 'processor_DW01_sub_2'
-Removing design 'processor_DW01_add_9'
-Removing design 'processor_DW01_add_10'
-Removing design 'processor_DW01_cmp6_42'
-Removing design 'processor_DW01_add_11'
-Removing design 'processor_DW01_cmp6_43'
-Removing design 'processor_DW02_mult_3'
-Removing design 'processor_DW02_mult_4'
-Removing design 'processor_DW01_add_16'
-Removing design 'processor_DW02_mult_5'
-Removing design 'processor_DW01_add_17'
-Removing design 'processor_DW02_mult_6'
-Removing design 'processor_DW01_add_18'
-Removing design 'processor_DW01_add_19'
-Removing design 'processor_DW01_inc_9'
-Removing design 'processor_DW01_inc_10'
-Removing design 'processor_DW02_mult_11'
-Removing design 'processor_DW01_add_20'
-Removing library 'lec25dscc25_TT'
-Removing library 'gtech'
-Removing library 'standard.sldb'
-Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
-Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
-Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
-  Loading link library 'lec25dscc25_TT'
-  Loading link library 'gtech'
-Loading verilog file '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor.vg'
-Detecting input file type automatically (-rtl or -netlist).
-Running DC verilog reader
-Performing 'read' command.
-Compiling source file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor.vg
-Reading with netlist reader (equivalent to -netlist option).
-Verilog netlist reader completed successfully.
-Current design is now '/afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/synth/processor_DW01_inc_0.db:processor_DW01_inc_0'
-Loaded 38 designs.
-Current design is 'processor_DW01_inc_0'.
-Current design is 'processor'.
-
-Thank you...
