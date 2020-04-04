@@ -186,7 +186,7 @@ module processor (
 	                                commit_halt                ? HALTED_ON_WFI :
 	                                NO_ERROR;
     
-	logic [3:0] rs_full;
+	logic [4:0] rs_full;
     assign rs_full = {rs_sq_full,rs_lb_full,rs_branch_full,rs_mul_full,rs_alu_full};
 //////////////////////////////////////////////////
 //                                              //

@@ -139,9 +139,9 @@ simv:	$(SIMFILES) $(TESTBENCH)
 	$(URG)
 
 
-#dve:	$(SIMFILES) $(TESTBENCH)
-#	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
-#.PHONY:	dve
+dve:	$(SIMFILES) $(TESTBENCH)
+	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
+.PHONY:	dve
 
 # For visual debugger
 vis_simv:	$(SIMFILES) $(VTUBER)
@@ -155,9 +155,9 @@ syn_simv:	$(SYNFILES) $(TESTBENCH)
 syn:	syn_simv
 	./syn_simv -cm line+tgl | tee syn_program.out
 
-dve:	$(SYNFILES) $(TESTBENCH)
-	$(VCS) +memcbk $(TESTBENCH) $(SYNFILES) -o dve -R -gui
-.PHONY:	dve
+#dve:	$(SYNFILES) $(TESTBENCH)
+#	$(VCS) +memcbk $(TESTBENCH) $(SYNFILES) -o dve -R -gui
+# .PHONY:	dve
 
 clean:
 	rm -rf *simv *simv.daidir csrc vcs.key program.out *.key

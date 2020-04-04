@@ -667,7 +667,7 @@ module top_level (
         .reset(reset),
         .PC(id_packet.PC),
         .NPC(id_packet.NPC),
-        .enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.wr_mem == `TRUE),
+        .enable(id_packet.valid && id_packet.fu_type == STORE && id_packet.wr_mem == `TRUE),
         .base_preg_idx(opa_preg_idx),
         .src_preg_idx(opb_preg_idx),
         .offset(fu_offset),
