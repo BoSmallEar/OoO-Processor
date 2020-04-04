@@ -572,7 +572,7 @@ typedef struct packed {
 	logic [`XLEN-1:0]       PC;       
     logic [`XLEN-1:0]       addr;
     logic [4:0]             rd_preg;
-    logic                   rob_idx;
+    logic [`ROB_LEN-1:0]              rob_idx;
 	logic  [`XLEN-1:0]      forward_data;
     logic [`SQ_LEN-1:0]     age;
 	logic					sq_empty_when_dispatch;
@@ -593,7 +593,7 @@ typedef struct packed {
 	logic [`XLEN-1:0]       PC;                
     logic [`XLEN-1:0]       addr;
     logic [`XLEN-1:0]       data;
-    logic                   rob_idx;
+    logic [`ROB_LEN-1:0]           rob_idx;
     logic                   rsvd;
 	MEM_SIZE                mem_size;
 	// logic                   valid;
@@ -609,7 +609,7 @@ typedef struct packed {
 	logic [`XLEN-1:0]       PC;       
     logic [`XLEN-1:0]       forward_data;
     logic [4:0]             rd_preg;
-    logic                   rob_idx;    
+    logic [`ROB_LEN-1:0]         rob_idx;    
 } FORWARD_PACKET;
 
 

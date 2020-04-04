@@ -8,12 +8,21 @@ Disassembly of section .text:
    0:	00000013          	addi	x0,x0,0
    4:	00000513          	addi	x10,x0,0
    8:	000035b7          	lui	x11,0x3
-   c:	01a58593          	addi	x11,x11,26 # 301a <_ebss+0x2f9a>
+   c:	01a58593          	addi	x11,x11,26 # 301a <_ebss+0x2f7a>
   10:	15600613          	addi	x12,x0,342
   14:	00001137          	lui	x2,0x1
-  18:	80010113          	addi	x2,x2,-2048 # 800 <_ebss+0x780>
+  18:	80010113          	addi	x2,x2,-2048 # 800 <_ebss+0x760>
   1c:	00b12023          	sw	x11,0(x2)
-  20:	10500073          	wfi
+  20:	00410113          	addi	x2,x2,4
+  24:	00a60533          	add	x10,x12,x10
+  28:	00b60533          	add	x10,x12,x11
+  2c:	00a12023          	sw	x10,0(x2)
+  30:	ff010113          	addi	x2,x2,-16
+  34:	00012503          	lw	x10,0(x2)
+  38:	40a60533          	sub	x10,x12,x10
+  3c:	00000013          	addi	x0,x0,0
+  40:	00000013          	addi	x0,x0,0
+  44:	10500073          	wfi
 	...
 
 Disassembly of section .riscv.attributes:
@@ -23,7 +32,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	c.unimp
    4:	7200                	c.flw	f8,32(x12)
    6:	7369                	c.lui	x6,0xffffa
-   8:	01007663          	bgeu	x0,x16,14 <_ebss-0x6c>
+   8:	01007663          	bgeu	x0,x16,14 <_ebss-0x8c>
    c:	0014                	0x14
    e:	0000                	c.unimp
   10:	7205                	c.lui	x4,0xfffe1

@@ -19,7 +19,7 @@ module if_id_stage(
 	input         			 clock,                  // system clock
 	input         			 reset,                  // system reset
 	input					 rob_full,
-	input	[3:0]			 rs_full,
+	input	[4:0]			 rs_full,
 	input  	[`XLEN-1:0] 	 Icache2proc_data,       // Data coming back from instruction-memory
 	input					 Icache2proc_valid,
 	input	[`XLEN-1:0]	  	 result_PC,

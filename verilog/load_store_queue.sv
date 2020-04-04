@@ -270,6 +270,8 @@ module load_store_queue(
 //////////////////////////// load sequential /////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+    assign assigned_lb_idx = lq_free_idx;
+
     // Sequentially 
     always_ff @(posedge clock) begin
         if (reset) begin
@@ -281,7 +283,7 @@ module load_store_queue(
         
         if (lb_enable) begin  
             // Tell RS this inst is entered into FREE_INDEX 
-            assigned_lb_idx                 <= `SD lq_free_idx;
+            // assigned_lb_idx                 <= `SD lq_free_idx;
             // Age is the current SQ tail, new entry is always unresolved
             LB.entries[lq_free_idx].age        <= `SD sq_tail;
             LB.entries[lq_free_idx].rsvd       <= `SD 0;
