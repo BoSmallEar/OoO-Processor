@@ -21,7 +21,7 @@ module load_store_queue(
     input         RS_SQ_PACKET          rs_sq_packet,    
     // From rob
     input                               store_enable,   // Store @ROB-HEAD
-
+    input                               commit_mis_pred,
     // load outputs
     // To previous stage : no space for you
     output logic                       lb_full,
@@ -269,7 +269,7 @@ module load_store_queue(
 
     // Sequentially 
     always_ff @(posedge clock) begin
-        if (reset) begin
+        if (reset || commit_mis_pred) begin
             for(int i=0;i<`LB_CAPACITY;i++) begin
                 LB.entries[i].rsvd <= `SD 1'b0;
             end 
@@ -315,7 +315,7 @@ module load_store_queue(
 
 
     always_ff @(posedge clock) begin
-        if (reset) begin
+        if (reset || commit_mis_pred) begin
             SQ.head <= `SD 0;
             SQ.tail <= `SD 0;
             sq_counter <= `SD 0;

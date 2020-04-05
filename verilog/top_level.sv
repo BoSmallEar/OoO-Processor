@@ -713,7 +713,7 @@ module top_level (
         .rs_sq_out_valid(rs_sq_out_valid),
         .rs_sq_packet(rs_sq_packet),
         .store_enable(store_enable),
-
+        .commit_mis_pred(mis_pred_is_head),
         // outputs
         .lb_full(lb_full),
         .assigned_lb_idx(assigned_lb_idx),
