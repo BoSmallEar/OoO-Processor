@@ -98,7 +98,7 @@ module prf(
                         prf_free[i] <= `SD 1'b0;
                         prf_valid[i] <= `SD 1'b1;
                     end
-                    else if (i == rrat_prev_reg_idx) begin
+                    else if ((i == rrat_prev_reg_idx) && (rrat_prev_reg_idx != 0)) begin
                         prf_free[i] <= `SD 1'b1;
                         prf_valid[i] <= `SD 1'b0;
                     end 
