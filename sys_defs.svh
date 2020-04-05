@@ -572,7 +572,7 @@ typedef struct packed {
 typedef struct packed {          
 	logic [`XLEN-1:0]       PC;       
     logic [`XLEN-1:0]       addr;
-    logic [4:0]             rd_preg;
+    logic [`PRF_LEN-1:0]     rd_preg;
     logic [`ROB_LEN-1:0]              rob_idx;
 	logic  [`XLEN-1:0]      forward_data;
     logic [`SQ_LEN-1:0]     age;
@@ -605,12 +605,6 @@ typedef struct packed {
     logic       [`SQ_LEN-1:0]        tail;
 } STORE_QUEUE;
 
-typedef struct packed {            
-	logic [`XLEN-1:0]       PC;       
-    logic [`XLEN-1:0]       forward_data;
-    logic [4:0]             rd_preg;
-    logic [`ROB_LEN-1:0]         rob_idx;    
-} FORWARD_PACKET;
 
 
 ////////////////////////////////////////////////

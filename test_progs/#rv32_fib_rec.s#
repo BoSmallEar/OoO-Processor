@@ -46,7 +46,7 @@ fib:	beq	x17,	x0,	fib_ret_1 # arg is 0: return 1
 	sw	x1, 8(x31)     #56	
 
 	lw	x17, 0(x31)	
-	addi	x17,	x17,	-2 # arg = arg-2
+	addi	x17,	x17,	-2 # arg = arg-2 #64
 	jal	x27,	fib # call fib
 
 	lw	x2, 8(x31)	
