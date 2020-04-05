@@ -23,7 +23,7 @@ module rrat(
     input [4:0]                       rob_commit_dest_areg_idx,
     input [`PRF_LEN-1:0]              rob_commit_dest_preg_idx,
 
-    output logic [31:0][`PRF_LEN-1:0] rob_commit_dest_preg_idxrat_packets_backup,
+    output logic [31:0][`PRF_LEN-1:0] rat_packets_backup,
     output logic [`PRF_LEN-1:0]       rrat_prev_preg_idx,
     output logic [`PRF_SIZE-1:0]      rrat_free_backup,
     output logic [`PRF_SIZE-1:0]      rrat_valid_backup,
