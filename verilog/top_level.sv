@@ -441,8 +441,8 @@ module top_level (
             end
 			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
 			OPA_IS_PC:  begin 
-                fu_opa_value = (id_packet.inst==`RV32_JAL) ? id_packet.PC : opa_value;
-                fu_opa_ready = (id_packet.inst==`RV32_JAL) ? 1'b1 : opa_ready;
+                fu_opa_value = (id_packet.uncond_branch && ~id_packet.is_jalr) ? id_packet.PC : opa_value;
+                fu_opa_ready = (id_packet.uncond_branch && ~id_packet.is_jalr) ? 1'b1 : opa_ready;
             end
 			OPA_IS_ZERO: fu_opa_value = 0;
 		endcase
