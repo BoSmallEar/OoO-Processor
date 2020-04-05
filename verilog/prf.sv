@@ -94,10 +94,14 @@ module prf(
         else if (commit_mis_pred) begin
             if (commit_uncond_branch) begin
                 for (int i=0; i<`PRF_SIZE; i++) begin
-                    if(i == rob_commit_dest_preg_idx) begin
+                    if (i == rob_commit_dest_preg_idx) begin
                         prf_free[i] <= `SD 1'b0;
                         prf_valid[i] <= `SD 1'b1;
                     end
+                    else if (i == rrat_prev_reg_idx) begin
+                        prf_free[i] <= `SD 1'b1;
+                        prf_valid[i] <= `SD 1'b0;
+                    end 
                     else begin
                         prf_free[i] <= `SD rrat_free_backup[i];
                         prf_valid[i] <= `SD rrat_valid_backup[i];

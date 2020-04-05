@@ -432,9 +432,7 @@ module top_level (
     );
 
     always_comb begin
-		fu_opa_value = `XLEN'hdeadfbac;
-        fu_opa_ready = 1'b1;
-		casez (id_packet.opa_select)
+		case (id_packet.opa_select)
 			OPA_IS_RS1: begin 
                 fu_opa_value = opa_value; 
                 fu_opa_ready = opa_ready;
@@ -445,16 +443,17 @@ module top_level (
                 fu_opa_ready = (id_packet.uncond_branch && ~id_packet.is_jalr) ? 1'b1 : opa_ready;
             end
 			OPA_IS_ZERO: fu_opa_value = 0;
+            default: begin
+                fu_opa_value = `XLEN'hdeadfbac;
+                fu_opa_ready = 1'b1;
+            end
 		endcase
     end
 
     always_comb begin
 		// Default value, Set only because the case isnt full.  If you see this
 		// value on the output of the mux you have an invalid opb_select
-        fu_opb_value = `XLEN'hfacefeed;
-        fu_opb_ready = 1'b1;
-        fu_offset = 0;
-		casez (id_packet.opb_select)
+		case (id_packet.opb_select)
 			OPB_IS_RS2:   begin
                 fu_opb_value = opb_value;
                 fu_opb_ready = opb_ready;  
@@ -479,7 +478,12 @@ module top_level (
                 endcase
             end
 			OPB_IS_U_IMM: fu_opb_value = `RV32_signext_Uimm(id_packet.inst);
-			OPB_IS_J_IMM: fu_offset = `RV32_signext_Jimm(id_packet.inst); 
+			OPB_IS_J_IMM: fu_offset = `RV32_signext_Jimm(id_packet.inst);
+            default: begin
+                fu_opb_value = `XLEN'hfacefeed;
+                fu_opb_ready = 1'b1;
+                fu_offset = 0;
+            end
 		endcase 
 	end
 
