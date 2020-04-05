@@ -575,7 +575,6 @@ typedef struct packed {
     logic [`ROB_LEN-1:0]              rob_idx;
 	logic  [`XLEN-1:0]      forward_data;
     logic [`SQ_LEN-1:0]     age;
-	logic					sq_empty_when_dispatch;
     logic                   rsvd;   //  Load address is resolved
 	MEM_SIZE                mem_size;
 	logic                   load_signed;

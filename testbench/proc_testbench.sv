@@ -638,18 +638,18 @@ task print_dcache_load_buffer;
     $display("====================================== DCACHE LOAD BUFFER =================================================");
     $display("|PC      |prf_idx |rob_idx |address |mem_size|load_signed |mem_tag |done|valid |data    |set_idx |way_idx |");
     for (int i=0; i<`LOAD_BUFFER_SIZE; i++) begin
-        $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d|",  load_buffer.PC,
-                                                                        load_buffer.prf_idx
-                                                                        load_buffer.rob_idx
-                                                                        load_buffer.address
-                                                                        load_buffer.mem_size
-                                                                        load_buffer.load_signed
-                                                                        load_buffer.mem_tag
-                                                                        load_buffer.done
-                                                                        load_buffer.valid
-                                                                        load_buffer.data
-                                                                        load_buffer.set_idx
-                                                                        load_buffer.way_idx);
+        $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d|",  load_buffer[i].PC,
+                                                                        load_buffer[i].prf_idx,
+                                                                        load_buffer[i].rob_idx,
+                                                                        load_buffer[i].address,
+                                                                        load_buffer[i].mem_size,
+                                                                        load_buffer[i].load_signed,
+                                                                        load_buffer[i].mem_tag,
+                                                                        load_buffer[i].done,
+                                                                        load_buffer[i].valid,
+                                                                        load_buffer[i].data,
+                                                                        load_buffer[i].set_idx,
+                                                                        load_buffer[i].way_idx);
     end
     $display("==========================================================================================================");
 endtask

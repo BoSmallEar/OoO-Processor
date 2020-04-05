@@ -85,14 +85,14 @@ module load_store_queue(
 
     // Choose an issuable entry to issue with the given selector
     psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_issue (
-        .req(LB.issue_list),
+        .req(LB.issue_list & (~LB.free_list)),
         .gnt(issue_psel_gnt),
         .gnt_bus(issue_gnt_bus),
         .empty(issue_none_selected)
     );
-    // Choose an issuable entry to forward with the given selector
+    // Choose a forwardable entry to forward with the given selector
     psel_gen #(.WIDTH(`LB_CAPACITY), .REQS(1)) psel_forward (
-        .req(LB.forward_list),
+        .req(LB.forward_list & (~LB.free_list)),
         .gnt(forward_psel_gnt),
         .gnt_bus(forward_gnt_bus),
         .empty(forward_none_selected)
@@ -135,7 +135,7 @@ module load_store_queue(
         for (int j=0; j<`LB_CAPACITY; j++) begin
             if (issue_psel_gnt[j]) lq_issue_idx = j;   
             if (forward_psel_gnt[j]) lq_forward_idx = j; 
-            if (LB.free_list[j]==0) lq_free_idx = j; 
+            if (LB.free_list[j]==1) lq_free_idx = j; 
         end
     end
  
@@ -166,14 +166,10 @@ module load_store_queue(
                 //                                   leq secure_age
 
                 // from head to LB.entries[j].age
-                if (LB.entries[j].sq_empty_when_dispatch) begin 
-                    LB.issue_list[j] = 1;
-                    LB.forward_list[j] = 0;
-                end
-                else begin
-                    if (sq_head < LB.entries[j].age) begin
+    
+                    if (sq_head <= LB.entries[j].age) begin
                         for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
-                            if (i >= sq_head && i < LB.entries[j].age) begin
+                            if ((i >= sq_head) && (i < LB.entries[j].age)) begin
                                 if (!SQ.entries[i].rsvd) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
@@ -257,7 +253,6 @@ module load_store_queue(
                             end
                         end
                     end
-                end
             end 
         end
     end
@@ -289,7 +284,6 @@ module load_store_queue(
             LB.entries[lq_free_idx].rsvd       <= `SD 0;
             // Update the list - this entry no longer free/resolved
             LB.free_list[lq_free_idx]          <= `SD 0;   
-            LB.entries[lq_free_idx].sq_empty_when_dispatch <= `SD sq_empty;  
         end 
         
         // RS fills information into specific entry when it's ready
