@@ -370,6 +370,7 @@ module dcache(
         end
         else begin
             memory_request_last_cycle <= `SD Dcache2mem_command;
+
             load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
 
             // Update: load buffer tail ptr

@@ -432,6 +432,8 @@ module top_level (
     );
 
     always_comb begin
+        fu_opa_value = `XLEN'hdeadfbac;
+        fu_opa_ready = 1'b1;
 		case (id_packet.opa_select)
 			OPA_IS_RS1: begin 
                 fu_opa_value = opa_value; 
@@ -453,6 +455,9 @@ module top_level (
     always_comb begin
 		// Default value, Set only because the case isnt full.  If you see this
 		// value on the output of the mux you have an invalid opb_select
+        fu_opb_value = `XLEN'hfacefeed;
+        fu_opb_ready = 1'b1;
+        fu_offset = 0;
 		case (id_packet.opb_select)
 			OPB_IS_RS2:   begin
                 fu_opb_value = opb_value;
