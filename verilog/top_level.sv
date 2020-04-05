@@ -291,6 +291,9 @@ module top_level (
         .reset(reset),                              // top level
         .rat_enable(rat_enable),                    // top level ??? this signal is not usd in RAT
         .commit_mis_pred(mis_pred_is_head),         // rob
+        .commit_uncond_branch(result_uncond_branch),
+        .rob_commit_dest_areg_idx(rob_commit_dest_areg_idx),
+        .rob_commit_dest_preg_idx(rob_commit_dest_preg_idx), 
         .opa_areg_idx(id_packet.opa_areg_idx),      // ID packet
         .opb_areg_idx(id_packet.opb_areg_idx),      // ID packet
         .dest_areg_idx(id_packet.dest_areg_idx),    // ID packet
@@ -400,6 +403,8 @@ module top_level (
         .prf_enable(rat_enable),            // ???
         .rrat_prev_reg_idx(rrat_prev_preg_idx),  // rrat
         .commit_mis_pred(mis_pred_is_head),      // rob
+        .commit_uncond_branch(result_uncond_branch),
+        .rob_commit_dest_preg_idx(rob_commit_dest_preg_idx),
         .commit_valid(result_valid),             // rob
         .rrat_free_backup(rrat_free_backup),     // rrat
         .rrat_valid_backup(rrat_valid_backup),   // rrat

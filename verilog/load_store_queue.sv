@@ -132,7 +132,7 @@ module load_store_queue(
         lq_issue_idx = `LB_CAPACITY'h0; 
         lq_forward_idx = `LB_CAPACITY'h0;
         lq_free_idx = `LB_LEN'h0; 
-        for (int j=0; j<`LB_CAPACITY; j++) begin
+        for (int j=`LB_CAPACITY-1; j>=0; j--) begin
             if (issue_psel_gnt[j]) lq_issue_idx = j;   
             if (forward_psel_gnt[j]) lq_forward_idx = j; 
             if (LB.free_list[j]==1) lq_free_idx = j; 

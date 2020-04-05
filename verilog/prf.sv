@@ -23,6 +23,8 @@ module prf(
     input                       prf_enable,
     input [`PRF_LEN-1:0]        rrat_prev_reg_idx,
     input                       commit_mis_pred,
+    input                       commit_uncond_branch,
+    input [`PRF_LEN-1:0]        rob_commit_dest_preg_idx,
     input                       commit_valid,
     input [`PRF_SIZE-1:0]       rrat_free_backup,                       // rrat
     input [`PRF_SIZE-1:0]       rrat_valid_backup,                      // rrat
@@ -90,11 +92,28 @@ module prf(
             
         end
         else if (commit_mis_pred) begin
-            prf_free             <= `SD rrat_free_backup;
-            prf_valid            <= `SD rrat_valid_backup;
-            free_preg_queue      <= `SD rrat_free_preg_queue_backup;
-            free_preg_queue_head <= `SD rrat_free_preg_queue_head_backup;
-            free_preg_queue_tail <= `SD rrat_free_preg_queue_tail_backup;
+            if (commit_uncond_branch) begin
+                for (int i=0; i<`PRF_SIZE; i++) begin
+                    if(i == rob_commit_dest_preg_idx) begin
+                        prf_free[i] <= `SD 1'b0;
+                        prf_valid[i] <= `SD 1'b1;
+                    end
+                    else begin
+                        prf_free[i] <= `SD rrat_free_backup[i];
+                        prf_valid[i] <= `SD rrat_valid_backup[i];
+                    end
+                end
+                free_preg_queue      <= `SD rrat_free_preg_queue_backup;
+                free_preg_queue_head <= `SD rrat_free_preg_queue_head_backup;
+                free_preg_queue_tail <= `SD rrat_free_preg_queue_tail_backup;
+            end
+            else begin
+                prf_free             <= `SD rrat_free_backup;
+                prf_valid            <= `SD rrat_valid_backup;
+                free_preg_queue      <= `SD rrat_free_preg_queue_backup;
+                free_preg_queue_head <= `SD rrat_free_preg_queue_head_backup;
+                free_preg_queue_tail <= `SD rrat_free_preg_queue_tail_backup;
+            end
         end
         else begin 
             if (commit_valid) begin

@@ -21,6 +21,9 @@ module rat(
     input                       reset,
     input                       rat_enable,
     input                       commit_mis_pred,
+    input                       commit_uncond_branch,
+    input [4:0]                 rob_commit_dest_areg_idx,
+    input [`PRF_LEN-1:0]        rob_commit_dest_preg_idx, 
     input [4:0]                 opa_areg_idx,
     input [4:0]                 opb_areg_idx,
     input [4:0]                 dest_areg_idx,
@@ -45,8 +48,18 @@ module rat(
     always_ff @(posedge clock) begin
         if (reset) 
             rat_packets      <= `SD'{32{`PRF_LEN'b0}};
-        else if (commit_mis_pred)
-            rat_packets <= `SD rat_packets_backup;
+        else if (commit_mis_pred) begin
+            if (commit_uncond_branch) begin
+                for (int i=0; i < 32; i++) begin
+                    if (i == rob_commit_dest_areg_idx)
+                        rat_packets[i] <= `SD rob_commit_dest_preg_idx;
+                    else
+                        rat_packets[i] <= `SD rat_packets_backup[i];
+                end
+            end
+            else
+                rat_packets <= `SD rat_packets_backup;
+        end
         else if (rat_enable)
             rat_packets[dest_areg_idx] <= `SD prf_free_preg_idx;
     end

@@ -217,7 +217,8 @@ module dcache(
     logic load_buffer_full;
 	
     // Record request last cycle
-    BUS_COMMAND request_last_cycle;
+    BUS_COMMAND memory_request_last_cycle;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
 
     always_comb begin
         load_cache_hit = 0;
@@ -313,6 +314,7 @@ module dcache(
     end
 
     // Outputs: Main Memory
+    // BUS_LOAD在此判定条件下会连续high两个cycle，应该为high一次cycle
     assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
@@ -367,7 +369,8 @@ module dcache(
 
         end
         else begin
-            request_last_cycle <= `SD Dcache2mem_command;
+            memory_request_last_cycle <= `SD Dcache2mem_command;
+            load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
 
             // Update: load buffer tail ptr
             if (lb2cache_request_valid && !load_cache_hit) begin
@@ -424,10 +427,11 @@ module dcache(
                 end
             end
 
-            // Update: load buffer send ptr
-            if (mem2Dcache_response != 0 && mem2Dcache_response_valid && request_last_cycle == BUS_LOAD) begin
-                load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
-                load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
+            // Update: load buffer [send ptr last cycle] entry memory tag
+            if (mem2Dcache_response != 0 && mem2Dcache_response_valid && memory_request_last_cycle == BUS_LOAD) begin
+                
+                load_buffer[load_buffer_send_ptr_last_cycle].mem_tag   <= `SD mem2Dcache_response;
+                //load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
 
             // Update: store hit -> cache
@@ -438,6 +442,12 @@ module dcache(
                     WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                     default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                 endcase
+            end
+
+
+            // Update: load buffer send ptr
+            if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) begin
+                load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
         end
     end
