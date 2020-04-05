@@ -108,6 +108,7 @@ module if_id_stage(
 		.opb_select(id_packet_out.opb_select),
 		.alu_func(id_packet_out.alu_func),
 		.fu_type(id_packet_out.fu_type),
+		.is_jalr(id_packet_out.is_jalr),
 		.dest_reg(dest_reg_select),
 		.rd_mem(id_packet_out.rd_mem),
 		.wr_mem(id_packet_out.wr_mem),

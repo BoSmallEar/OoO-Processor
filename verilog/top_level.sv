@@ -764,7 +764,7 @@ module top_level (
         .opb_ready(fu_opb_ready),
         .opb_value(fu_opb_value),
         .offset(fu_offset),
-        .is_jalr(id_packet.inst == `RV32_JALR),
+        .is_jalr(id_packet.is_jalr),
         .rob_idx(rob_tail),
         .dest_preg_idx(dest_preg_idx),
         .branch_func(id_packet.inst.b.funct3),

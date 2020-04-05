@@ -4,29 +4,36 @@ program.debug.elf:     file format elf32-littleriscv
 
 Disassembly of section .text:
 
-00000000 <loop-0x24>:
-   0:	00001237          	lui	tp,0x1
-   4:	000012b7          	lui	t0,0x1
-   8:	00828293          	addi	t0,t0,8 # 1008 <data+0x8>
-   c:	00001337          	lui	t1,0x1
-  10:	01030313          	addi	t1,t1,16 # 1010 <data+0x10>
-  14:	00200513          	addi	a0,zero,2
-  18:	00100113          	addi	sp,zero,1
-  1c:	00222023          	sw	sp,0(tp) # 1000 <data>
-  20:	0022a023          	sw	sp,0(t0)
+00000000 <fib-0x1c>:
+   0:	00100413          	addi	s0,zero,1
+   4:	00001fb7          	lui	t6,0x1
+   8:	00e00893          	addi	a7,zero,14
+   c:	01000def          	jal	s11,1c <fib>
+  10:	40000113          	addi	sp,zero,1024
+  14:	00112023          	sw	ra,0(sp)
+  18:	10500073          	wfi
 
-00000024 <loop>:
-  24:	00022103          	lw	sp,0(tp) # 0 <loop-0x24>
-  28:	0002a183          	lw	gp,0(t0)
-  2c:	002181b3          	add	gp,gp,sp
-  30:	00820213          	addi	tp,tp,8 # 8 <loop-0x1c>
-  34:	00828293          	addi	t0,t0,8
-  38:	00150513          	addi	a0,a0,1
-  3c:	01052593          	slti	a1,a0,16
-  40:	00332023          	sw	gp,0(t1)
-  44:	00830313          	addi	t1,t1,8
-  48:	fc059ee3          	bne	a1,zero,24 <loop>
-  4c:	10500073          	wfi
+0000001c <fib>:
+  1c:	04088063          	beq	a7,zero,5c <fib_ret_1>
+  20:	02888e63          	beq	a7,s0,5c <fib_ret_1>
+  24:	fe0f8f93          	addi	t6,t6,-32 # fe0 <data+0xbe0>
+  28:	01bfac23          	sw	s11,24(t6)
+  2c:	011fa023          	sw	a7,0(t6)
+  30:	fff88893          	addi	a7,a7,-1
+  34:	fe9ffdef          	jal	s11,1c <fib>
+  38:	001fa423          	sw	ra,8(t6)
+  3c:	000fa883          	lw	a7,0(t6)
+  40:	ffe88893          	addi	a7,a7,-2
+  44:	fd9ffdef          	jal	s11,1c <fib>
+  48:	008fa103          	lw	sp,8(t6)
+  4c:	001100b3          	add	ra,sp,ra
+  50:	018fad83          	lw	s11,24(t6)
+  54:	020f8f93          	addi	t6,t6,32
+  58:	000d8067          	jalr	zero,0(s11)
+
+0000005c <fib_ret_1>:
+  5c:	00100093          	addi	ra,zero,1
+  60:	000d8067          	jalr	zero,0(s11)
 	...
 
 Disassembly of section .riscv.attributes:
@@ -36,7 +43,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	c.unimp
    4:	7200                	c.flw	fs0,32(a2)
    6:	7369                	c.lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <loop-0x10>
+   8:	01007663          	bgeu	zero,a6,14 <fib-0x8>
    c:	0014                	0x14
    e:	0000                	c.unimp
   10:	7205                	c.lui	tp,0xfffe1

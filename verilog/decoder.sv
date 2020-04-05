@@ -30,6 +30,7 @@ module decoder(
 	output DEST_REG_SEL   dest_reg, // mux selects
 	output ALU_FUNC       alu_func,
 	output FU_TYPE		  fu_type,
+	output logic          is_jalr,
 	output logic          rd_mem, wr_mem, cond_branch, uncond_branch,
 	output MEM_SIZE       mem_size,
 	output logic          load_signed,
@@ -63,7 +64,8 @@ module decoder(
 		uncond_branch = `FALSE;
 		halt = `FALSE;
 		illegal = `FALSE;
-		fu_type = ALU; 
+		fu_type = ALU;
+		is_jalr = `FALSE;
 		mem_size = WORD;
 		load_signed = `FALSE;
 		casez (inst) 
@@ -89,6 +91,7 @@ module decoder(
 				opa_select    = OPA_IS_RS1;
 				opb_select    = OPB_IS_I_IMM;
 				uncond_branch = `TRUE;
+				is_jalr       = `TRUE;
 				fu_type = BRANCH;
 			end
 			`RV32_BEQ, `RV32_BNE, `RV32_BLT, `RV32_BGE,

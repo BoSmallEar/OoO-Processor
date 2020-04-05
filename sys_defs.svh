@@ -292,8 +292,8 @@ typedef struct packed {
 //
 //////////////////////////////////////////////
 
-`define PRF_SIZE      32	// number of entries
-`define PRF_LEN		  5		// length in bits == log(PRF_SIZE)
+`define PRF_SIZE      64	// number of entries
+`define PRF_LEN		  6		// length in bits == log(PRF_SIZE)
 `define ROB_SIZE      8		// number of entries
 `define ROB_LEN       3		// length in bits == log(ROB_SIZE)
 `define SQ_LEN 		  3
@@ -352,6 +352,7 @@ typedef struct packed {
 
 	logic       cond_branch;      // is inst a conditional branch?
 	logic       uncond_branch;    // is inst an unconditional branch?
+	logic       is_jalr;
 
 	logic       halt;             // is this a halt?
 	logic       illegal;          // is this instruction illegal?

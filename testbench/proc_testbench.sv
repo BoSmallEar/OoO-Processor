@@ -387,9 +387,9 @@ task print_rs;
         rs_mul_free[i]);
     end
     $display("============================================= RS-BR ==============================================");
-    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |free |");
+    $display("|rs_idx  |PC      |opa_ready |opa_value |opb_ready |opb_value |target_PC |pred_direction|rob_idx |free |is_jalr |offset |");
     for (int i = 0; i < `RS_BR_SIZE; i++) begin
-        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%10d|%14d|%8d|%5d|", i,
+        $display("|%8d|%8d|%10d|%10d|%10d|%10d|%10d|%14d|%8d|%5d|%10d|%8d|", i,
         rs_branch_packets[i].PC,
         rs_branch_packets[i].opa_ready,
         rs_branch_packets[i].opa_value,
@@ -398,7 +398,9 @@ task print_rs;
         rs_branch_packets[i].br_pred_target_PC,
         rs_branch_packets[i].br_pred_direction,
         rs_branch_packets[i].rob_idx,
-        rs_branch_free[i]);
+        rs_branch_free[i],
+        rs_branch_packets[i].is_jalr,
+        rs_branch_packets[i].offset);
     end
     $display("================================================= RS-LB =================================================");
     $display("|rs_idx  |PC      |base_ready|base_value|offset  |lb_idx  |dest_preg_idx |rob_idx |mem_size|signed|free |");
