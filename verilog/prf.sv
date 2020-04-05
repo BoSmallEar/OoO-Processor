@@ -64,9 +64,9 @@ module prf(
     // assign opa_ready = (cdb_broadcast_valid && (opa_preg_idx == cdb_dest_preg_idx)) || prf_valid[opa_preg_idx];
     // assign opb_ready = (cdb_broadcast_valid && (opb_preg_idx == cdb_dest_preg_idx)) || prf_valid[opb_preg_idx];
     always_comb begin
-        for (int i = `PRF_SIZE-1; i>0; i--){
+        for (int i = `PRF_SIZE-1; i>0; i--) begin
             if (prf_free[i]) prf_free_preg_idx = i;
-        }
+        end
     end 
  
     assign opa_value =  (cdb_dest_preg_idx == 0) ? prf_values[opa_preg_idx] : 
