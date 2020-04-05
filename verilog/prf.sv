@@ -63,7 +63,12 @@ module prf(
     // assign opb_value = (cdb_broadcast_valid && (opb_preg_idx == cdb_dest_preg_idx)) ? cdb_result : prf_values[opb_preg_idx];
     // assign opa_ready = (cdb_broadcast_valid && (opa_preg_idx == cdb_dest_preg_idx)) || prf_valid[opa_preg_idx];
     // assign opb_ready = (cdb_broadcast_valid && (opb_preg_idx == cdb_dest_preg_idx)) || prf_valid[opb_preg_idx];
-    assign prf_free_preg_idx = free_preg_queue[free_preg_queue_head];
+    always_comb begin
+        for (int i = `PRF_SIZE-1; i>0; i--){
+            if (prf_free[i]) prf_free_preg_idx = i;
+        }
+    end 
+ 
     assign opa_value =  (cdb_dest_preg_idx == 0) ? prf_values[opa_preg_idx] : 
                         (cdb_broadcast_valid && (opa_preg_idx == cdb_dest_preg_idx)) ? cdb_result : prf_values[opa_preg_idx];
     assign opb_value =  (cdb_dest_preg_idx == 0) ? prf_values[opb_preg_idx] : 
