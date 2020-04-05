@@ -216,8 +216,7 @@ module dcache(
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
     logic load_buffer_full;
 	
-    // Record request last cycle
-    BUS_COMMAND memory_request_last_cycle;
+    // Record value of load buffer send ptr last cycle
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
 
     always_comb begin
@@ -369,8 +368,6 @@ module dcache(
 
         end
         else begin
-            memory_request_last_cycle <= `SD Dcache2mem_command;
-
             load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
 
             // Update: load buffer tail ptr
@@ -429,7 +426,7 @@ module dcache(
             end
 
             // Update: load buffer [send ptr last cycle] entry memory tag
-            if (mem2Dcache_response != 0 && mem2Dcache_response_valid && memory_request_last_cycle == BUS_LOAD) begin
+            if (mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) begin
                 
                 load_buffer[load_buffer_send_ptr_last_cycle].mem_tag   <= `SD mem2Dcache_response;
                 //load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
