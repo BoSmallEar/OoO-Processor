@@ -485,9 +485,9 @@ task print_cdb;
     $display("cdb_global_pred_direction: %d", cdb_global_pred_direction);
     $display("========================================================");
     if (result_valid)
-        $dispaly("commit PC: %d", rob_packets[rob_head].PC);  
+        $display("commit PC: %d", rob_packets[rob_head].PC);  
     else
-        $dispaly("commit PC: x");
+        $display("commit PC: x");
 endtask
 
 task print_id_packet;
