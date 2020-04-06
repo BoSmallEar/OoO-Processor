@@ -325,7 +325,7 @@ module dcache(
     // Outputs: Main Memory
     // BUS_LOAD在此判定条件下会连续high两个cycle，应该为high一次cycle
     assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
-                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
+                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].mem_tag == 0) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].address : 0;
     assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : DOUBLE;
@@ -414,7 +414,7 @@ module dcache(
 
         end
         else begin
-            load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
+            // load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
 
             // Update: load buffer tail ptr
             if (lb2cache_request_valid && !load_cache_hit) begin
@@ -490,7 +490,8 @@ module dcache(
 
 
             // Update: load buffer send ptr
-            if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) begin
+            if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].mem_tag == 0) begin
+                load_buffer_send_ptr_last_cycle             <= `SD load_buffer_send_ptr;
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
         end
