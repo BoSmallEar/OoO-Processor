@@ -106,7 +106,6 @@ module rs_lb(
         if (reset || commit_mis_pred) begin
             rs_lb_free      <= `SD ~`RS_LB_SIZE'h0;
             rs_lb_counter   <= `SD `RS_LB_LEN'h0;
-            rs_lb_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_lb_counter <= `SD rs_lb_counter + enable - (!no_rs_selected);

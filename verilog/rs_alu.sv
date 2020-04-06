@@ -104,14 +104,13 @@ module rs_alu(
     assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
     assign rs_alu_packet = rs_alu_packets[rs_alu_ex_idx];
     assign rs_alu_out_valid = !no_rs_selected;
-    
+
     int t;
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_alu_free      <= `SD ~`RS_ALU_SIZE'h0;
             rs_alu_counter   <= `SD 0;
-            rs_alu_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_alu_counter <= `SD rs_alu_counter + (enable&&!halt&&!illegal) - (!no_rs_selected);

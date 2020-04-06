@@ -112,7 +112,6 @@ module rs_sq(
         if (reset || commit_mis_pred) begin
             rs_sq_free      <= `SD ~`RS_SQ_SIZE'h0;
             rs_sq_counter   <= `SD `RS_SQ_LEN'h0;
-            rs_sq_out_valid <= `SD 1'b0; 
         end 
         else begin
             rs_sq_counter <= `SD rs_sq_counter + enable - (!no_rs_selected);

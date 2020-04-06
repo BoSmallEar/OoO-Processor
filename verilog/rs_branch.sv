@@ -116,7 +116,6 @@ module rs_branch(
         if (reset || commit_mis_pred) begin
             rs_branch_free      <= `SD ~`RS_BR_SIZE'h0;
             rs_branch_counter   <= `SD 0;
-            rs_branch_out_valid <= `SD 1'b0;
         end 
         else begin
             rs_branch_counter <= `SD rs_branch_counter + enable - (!no_rs_selected);
