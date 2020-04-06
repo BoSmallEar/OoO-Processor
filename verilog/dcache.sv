@@ -300,7 +300,7 @@ module dcache(
     always_comb begin
         if (sq2cache_request_valid) begin
             store_cache_hit = 0;
-            //store_cache_hit_set = store_set;
+            store_cache_hit_set = store_set;
             store_cache_hit_way = 0;
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
