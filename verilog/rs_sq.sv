@@ -69,6 +69,8 @@ module rs_sq(
     //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_sq_full = (rs_sq_counter == `RS_SQ_SIZE);
+    assign rs_sq_packet = rs_sq_packets[rs_sq_ex_idx];
+    assign rs_sq_out_valid = !no_rs_selected;
 
     int i;
     always_comb begin
@@ -131,12 +133,8 @@ module rs_sq(
             
             // issue
             if (!no_rs_selected) begin
-                rs_sq_packet <= `SD rs_sq_packets[rs_sq_ex_idx];
-                rs_sq_out_valid <= `SD 1'b1;
                 rs_sq_free[rs_sq_ex_idx] <= `SD 1'b1; 
             end 
-            else
-                rs_sq_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin

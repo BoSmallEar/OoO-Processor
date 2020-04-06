@@ -66,6 +66,8 @@ module rs_mul(
     //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
+    assign rs_mul_out_valid = !no_rs_selected;
+    assign rs_mul_packet = rs_mul_packets[rs_mul_ex_idx];
 
     // find out the smallest index that corresponds to a free rs entry
     int i;
@@ -133,12 +135,8 @@ module rs_mul(
             
             // issue
             if (!no_rs_selected) begin
-                rs_mul_packet <= `SD rs_mul_packets[rs_mul_ex_idx];
-                rs_mul_out_valid <= `SD 1'b1;
                 rs_mul_free[rs_mul_ex_idx] <= `SD 1'b1; 
             end
-            else
-                rs_mul_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin

@@ -68,6 +68,8 @@ module rs_alu(
     //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
+    assign rs_alu_packet = rs_alu_packets[rs_alu_ex_idx];
+    assign rs_alu_out_valid = !no_rs_selected;
 
     int i;
     always_comb begin
@@ -132,12 +134,8 @@ module rs_alu(
             
             // issue
             if (!no_rs_selected) begin
-                rs_alu_packet <= `SD rs_alu_packets[rs_alu_ex_idx];
-                rs_alu_out_valid <= `SD 1'b1;
                 rs_alu_free[rs_alu_ex_idx] <= `SD 1'b1; 
             end
-            else
-                rs_alu_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin

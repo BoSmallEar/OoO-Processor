@@ -62,7 +62,11 @@ module rs_lb(
     `endif
     
     logic [`RS_LB_SIZE-1:0] psel_gnt;  // output of the priority selector 
+    
     assign rs_lb_full = (rs_lb_counter == `RS_LB_SIZE);
+    assign rs_lb_packet = rs_lb_packets[rs_lb_ex_idx];
+    assign rs_lb_out_valid = !no_rs_selected;
+
 
     int i;
     always_comb begin
@@ -125,12 +129,8 @@ module rs_lb(
             
             // issue
             if (!no_rs_selected) begin
-                rs_lb_packet <= `SD rs_lb_packets[rs_lb_ex_idx];
-                rs_lb_out_valid <= `SD 1'b1;
                 rs_lb_free[rs_lb_ex_idx] <= `SD 1'b1; 
             end
-            else
-                rs_lb_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin

@@ -73,6 +73,8 @@ module rs_branch(
     //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
     assign rs_branch_full = (rs_branch_counter == `RS_BR_SIZE);
+    assign rs_branch_out_valid = !no_rs_selected;
+    assign rs_branch_packet = rs_branch_packets[rs_branch_ex_idx];
 
     int i;
     always_comb begin
@@ -147,12 +149,8 @@ module rs_branch(
             
             // issue
             if (!no_rs_selected) begin
-                rs_branch_packet <= `SD rs_branch_packets[rs_branch_ex_idx];
-                rs_branch_out_valid <= `SD 1'b1;
                 rs_branch_free[rs_branch_ex_idx] <= `SD 1'b1; 
             end
-            else
-                rs_branch_out_valid <= `SD 1'b0;
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin

@@ -72,78 +72,78 @@ btt6:
 	ori t1, t1, -1                                  # 232
 	li t2, 0                                        # 236
 	addi t2, t2, 3
-	andi t2, t2, 1
+	andi t2, t2, 1                                  # 244
 	li t3, 0
-	xori t3, t3, -1 
+	xori t3, t3, -1                                 # 252
 	bne t3, t1, FAIL
-	andi t1, t1, -2048
+	andi t1, t1, -2048                              # 260
 	bne t1,t6, FAIL
-	slti t4, t1, 1	
+	slti t4, t1, 1	                                # 268
 	sltiu t5, t1, 1
-	bne t4,t5, im_hop
+	bne t4,t5, im_hop                               # 276 
 	bge t1, t1, FAIL
 im_hop:	
-	li t2, 0x1
+	li t2, 0x1                                      # 284
 	slli t2, t2, 12
 	lui t1, 1
-	bne t2, t1, FAIL
+	bne t2, t1, FAIL								# 296
 	lui t1, 0xfffff
-	srli t1, t1, 31
+	srli t1, t1, 31                                 # 304
 	li t2, 1
-	bne t2, t1, FAIL
-	lui t1, 0xfffff
-	srai t1, t1, 31
-	lui t2, 0xfffff
-	ori t2, t2, -1
-	bne t2, t1, FAIL 
+	bne t2, t1, FAIL								# 312
+	lui t1, 0xfffff									# 316 t1=1111_1111_1111_1111_1111
+	srai t1, t1, 31									# 320
+	lui t2, 0xfffff									# 324
+	ori t2, t2, -1									# 328 
+	bne t2, t1, FAIL 								# 332
 ## Memory tests ##
-	li t0, 0x2 #TODO: testname	
-	li t1, 255
-	sb t1, 0(sp) 
-	lb t2, 0(sp)
-	bge t2, t1, FAIL
-	lbu t2, 0(sp)
-	bne t1,t2, FAIL	
-	ori t1, t1, -1 
-	lui t1, 0xf	
-	sh t1, 0(sp)
-	lh t2, 0(sp)
-	bge t2, t1, FAIL
-	lhu t2, 0(sp)
-	bne t2, t2, FAIL	
-	ori t1, t1, -1 
-	lui t1, 0x7ffff
-	sw t1, 0(sp)
-	lw t2, 0(sp)
-	bne t1, t2, FAIL
-## Arithimetic between register tests ##
-	li t0, 0x3
-	li t1, 5
-	li t2, 0
+	li t0, 0x2 #TODO: testname	                    # 336
+	li t1, 255                                      # 340
+	sb t1, 0(sp)                                    # 344   
+	lb t2, 0(sp)									# 348
+	bge t2, t1, FAIL								# 352
+	lbu t2, 0(sp)									# 356
+	bne t1,t2, FAIL									# 360
+	ori t1, t1, -1 									# 364
+	lui t1, 0xf										# 368
+	sh t1, 0(sp)									# 372
+	lh t2, 0(sp)									# 376
+	bge t2, t1, FAIL								# 380
+	lhu t2, 0(sp)									# 384
+	bne t2, t2, FAIL								# 388
+	ori t1, t1, -1 									# 392
+	lui t1, 0x7ffff									# 396
+	sw t1, 0(sp)									# 400
+	lw t2, 0(sp)									# 404
+	bne t1, t2, FAIL								# 408
+## Arithimetic between register tests ##			
+	li t0, 0x3										# 412
+	li t1, 5                                        # 416
+	li t2, 0                                        # 420
 	add t2, t1, t1
-	slli t1, t1, 1	
+	slli t1, t1, 1	             # 428
 	bne t1, t2, FAIL
-	li t1, 0x3
+	li t1, 0x3	                 # 436
 	li t2, 0x4
-	or t1, t1,t2
+	or t1, t1,t2	             # 444
 	li t3, 0x7
-	bne t1,t3, FAIL	
+	bne t1,t3, FAIL		         # 452
 	li t1, 3
-	sub t1, t1, t2
+	sub t1, t1, t2   	         # 460
 	li t2, -1
-	bne t1,t2, FAIL
+	bne t1,t2, FAIL	             # 468
 	# TODO: Finish out with arithmetic instructions, they have been enurmated 
 	# in the previous section with immeadiates, just need to test them w/ reg args
 ## MULT Instructions ##
-	li t0, 0x4
-	li t1, 14
+	li t0, 0x4	                 # 472
+	li t1, 14	                 # 476
 	li t2, 40
-	mul t3, t2, t1
+	mul t3, t2, t1	             # 484
 	li t4, 560
-	bne t4, t3, FAIL
-	lui t1, 0x7ff00
-	lui t2, 0x55555
-	mulhu t5, t1, t2
+	bne t4, t3, FAIL             # 492
+	lui t1, 0x7ff00	             # 496
+	lui t2, 0x55555              # 500
+	mulhu t5, t1, t2             # 504
 	mul t4, t1, t2
 	lui t1, 0xfff00
     lui t2, 0xf5555
