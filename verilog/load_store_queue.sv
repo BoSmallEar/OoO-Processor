@@ -9,6 +9,7 @@ module load_store_queue(
     // load inputs
     input                                       clock,
     input                                       reset,
+    input               [`XLEN-1:0]                PC,      
     input                                       lb_enable,  
     // From RS_SQ
     input                                       rs_lb_out_valid,
@@ -282,13 +283,13 @@ module load_store_queue(
             // Age is the current SQ tail, new entry is always unresolved
             LB.entries[lq_free_idx].age        <= `SD sq_tail;
             LB.entries[lq_free_idx].rsvd       <= `SD 0;
+            LB.entries[lq_free_idx].PC          <= `SD PC;
             // Update the list - this entry no longer free/resolved
             LB.free_list[lq_free_idx]          <= `SD 0;   
         end 
         
         // RS fills information into specific entry when it's ready
         if (rs_lb_out_valid && LB.entries[rs_lb_packet.lb_idx].rsvd == 0) begin
-            LB.entries[rs_lb_packet.lb_idx].PC          <= `SD rs_lb_packet.PC;
             LB.entries[rs_lb_packet.lb_idx].addr        <= `SD rs_lb_packet.base_value + rs_lb_packet.offset;
             LB.entries[rs_lb_packet.lb_idx].rd_preg     <= `SD rs_lb_packet.dest_preg_idx;
             LB.entries[rs_lb_packet.lb_idx].rob_idx     <= `SD rs_lb_packet.rob_idx;

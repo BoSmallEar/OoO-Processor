@@ -720,6 +720,7 @@ module top_level (
     load_store_queue load_store_queue0(
         .clock(clock),
         .reset(reset),
+        .PC(id_packet.PC),
         .lb_enable(id_packet.valid && id_packet.fu_type == LOAD && id_packet.rd_mem==`TRUE),  
         .rs_lb_out_valid(rs_lb_out_valid),
         .rs_lb_packet(rs_lb_packet),  
