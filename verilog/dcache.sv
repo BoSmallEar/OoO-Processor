@@ -194,7 +194,7 @@ module dcache(
 
     logic [9:0] load_tag;                            // Unique identifier of a specific block
     logic [2:0] load_set;                            // Decides the position in the cache
-    assign { load_tag, load_set } = lb2cache_request_entry.addr[31:3];
+    assign { load_tag, load_set } = lb2cache_request_entry.addr[15:3];
 
     // load instruction
     logic load_cache_hit;
@@ -204,7 +204,7 @@ module dcache(
     // store instruction
     logic [9:0] store_tag;                            // Unique identifier of a specific block
     logic [2:0] store_set;                            // Decides the position in the cache
-    assign { store_tag, store_set } = sq2cache_request_entry.addr[31:3];
+    assign { store_tag, store_set } = sq2cache_request_entry.addr[15:3];
 
     logic store_cache_hit;
     logic [`SET_LEN-1:0] store_cache_hit_set;
