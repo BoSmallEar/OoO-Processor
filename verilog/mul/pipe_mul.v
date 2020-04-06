@@ -107,9 +107,7 @@ module mult2cdb(
 	assign absolute_opa   = a_sign == 0 ? unsigned_opa : 1 + ~{{`XLEN{1'b1}}, rs_mul_packet.opa_value};
 	assign absolute_opb   = b_sign == 0 ? unsigned_opb : 1 + ~{{`XLEN{1'b1}}, rs_mul_packet.opb_value};
 
-    assign mul_prf_idx = rs_mul_packet.dest_preg_idx;
-	assign mul_rob_idx = rs_mul_packet.rob_idx;
-	assign mul_PC	   = rs_mul_packet.PC;
+
 	
 	logic [`DOUBLE_XLEN-1:0] product;
 	// logic signed [2*`XLEN-1:0] mixed_mul;
@@ -138,6 +136,15 @@ module mult2cdb(
 			default:	mul_value = `XLEN'hfacebeec;  // here to prevent latches
 		endcase
 	end
+
+	always_ff @(posedge clock) begin
+		if (mul_enable) begin
+	    	mul_prf_idx <= rs_mul_packet.dest_preg_idx;
+			mul_rob_idx<= rs_mul_packet.rob_idx;
+			mul_PC	    <= rs_mul_packet.PC;
+		end
+	end
+
 
     // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
