@@ -13,8 +13,8 @@ sw a0, 0(sp)
 lw a3, 0(sp)        #48
 addi sp, sp, -16
 sw a3, 0(sp)        #56
-# lw a0, 0(sp)
-# sub a0, a2, a0
+lw a0, 0(sp)
+sub a0, a2, a0
 nop
 nop
 wfi

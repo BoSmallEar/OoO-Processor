@@ -1,0 +1,46 @@
+set ucliGUI::state
+set ucliGUI::state
+ucliCore::getToolPID
+synopsys::env hasTB
+trigger_hier_stack_context_switch 0
+synUtils::setDVEInitPhase 1
+synopsys::dump -type VPD -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/inter.vpd -locking
+synopsys::dump -autoflush on -fid VPD0
+set ::dve_fid VPD0
+synUtils::setDVEInitPhase 0
+ucliCore::getToolPID
+synUtils::sendTool -active _icl_setToolSocket /tmp/smlnpM9bIm8
+synUtils::sendTool -active {_icl_start_rpc -version "N-2017.12-SP2-1_Full64" -sync_file /tmp/vcs_dve_rpc.shiyuliu.20926}
+synUtils::sendTool -active {_icl_createSharedMemory /tmp/vcs_dve_general.shiyuliu.20926}
+ucliGUI::vpdAddHierarchy -scope proc_testbench -depth 1 -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/inter.vpd; synopsys::dump -flush VPD0
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary binary hexadecimal binary binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary } -list {{clock_count[31:0]} {instr_count[31:0]} clock reset {mem2proc_response[3:0]} {mem2proc_data[63:0]} {mem2proc_tag[3:0]} {proc2mem_command[1:0]} {proc2mem_addr[31:0]} {proc2mem_data[63:0]} proc2mem_size result_mis_pred btb_taken {btb_target_PC[31:0]} tournament_taken local_taken global_taken prf_values {prf_free[63:0]} {prf_valid[63:0]} free_preg_queue {free_preg_queue_head[5:0]} {free_preg_queue_tail[5:0]} processor_error_status rob_packets {rob_head[2:0]} {rob_tail[2:0]} rat_packets {opa_preg_idx[5:0]} {opb_preg_idx[5:0]} fu_opa_ready }
+config endofsim noexit
+config onfail enable all
+config syscaddplainmembers
+config syscaddsourcenames
+config syscaddstructtypes
+synopsys::listing -disable
+synopsys::dump -add {proc_testbench.processor0.top_level0.dcache0.dcache_PC proc_testbench.processor0.top_level0.dcache0.dcache_blocks proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx proc_testbench.processor0.top_level0.dcache0.dcache_valid proc_testbench.processor0.top_level0.dcache0.dcache_value } -aggregates  -fid VPD0
+synopsys::run
+set ucliGUI::state
+set ucliGUI::state
+set synopsys::env(time) 7200
+set synopsys::env(time) 14600
+set synopsys::env(time) 22500
+set synopsys::env(time) 30300
+ucliCore::getToolPID
+ucliCore::stopTool -no_signal
+set ucliGUI::state
+set ucliGUI::state
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary binary hexadecimal binary binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {{clock_count[31:0]} {instr_count[31:0]} clock reset {mem2proc_response[3:0]} {mem2proc_data[63:0]} {mem2proc_tag[3:0]} {proc2mem_command[1:0]} {proc2mem_addr[31:0]} {proc2mem_data[63:0]} proc2mem_size result_mis_pred btb_taken {btb_target_PC[31:0]} tournament_taken local_taken global_taken prf_values {prf_free[63:0]} {prf_valid[63:0]} free_preg_queue {free_preg_queue_head[5:0]} {free_preg_queue_tail[5:0]} processor_error_status rob_packets {rob_head[2:0]} {rob_tail[2:0]} rat_packets {opa_preg_idx[5:0]} {opb_preg_idx[5:0]} fu_opa_ready fu_opb_ready {fu_opa_value[31:0]} {fu_opb_value[31:0]} {fu_offset[31:0]} rrat_packets rs_alu_packets {rs_alu_counter[3:0]} {rs_alu_ex[7:0]} {rs_alu_free[7:0]} {rs_alu_free_idx[2:0]} {rs_alu_ex_idx[2:0]} rs_branch_packets {rs_branch_counter[2:0]} {rs_branch_ex[3:0]} }
+ucliGUI::getSignalValues -scope proc_testbench -radix {hexadecimal hexadecimal hexadecimal binary hexadecimal binary binary binary hexadecimal hexadecimal hexadecimal binary hexadecimal binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal binary hexadecimal hexadecimal hexadecimal hexadecimal hexadecimal } -list {{cdb_dest_preg_idx[5:0]} {cdb_rob_idx[2:0]} {cdb_broadcast_inst_PC[31:0]} cdb_br_direction {cdb_br_target_PC[31:0]} cdb_mis_pred cdb_local_pred_direction cdb_global_pred_direction id_packet_out {prf_free_preg_idx[5:0]} {dest_preg_idx[5:0]} opa_ready {opa_value[31:0]} opb_ready {opb_value[31:0]} {rs_branch_free[3:0]} rs_mul_packets {rs_mul_free[3:0]} rs_lb_packets {rs_lb_free[3:0]} rs_sq_packets {rs_sq_free[3:0]} SQ LB {sq_head[2:0]} {sq_counter[2:0]} sq_empty {lq_free_idx[2:0]} {lq_issue_idx[2:0]} {lq_forward_idx[2:0]} load_buffer {debug_counter[63:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.processor0.top_level0.dcache0 -radix {decimal } -list {{dcache_PC[31:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.processor0.top_level0.dcache0 -radix {decimal } -list {{dcache_value[31:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.processor0.top_level0.dcache0 -radix {decimal } -list {{dcache_prf_idx[5:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.processor0.top_level0.dcache0 -radix {decimal } -list {{dcache_rob_idx[2:0]} }
+ucliGUI::getSignalValues -scope proc_testbench.processor0.top_level0.dcache0 -radix {decimal } -list {dcache_blocks }
+if [catch {gui_sim_terminate}] {gui_sim_terminate -kill}
+synopsys::finish
+set ucliGUI::state
+set ucliGUI::state
+ucli_exit

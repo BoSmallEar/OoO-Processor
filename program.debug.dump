@@ -7,7 +7,7 @@ Disassembly of section .text:
 00000000 <fib-0x1c>:
    0:	00100413          	addi	x8,x0,1
    4:	00001fb7          	lui	x31,0x1
-   8:	00300893          	addi	x17,x0,3
+   8:	00400893          	addi	x17,x0,4
    c:	01000def          	jal	x27,1c <fib>
   10:	40000113          	addi	x2,x0,1024
   14:	00112023          	sw	x1,0(x2)
