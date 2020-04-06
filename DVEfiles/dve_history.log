@@ -9,18 +9,18 @@ gui_create_pref_key -category {schem_pin_hc} -key {textExtFont} -value_type {str
 gui_state_default_create -off -ini
 gui_set_state_value -category Globals -key recent_sessions -value {{gui_load_session -ignore_errors -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/session_mile2_debug1.inter.vpd.tcl} {gui_load_session -ignore_errors -file /afs/umich.edu/user/s/h/shiyuliu/Desktop/group8w20/session.inter.vpd.tcl}}
 gui_set_state_value -category Layout -key child_console_size_x -value 2291
-gui_set_state_value -category Layout -key child_console_size_y -value 392
+gui_set_state_value -category Layout -key child_console_size_y -value 391
 gui_set_state_value -category Layout -key child_data_coltype -value 52
 gui_set_state_value -category Layout -key child_data_colvalue -value 101
 gui_set_state_value -category Layout -key child_data_colvariable -value 210
-gui_set_state_value -category Layout -key child_data_size_x -value 370
-gui_set_state_value -category Layout -key child_data_size_y -value 705
+gui_set_state_value -category Layout -key child_data_size_x -value 369
+gui_set_state_value -category Layout -key child_data_size_y -value 706
 gui_set_state_value -category Layout -key child_hier_col3 -value {-1}
 gui_set_state_value -category Layout -key child_hier_colhier -value 211
 gui_set_state_value -category Layout -key child_hier_colpd -value 0
 gui_set_state_value -category Layout -key child_hier_coltype -value 107
-gui_set_state_value -category Layout -key child_hier_size_x -value 324
-gui_set_state_value -category Layout -key child_hier_size_y -value 705
+gui_set_state_value -category Layout -key child_hier_size_x -value 323
+gui_set_state_value -category Layout -key child_hier_size_y -value 706
 gui_set_state_value -category Layout -key child_schematic_docknewline -value false
 gui_set_state_value -category Layout -key child_schematic_pos_x -value {-2}
 gui_set_state_value -category Layout -key child_schematic_pos_y -value {-15}
@@ -29,8 +29,8 @@ gui_set_state_value -category Layout -key child_schematic_size_y -value 755
 gui_set_state_value -category Layout -key child_source_docknewline -value false
 gui_set_state_value -category Layout -key child_source_pos_x -value {-2}
 gui_set_state_value -category Layout -key child_source_pos_y -value {-15}
-gui_set_state_value -category Layout -key child_source_size_x -value 1600
-gui_set_state_value -category Layout -key child_source_size_y -value 700
+gui_set_state_value -category Layout -key child_source_size_x -value 1602
+gui_set_state_value -category Layout -key child_source_size_y -value 701
 gui_set_state_value -category Layout -key child_wave_colname -value 321
 gui_set_state_value -category Layout -key child_wave_colvalue -value 340
 gui_set_state_value -category Layout -key child_wave_left -value 665
@@ -61,73 +61,61 @@ gui_state_default_create -off
 gui_sim_run Ucli -exe dve -args {-ucligui  -V +vc -cm_runsilent -cm line+tgl +memcbk} -dir .
 gui_list_expand -id  Hier.1   proc_testbench
 gui_list_expand -id  Hier.1   proc_testbench.processor0
-gui_list_select -id Hier.1 -current_item_name proc_testbench.processor0.top_level0 -current_item_type Scope  -selected  { proc_testbench.processor0.top_level0   }
 gui_list_expand -id  Hier.1   proc_testbench.processor0.top_level0
 gui_list_select -id Hier.1 -current_item_name proc_testbench.processor0.top_level0.dcache0 -current_item_type Scope  -selected  { proc_testbench.processor0.top_level0.dcache0   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.load_buffer[15:0]}   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}   }
-gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}   }
+gui_list_select -id Data.1 -selected  { proc_testbench.processor0.top_level0.dcache0.dcache_valid   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.clock   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}  proc_testbench.processor0.top_level0.dcache0.clock  proc_testbench.processor0.top_level0.dcache0.reset   }
 gui_open_window Wave
-gui_list_add -id Wave.1 -from Data.1 { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]} proc_testbench.processor0.top_level0.dcache0.dcache_valid {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]} } -insertionbar
+gui_list_add -id Wave.1 -from Data.1 { proc_testbench.processor0.top_level0.dcache0.clock proc_testbench.processor0.top_level0.dcache0.reset {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]} proc_testbench.processor0.top_level0.dcache0.dcache_valid {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]} {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]} } -insertionbar
 gui_wv_zoom_timerange -id  Wave.1 0 533
 gui_sim_continue  
 gui_sim_stop 
-gui_zoom -window Wave.1 -full
-gui_wv_zoom_timerange -id  Wave.1 29651 33697
-gui_wv_zoom_timerange -id  Wave.1 31408 32904
-gui_wv_zoom_timerange -id  Wave.1 32548 32913
-gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}   }
-gui_list_set_selected_property -id Wave.1 -radix decimal
-gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}   }
+gui_wv_scroll_hslidermove -id  Wave.1 71166
+gui_wv_scroll_hslidermove -id  Wave.1 69540
+gui_wv_scroll_hslidermove -id  Wave.1 70391
+gui_wv_zoom_timerange -id  Wave.1 23557 23875
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.clock   }
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.clock  proc_testbench.processor0.top_level0.dcache0.reset  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}   }
+gui_list_select -id Wave.1 -selected  {  }
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.clock   }
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.clock  proc_testbench.processor0.top_level0.dcache0.reset  {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}  proc_testbench.processor0.top_level0.dcache0.dcache_valid  {proc_testbench.processor0.top_level0.dcache0.dcache_value[31:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}   }
 gui_list_set_selected_property -id Wave.1 -radix decimal
 gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}   }
-gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_prf_idx[5:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_rob_idx[2:0]}  {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}   }
-gui_list_set_selected_property -id Wave.1 -radix decimal
-gui_list_select -id Wave.1 -selected  {  }
 gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7:0][3:0]}
+gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7][3:0]}   }
+gui_marker_move -id  Wave.1 C1 23778
+gui_wv_zoom_timerange -id  Wave.1 29944 33123
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_tag[3:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}   }
+gui_list_select -id Data.1 -selected  { proc_testbench.processor0.top_level0.dcache0.lb2cache_request_entry   }
+gui_list_select -id Data.1 -selected  { proc_testbench.processor0.top_level0.dcache0.sq2cache_request_entry   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_command[1:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_command[1:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_addr[31:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_size[1:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_data[63:0]}   }
+gui_list_add -id Wave.1 -from Data.1 { {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_command[1:0]} {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_addr[31:0]} {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_size[1:0]} {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_data[63:0]} } -insertionbar
+gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_command[1:0]}   }
+gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_command[1:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_addr[31:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_size[1:0]}  {proc_testbench.processor0.top_level0.dcache0.Dcache2mem_data[63:0]}   }
+gui_list_set_selected_property -id Wave.1 -radix decimal
+gui_marker_move -id  Wave.1 C1 31311
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}  {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_tag[3:0]}  proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response_valid   }
+gui_list_select -id Data.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}  {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_tag[3:0]}  proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response_valid  {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response[3:0]}   }
+gui_list_add -id Wave.1 -from Data.1 { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]} {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_tag[3:0]} proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response_valid {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response[3:0]} } -insertionbar
+gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}   }
+gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_data[63:0]}  {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_tag[3:0]}  proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response_valid  {proc_testbench.processor0.top_level0.dcache0.mem2Dcache_response[3:0]}   }
+gui_list_set_selected_property -id Wave.1 -radix decimal
+gui_marker_move -id  Wave.1 C1 31363
 gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][3:0]}
 gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][3]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][2]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][2]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][1]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][1]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][0]}
-gui_wv_scroll_hslidermove -id  Wave.1 109145
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][3].data}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[0][3].data}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7][3:0]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7][3]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[7][3]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[6][3:0]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[6][3:0]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[5][3:0]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][3:0]}
-gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][3]}   }
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][3]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[5][3]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[5][2]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][2]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][1]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[4][1]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[3][3:0]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[3][3]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[3][3]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[2][3:0]}
-gui_list_expand -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[1][3:0]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[1][3:0]}
-gui_list_collapse -id  Wave.1   {proc_testbench.processor0.top_level0.dcache0.dcache_blocks[2][3:0]}
-gui_wv_scroll_hslidermove -id  Wave.1 103703
-gui_list_select -id Wave.1 -selected  { {proc_testbench.processor0.top_level0.dcache0.dcache_PC[31:0]}   }
-gui_wv_zoom_timerange -id  Wave.1 19957 25421
-gui_marker_move -id  Wave.1 C1 24860
-gui_marker_move -id  Wave.1 C1 24960
-gui_marker_move -id  Wave.1 C1 24960
-gui_marker_move -id  Wave.1 C1 22204
-gui_wv_zoom_timerange -id  Wave.1 24463 25327
-gui_marker_move -id  Wave.1 C1 24890
-gui_close_window -window TopLevel.1
+gui_list_select -id Data.1 -selected  { proc_testbench.processor0.top_level0.dcache0.store_cache_hit   }
+gui_list_select -id Data.1 -selected  { proc_testbench.processor0.top_level0.dcache0.store_cache_hit  {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_set[2:0]}  {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_way[1:0]}   }
+gui_list_add -id Wave.1 -from Data.1 { proc_testbench.processor0.top_level0.dcache0.store_cache_hit {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_set[2:0]} {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_way[1:0]} } -insertionbar
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.store_cache_hit   }
+gui_list_select -id Wave.1 -selected  { proc_testbench.processor0.top_level0.dcache0.store_cache_hit  {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_set[2:0]}  {proc_testbench.processor0.top_level0.dcache0.store_cache_hit_way[1:0]}   }
+gui_list_set_selected_property -id Wave.1 -radix decimal
+gui_marker_move -id  Wave.1 C1 31315
 gui_close_window -window Wave.1
+gui_close_window -window TopLevel.2
