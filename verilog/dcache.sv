@@ -220,18 +220,23 @@ module dcache(
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
 
     always_comb begin
-        load_cache_hit = 0;
-        load_cache_hit_set = load_set;
-        load_cache_hit_way = 0;
-
         // check cache hit/miss
         if (lb2cache_request_valid) begin
+            load_cache_hit = 0;
+            load_cache_hit_set = load_set;
+            load_cache_hit_way = 0;
+
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[load_set][i].valid && (dcache_blocks[load_set][i].tag == load_tag)) begin
                     load_cache_hit = 1;
                     load_cache_hit_way = i;
                 end
             end
+        end
+        else begin
+            load_cache_hit = 0;
+            load_cache_hit_set = 0;
+            load_cache_hit_way = 0;
         end
     end
 
@@ -310,6 +315,11 @@ module dcache(
                 end
             end
         end
+        else begin
+            store_cache_hit = 0;
+            store_cache_hit_set = 0;
+            store_cache_hit_way = 0;
+        end
     end
 
     // Outputs: Main Memory
@@ -325,8 +335,8 @@ module dcache(
     logic [`WAY_SIZE-1:0] way_psel_gnt;
     logic no_way_selected;
     logic [`WAY_SIZE-1:0] gnt_bus;
-    logic [`WAY_LEN-1:0] current_load_assigned_way;
-    logic [`WAY_LEN-1:0] current_load_plru_way;
+    logic [`WAY_LEN-1:0] load_buffer_head_assigned_way;
+    logic [`WAY_LEN-1:0] load_buffer_head_plru_way;
 
     logic load_plru_update_enable;
     assign load_plru_update_enable = dcache_valid;
@@ -340,7 +350,7 @@ module dcache(
         .clock(clock),
         .reset(reset),
         
-        .load_set_idx_lookup(load_set),
+        .load_set_idx_lookup(load_buffer[load_buffer_head_ptr].set_idx),
 
         .load_update_enable(load_plru_update_enable),
         .load_set_idx_hit(load_plru_update_set),
@@ -350,11 +360,11 @@ module dcache(
         .store_set_idx_hit(store_cache_hit_set),
         .store_way_idx_hit(store_cache_hit_way),
 
-        .load_lru_way_idx(current_load_plru_way)
+        .load_lru_way_idx(load_buffer_head_plru_way)
     );
     
     psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
-        .req({~dcache_blocks[load_set][3].valid, ~dcache_blocks[load_set][2].valid, ~dcache_blocks[load_set][1].valid, ~dcache_blocks[load_set][0].valid}),
+        .req({~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][3].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][2].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][1].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][0].valid}),
         .gnt(way_psel_gnt),
         .gnt_bus(way_gnt_bus),
         .empty(no_way_selected)
@@ -362,15 +372,15 @@ module dcache(
     
     always_comb begin
         if (no_way_selected) begin
-            current_load_assigned_way = current_load_plru_way;
+            load_buffer_head_assigned_way = load_buffer_head_plru_way;
         end
         else begin
             case(way_psel_gnt) 
-                4'b0001: current_load_assigned_way = `WAY_LEN'h0;
-                4'b0010: current_load_assigned_way = `WAY_LEN'h1;
-                4'b0100: current_load_assigned_way = `WAY_LEN'h2;
-                4'b1000: current_load_assigned_way = `WAY_LEN'h3;
-                default: current_load_assigned_way = current_load_plru_way;
+                4'b0001: load_buffer_head_assigned_way = `WAY_LEN'h0;
+                4'b0010: load_buffer_head_assigned_way = `WAY_LEN'h1;
+                4'b0100: load_buffer_head_assigned_way = `WAY_LEN'h2;
+                4'b1000: load_buffer_head_assigned_way = `WAY_LEN'h3;
+                default: load_buffer_head_assigned_way = load_buffer_head_plru_way;
             endcase
         end
     end
@@ -421,7 +431,7 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
 
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
-                load_buffer[load_buffer_tail_ptr].way_idx     <= `SD current_load_assigned_way;
+                load_buffer[load_buffer_tail_ptr].way_idx     <= `SD 0;
 
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end
@@ -432,9 +442,9 @@ module dcache(
                 load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
 
                 // update cache block data
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].data <= `SD load_buffer[load_buffer_head_ptr].data;
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer[load_buffer_head_ptr].way_idx].valid <= `SD 1;
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
             end
 
 
