@@ -763,7 +763,7 @@ endtask  // task show_clk_count
                 cdb_global_pred_direction,
                 rob_packets,
                 rob_head,
-                result_valid;
+                result_valid
             );
             print_id_packet(id_packet_out);
             print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
