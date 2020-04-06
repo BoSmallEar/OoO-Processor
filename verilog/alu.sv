@@ -32,7 +32,7 @@ module alu(
 			ALU_XOR:      alu_value = rs_alu_packet.opa_value ^ rs_alu_packet.opb_value;
 			ALU_SRL:      alu_value = rs_alu_packet.opa_value >> rs_alu_packet.opb_value[4:0];
 			ALU_SLL:      alu_value = rs_alu_packet.opa_value << rs_alu_packet.opb_value[4:0];
-			ALU_SRA:      alu_value = rs_alu_packet.opa_value >>> rs_alu_packet.opb_value[4:0]; // arithmetic from logical shift
+			ALU_SRA:      alu_value = signed_opa >>> rs_alu_packet.opb_value[4:0]; // arithmetic from logical shift
 			// ALU_MUL:      alu_value = signed_mul[`XLEN-1:0];
 			// ALU_MULH:     alu_value = signed_mul[2*`XLEN-1:`XLEN];
 			// ALU_MULHSU:   alu_value = mixed_mul[2*`XLEN-1:`XLEN];

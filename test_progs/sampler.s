@@ -1,76 +1,76 @@
 .section .text
 .align 4
 	nop											# 0
-	li sp, 2048									# 4
+	li sp, 2048									# 4 - 8 ???
 ## Branch tests ##
-	li t0, 0x1 #TODO: this will be test number 	# 8
-	li t6, 0									# 12
-	li t1, 1									# 16
-	li t2, 2									# 20
-	bne t1,t2, bt1								# 24
-	nop											# 28
+	li t0, 0x1 #TODO: this will be test number 	# 12
+	li t6, 0									# 16
+	li t1, 1									# 20
+	li t2, 2									# 24
+	bne t1,t2, bt1								# 28
 	nop											# 32
 	nop											# 36
-	wfi											# 40
+	nop											# 40
+	wfi											# 44
 bt1:
-	addi t6, t6, 1								# 44
-	li t1, 0									# 48
-	li t2, 0									# 52
-	bne t1, t2, bt2								# 56
-	addi t6, t6, 1								# 60
+	addi t6, t6, 1								# 48 branch target
+	li t1, 0									# 52
+	li t2, 0									# 56
+	bne t1, t2, bt2								# 60
+	addi t6, t6, 1								# 64
 bt2:
-	beq t1, t2, bt3								# 64
-	nop											# 68
-	wfi											# 72
+	beq t1, t2, bt3								# 68
+	nop											# 72
+	wfi											# 76
 bt3:
-	addi t6, t6, 1								# 76
-	addi t1, t1, 1								# 80
-	bltu t1, t0, bt4							# 84
-	blt  t1, t0, bt4							# 88
-	bge  t0, t1, bt4							# 92
-	bgeu t0, t1, bt4 							# 96
-	addi t6, t6, 1								# 100
-	bge	 t1, t0, bt4							# 104
-	nop											#
-	wfi											#
+	addi t6, t6, 1								# 80 branch target
+	addi t1, t1, 1								# 84
+	bltu t1, t0, bt4							# 88
+	blt  t1, t0, bt4							# 92
+	bge  t0, t1, bt4							# 96
+	bgeu t0, t1, bt4 							# 100
+	addi t6, t6, 1								# 104
+	bge	 t1, t0, bt4							# 108
+	nop											# 112
+	wfi											# 116
 bt4:
-	lui t1, 0xfffff								#
-	lui t0, 0x7ffff								#
-	bgeu t1, t0, btt1							#
-	nop											#
-	wfi											#
+	lui t1, 0xfffff								# 120 branch target
+	lui t0, 0x7ffff								# 124
+	bgeu t1, t0, btt1							# 128
+	nop											# 132
+	wfi											# 136
 btt1:
-	bltu t0, t1, btt2							#
-	nop											#
-	wfi											#
+	bltu t0, t1, btt2							# 140
+	nop											# 144
+	wfi											# 148
 btt2:
-	blt t1, t0, btt3							#
-	nop											#
-	wfi											#
+	blt t1, t0, btt3							# 152
+	nop											# 156
+	wfi											# 160
 btt3:
-	bge t0, t1, btt4							#
-	nop											#
-	wfi											#
+	bge t0, t1, btt4							# 164
+	nop											# 168
+	wfi											# 172
 btt4:
-	jal btt5 									#
-	nop											#
-	wfi											#
+	jal btt5 									# 176 branch target
+	nop											# 180
+	wfi											# 184
 btt5:
-	li t0, 0									#
-	la t1, btt6									#
-	jalr t0,t1,0								#
+	li t0, 0									# 188
+	la t1, btt6									# 192 196
+	jalr t0,t1,0								# 200
 linkaddr:
-	wfi											#
+	wfi											# 204
 btt6:
-	la t1, linkaddr								#
-	bne t0, t1, linkaddr						#
+	la t1, linkaddr								# 208 212
+	bne t0, t1, linkaddr						# 216
 
 ## Immediate tests ##
-	li t0, 0x1 #TODO: this will be the test number	
-	li t6 , 0 #zero out
-	ori t6, t6, -2048 
-	ori t1, t1, -1 
-	li t2, 0
+	li t0, 0x1 #TODO: this will be the test number	# 220   
+	li t6 , 0 #zero out                             # 224
+	ori t6, t6, -2048                               # 228
+	ori t1, t1, -1                                  # 232
+	li t2, 0                                        # 236
 	addi t2, t2, 3
 	andi t2, t2, 1
 	li t3, 0
@@ -151,4 +151,4 @@ im_hop:
 	mul t4, t1,t2
 	wfi
 FAIL: 
-	wfi
+	wfi                                             # 532
