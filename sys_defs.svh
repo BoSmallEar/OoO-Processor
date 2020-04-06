@@ -314,7 +314,7 @@ typedef struct packed {
 
 
 
-`define XLENFU		  4		// number of function units
+`define XLENFU		  5		// number of function units
 
 typedef enum logic [2:0] {
 	ALU        = 3'h0,
@@ -469,7 +469,7 @@ typedef struct packed {
 	logic 	[`XLEN-1:0] 	base_value;   
 	logic 	 [11:0]			offset;
 
-	logic 	[`LB_LEN-1: 0]		lb_idx;
+	logic 	[`LB_LEN-1: 0]	lb_idx;
 	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
 	logic 	[`ROB_LEN-1:0] 	rob_idx;
 	
@@ -572,8 +572,8 @@ typedef struct packed {
 typedef struct packed {          
 	logic [`XLEN-1:0]       PC;       
     logic [`XLEN-1:0]       addr;
-    logic [`PRF_LEN-1:0]     rd_preg;
-    logic [`ROB_LEN-1:0]              rob_idx;
+    logic [`PRF_LEN-1:0]    rd_preg;
+    logic [`ROB_LEN-1:0]    rob_idx;
 	logic  [`XLEN-1:0]      forward_data;
     logic [`SQ_LEN-1:0]     age;
     logic                   rsvd;   //  Load address is resolved
@@ -593,7 +593,7 @@ typedef struct packed {
 	logic [`XLEN-1:0]       PC;                
     logic [`XLEN-1:0]       addr;
     logic [`XLEN-1:0]       data;
-    logic [`ROB_LEN-1:0]           rob_idx;
+    logic [`ROB_LEN-1:0]    rob_idx;
     logic                   rsvd;
 	MEM_SIZE                mem_size;
 	// logic                   valid;

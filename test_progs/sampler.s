@@ -1,69 +1,69 @@
 .section .text
 .align 4
-	nop	
-	li sp, 2048
+	nop											# 0
+	li sp, 2048									# 4
 ## Branch tests ##
-	li t0, 0x1 #TODO: this will be test number 
-	li t6, 0
-	li t1, 1
-	li t2, 2
-	bne t1,t2, bt1
-	nop
-	nop
-	nop
-	wfi
+	li t0, 0x1 #TODO: this will be test number 	# 8
+	li t6, 0									# 12
+	li t1, 1									# 16
+	li t2, 2									# 20
+	bne t1,t2, bt1								# 24
+	nop											# 28
+	nop											# 32
+	nop											# 36
+	wfi											# 40
 bt1:
-	addi t6, t6, 1
-	li t1, 0
-	li t2, 0
-	bne t1, t2, bt2
-	addi t6, t6, 1
+	addi t6, t6, 1								# 44
+	li t1, 0									# 48
+	li t2, 0									# 52
+	bne t1, t2, bt2								# 56
+	addi t6, t6, 1								# 60
 bt2:
-	beq t1, t2, bt3
-	nop
-	wfi
+	beq t1, t2, bt3								# 64
+	nop											# 68
+	wfi											# 72
 bt3:
-	addi t6, t6, 1
-	addi t1, t1, 1
-	bltu t1, t0, bt4
-	blt  t1, t0, bt4
-	bge  t0, t1, bt4
-	bgeu t0, t1, bt4 
-	addi t6, t6, 1
-	bge	 t1, t0, bt4
-	nop
-	wfi
+	addi t6, t6, 1								# 76
+	addi t1, t1, 1								# 80
+	bltu t1, t0, bt4							# 84
+	blt  t1, t0, bt4							# 88
+	bge  t0, t1, bt4							# 92
+	bgeu t0, t1, bt4 							# 96
+	addi t6, t6, 1								# 100
+	bge	 t1, t0, bt4							# 104
+	nop											#
+	wfi											#
 bt4:
-	lui t1, 0xfffff
-	lui t0, 0x7ffff
-	bgeu t1, t0, btt1
-	nop
-	wfi
+	lui t1, 0xfffff								#
+	lui t0, 0x7ffff								#
+	bgeu t1, t0, btt1							#
+	nop											#
+	wfi											#
 btt1:
-	bltu t0, t1, btt2
-	nop
-	wfi
+	bltu t0, t1, btt2							#
+	nop											#
+	wfi											#
 btt2:
-	blt t1, t0, btt3
-	nop
-	wfi
+	blt t1, t0, btt3							#
+	nop											#
+	wfi											#
 btt3:
-	bge t0, t1, btt4
-	nop
-	wfi
+	bge t0, t1, btt4							#
+	nop											#
+	wfi											#
 btt4:
-	jal btt5 
-	nop
-	wfi
+	jal btt5 									#
+	nop											#
+	wfi											#
 btt5:
-	li t0, 0
-	la t1, btt6
-	jalr t0,t1,0
+	li t0, 0									#
+	la t1, btt6									#
+	jalr t0,t1,0								#
 linkaddr:
-	wfi
+	wfi											#
 btt6:
-	la t1, linkaddr
-	bne t0, t1, linkaddr
+	la t1, linkaddr								#
+	bne t0, t1, linkaddr						#
 
 ## Immediate tests ##
 	li t0, 0x1 #TODO: this will be the test number	
