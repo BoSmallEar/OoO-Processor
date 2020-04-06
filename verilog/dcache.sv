@@ -370,7 +370,7 @@ module dcache(
                 4'b0010: current_load_assigned_way = `WAY_LEN'h1;
                 4'b0100: current_load_assigned_way = `WAY_LEN'h2;
                 4'b1000: current_load_assigned_way = `WAY_LEN'h3;
-                default: current_load_assigned_way = current_load_plru_way
+                default: current_load_assigned_way = current_load_plru_way;
             endcase
         end
     end
