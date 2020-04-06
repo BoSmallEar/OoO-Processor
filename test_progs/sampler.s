@@ -144,11 +144,11 @@ im_hop:
 	lui t1, 0x7ff00	             # 496
 	lui t2, 0x55555              # 500
 	mulhu t5, t1, t2             # 504
-	mul t4, t1, t2
-	lui t1, 0xfff00
+	mul t4, t1, t2               # 508
+	lui t1, 0xfff00              # 512
     lui t2, 0xf5555
-	mulh t5, t1,t2
+	mulh t5, t1,t2               # 520
 	mul t4, t1,t2
-	wfi
+	wfi                          # 528
 FAIL: 
 	wfi                                             # 532

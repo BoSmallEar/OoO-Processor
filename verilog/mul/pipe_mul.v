@@ -139,9 +139,9 @@ module mult2cdb(
 
 	always_ff @(posedge clock) begin
 		if (mul_enable) begin
-	    	mul_prf_idx <= rs_mul_packet.dest_preg_idx;
-			mul_rob_idx<= rs_mul_packet.rob_idx;
-			mul_PC	    <= rs_mul_packet.PC;
+	    	mul_prf_idx <= `SD rs_mul_packet.dest_preg_idx;
+			mul_rob_idx <= `SD rs_mul_packet.rob_idx;
+			mul_PC	    <= `SD rs_mul_packet.PC;
 		end
 	end
 
