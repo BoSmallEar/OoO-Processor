@@ -300,7 +300,7 @@ module dcache(
     always_comb begin
         if (sq2cache_request_valid) begin
             store_cache_hit = 0;
-            store_cache_hit_set = store_set;
+            //store_cache_hit_set = store_set;
             store_cache_hit_way = 0;
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
@@ -322,24 +322,60 @@ module dcache(
     assign Dcache2mem_data = sq2cache_request_valid ? sq2cache_request_entry.data : 0;
 
 
+    logic [`WAY_SIZE-1:0] way_psel_gnt;
+    logic no_way_selected;
+    logic [`WAY_SIZE-1:0] gnt_bus;
     logic [`WAY_LEN-1:0] current_load_assigned_way;
+    logic [`WAY_LEN-1:0] current_load_plru_way;
 
+    logic load_plru_update_enable;
+    assign load_plru_update_enable = dcache_valid;
+
+    logic [`SET_LEN-1:0] load_plru_update_set;
+    assign load_plru_update_set = load_cache_hit ? load_set : load_buffer[load_buffer_head_ptr].set_idx;
+    logic [`WAY_LEN-1:0] load_plru_update_way;
+    assign load_plru_update_way = load_cache_hit ? load_cache_hit_way : load_buffer[load_buffer_head_ptr].way_idx;
+    
     tree_plru tree_plru_0(
         .clock(clock),
         .reset(reset),
         
         .load_set_idx_lookup(load_set),
 
-        .load_update_enable(lb2cache_request_valid && load_cache_hit),
-        .load_set_idx_hit(load_cache_hit_set),
-        .load_way_idx_hit(load_cache_hit_way),
+        .load_update_enable(load_plru_update_enable),
+        .load_set_idx_hit(load_plru_update_set),
+        .load_way_idx_hit(load_plru_update_way),
         
         .store_update_enable(sq2cache_request_valid && store_cache_hit),
         .store_set_idx_hit(store_cache_hit_set),
         .store_way_idx_hit(store_cache_hit_way),
 
-        .load_lru_way_idx(current_load_assigned_way)
+        .load_lru_way_idx(current_load_plru_way)
     );
+    
+    psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
+        .req({~dcache_blocks[load_set][3].valid, ~dcache_blocks[load_set][2].valid, ~dcache_blocks[load_set][1].valid, ~dcache_blocks[load_set][0].valid}),
+        .gnt(way_psel_gnt),
+        .gnt_bus(way_gnt_bus),
+        .empty(no_way_selected)
+    );
+    
+    always_comb begin
+        if (no_way_selected) begin
+            current_load_assigned_way = current_load_plru_way;
+        end
+        else begin
+            case(way_psel_gnt) 
+                4'b0001: current_load_assigned_way = `WAY_LEN'h0;
+                4'b0010: current_load_assigned_way = `WAY_LEN'h1;
+                4'b0100: current_load_assigned_way = `WAY_LEN'h2;
+                4'b1000: current_load_assigned_way = `WAY_LEN'h3;
+                default: current_load_assigned_way = current_load_plru_way
+            endcase
+        end
+    end
+
+
 
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
