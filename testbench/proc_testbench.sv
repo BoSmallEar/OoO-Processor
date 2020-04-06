@@ -459,7 +459,7 @@ task print_cdb;
     input logic                 cdb_mis_pred;
     input logic                 cdb_local_pred_direction;
     input logic                 cdb_global_pred_direction;
-    input ROB_PACKET [`ROB_LEN-1:0]     rob_packets;
+    input ROB_PACKET [`ROB_SIZE-1:0]     rob_packets;
     input [`ROB_LEN-1:0]                rob_head;
     input logic                         result_valid;
 
