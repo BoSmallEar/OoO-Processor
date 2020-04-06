@@ -67,15 +67,6 @@ module rs_branch(
 
     logic [`RS_BR_SIZE-1:0] psel_gnt;  // output of the priority selector
  
-
-
-    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued 
-
-    assign rs_branch_full = (rs_branch_counter == `RS_BR_SIZE);
-    assign rs_branch_out_valid = !no_rs_selected;
-    assign rs_branch_packet = rs_branch_packets[rs_branch_ex_idx];
-
     int i;
     always_comb begin
         rs_branch_free_idx = `RS_BR_LEN'h0; // avoid additional latch, not very important
@@ -110,6 +101,14 @@ module rs_branch(
             if (psel_gnt[j]) rs_branch_ex_idx = j; 
         end
     end
+
+    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
+
+    assign rs_branch_full = (rs_branch_counter == `RS_BR_SIZE);
+    assign rs_branch_out_valid = !no_rs_selected;
+    assign rs_branch_packet = rs_branch_packets[rs_branch_ex_idx];
+
 
     int t;
     // synopsys sync_set_reset "reset"

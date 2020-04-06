@@ -67,10 +67,6 @@ module rs_alu(
     // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
     //           or CDB has broadcast a Mul result such that a new packet can be issued 
 
-    assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
-    assign rs_alu_packet = rs_alu_packets[rs_alu_ex_idx];
-    assign rs_alu_out_valid = !no_rs_selected;
-
     int i;
     always_comb begin
         rs_alu_free_idx = `RS_ALU_LEN'h0; // avoid additional latch, not very important
@@ -105,6 +101,10 @@ module rs_alu(
         end
     end
 
+    assign rs_alu_full = (rs_alu_counter == `RS_ALU_SIZE);
+    assign rs_alu_packet = rs_alu_packets[rs_alu_ex_idx];
+    assign rs_alu_out_valid = !no_rs_selected;
+    
     int t;
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin

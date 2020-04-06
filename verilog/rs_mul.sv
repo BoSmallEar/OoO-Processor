@@ -62,13 +62,6 @@ module rs_mul(
     
     logic [`RS_MUL_SIZE-1:0] psel_gnt;  // output of the priority selector 
 
-    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued 
-
-    assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
-    assign rs_mul_out_valid = !no_rs_selected;
-    assign rs_mul_packet = rs_mul_packets[rs_mul_ex_idx];
-
     // find out the smallest index that corresponds to a free rs entry
     int i;
     always_comb begin
@@ -105,6 +98,15 @@ module rs_mul(
             if (psel_gnt[j]) rs_mul_ex_idx = j; 
         end
     end
+
+
+    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
+
+    assign rs_mul_full = (rs_mul_counter == `RS_MUL_SIZE);
+    assign rs_mul_out_valid = !no_rs_selected;
+    assign rs_mul_packet = rs_mul_packets[rs_mul_ex_idx];
+
 
     int t;
     // synopsys sync_set_reset "reset"

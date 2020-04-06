@@ -344,7 +344,7 @@ module dcache(
     logic [`SET_LEN-1:0] load_plru_update_set;
     assign load_plru_update_set = load_cache_hit ? load_set : load_buffer[load_buffer_head_ptr].set_idx;
     logic [`WAY_LEN-1:0] load_plru_update_way;
-    assign load_plru_update_way = load_cache_hit ? load_cache_hit_way : load_buffer[load_buffer_head_ptr].way_idx;
+    assign load_plru_update_way = load_cache_hit ? load_cache_hit_way : load_buffer_head_assigned_way;
     
     tree_plru tree_plru_0(
         .clock(clock),
@@ -431,7 +431,7 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
 
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
-                load_buffer[load_buffer_tail_ptr].way_idx     <= `SD 0;
+                //load_buffer[load_buffer_tail_ptr].way_idx     <= `SD 0;
 
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end

@@ -65,12 +65,6 @@ module rs_sq(
     
         logic [`RS_SQ_SIZE-1:0] psel_gnt;  // output of the priority selector 
 
-    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
-    //           or CDB has broadcast a Mul result such that a new packet can be issued 
-
-    assign rs_sq_full = (rs_sq_counter == `RS_SQ_SIZE);
-    assign rs_sq_packet = rs_sq_packets[rs_sq_ex_idx];
-    assign rs_sq_out_valid = !no_rs_selected;
 
     int i;
     always_comb begin
@@ -105,6 +99,13 @@ module rs_sq(
             if (psel_gnt[j]) rs_sq_ex_idx = j; 
         end
     end
+
+    // 'issue' : either in the initial state (never issue a RS_MUL_PACKET)
+    //           or CDB has broadcast a Mul result such that a new packet can be issued 
+
+    assign rs_sq_full = (rs_sq_counter == `RS_SQ_SIZE);
+    assign rs_sq_packet = rs_sq_packets[rs_sq_ex_idx];
+    assign rs_sq_out_valid = !no_rs_selected;
 
     int t;
     always_ff @(posedge clock) begin

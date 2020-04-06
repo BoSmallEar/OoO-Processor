@@ -63,11 +63,6 @@ module rs_lb(
     
     logic [`RS_LB_SIZE-1:0] psel_gnt;  // output of the priority selector 
     
-    assign rs_lb_full = (rs_lb_counter == `RS_LB_SIZE);
-    assign rs_lb_packet = rs_lb_packets[rs_lb_ex_idx];
-    assign rs_lb_out_valid = !no_rs_selected;
-
-
     int i;
     always_comb begin
         rs_lb_free_idx = `RS_LB_LEN'h0; // avoid additional latch, not very important
@@ -101,6 +96,10 @@ module rs_lb(
             if (psel_gnt[j]) rs_lb_ex_idx = j; 
         end
     end
+
+    assign rs_lb_full = (rs_lb_counter == `RS_LB_SIZE);
+    assign rs_lb_packet = rs_lb_packets[rs_lb_ex_idx];
+    assign rs_lb_out_valid = !no_rs_selected;
 
     int t;
     always_ff @(posedge clock) begin
