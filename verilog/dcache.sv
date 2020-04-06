@@ -325,7 +325,7 @@ module dcache(
     // Outputs: Main Memory
     // BUS_LOAD在此判定条件下会连续high两个cycle，应该为high一次cycle
     assign Dcache2mem_command = sq2cache_request_valid ? BUS_STORE : 
-                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].mem_tag == 0) ? BUS_LOAD : BUS_NONE;
+                                (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE;
     assign Dcache2mem_addr = sq2cache_request_valid ? sq2cache_request_entry.addr :
                                 (load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) ? load_buffer[load_buffer_send_ptr].address : 0;
     assign Dcache2mem_size = sq2cache_request_valid ? sq2cache_request_entry.mem_size : DOUBLE;
