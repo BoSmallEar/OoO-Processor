@@ -414,7 +414,7 @@ module dcache(
 
         end
         else begin
-            // load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
+            load_buffer_send_ptr_last_cycle <= `SD load_buffer_send_ptr;
 
             // Update: load buffer tail ptr
             if (lb2cache_request_valid && !load_cache_hit) begin
@@ -473,7 +473,6 @@ module dcache(
 
             // Update: load buffer [send ptr last cycle] entry memory tag
             if (mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) begin
-                
                 load_buffer[load_buffer_send_ptr_last_cycle].mem_tag   <= `SD mem2Dcache_response;
                 //load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
@@ -491,7 +490,6 @@ module dcache(
 
             // Update: load buffer send ptr
             if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].mem_tag == 0) begin
-                load_buffer_send_ptr_last_cycle             <= `SD load_buffer_send_ptr;
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
         end
