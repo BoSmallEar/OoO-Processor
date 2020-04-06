@@ -459,6 +459,9 @@ task print_cdb;
     input logic                 cdb_mis_pred;
     input logic                 cdb_local_pred_direction;
     input logic                 cdb_global_pred_direction;
+    input ROB_PACKET [`ROB_LEN-1:0]     rob_packets;
+    input [`ROB_LEN-1:0]                rob_head;
+    input logic                         result_valid;
 
     $display("========================= CDB =========================");
     case(module_select)
@@ -481,7 +484,10 @@ task print_cdb;
     $display("cdb_local_pred_direction: %d", cdb_local_pred_direction);
     $display("cdb_global_pred_direction: %d", cdb_global_pred_direction);
     $display("========================================================");
-
+    if (result_valid)
+        $dispaly("commit PC: %d", rob_packets[rob_head].PC);  
+    else
+        $dispaly("commit PC: x");
 endtask
 
 task print_id_packet;
