@@ -489,7 +489,7 @@ module dcache(
 
 
             // Update: load buffer send ptr
-            if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].mem_tag == 0) begin
+            if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) begin
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
         end
