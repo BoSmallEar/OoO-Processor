@@ -450,7 +450,7 @@ typedef struct packed {
 	
 	logic 					base_ready;
 	logic 	[`XLEN-1:0] 	base_value;  
-	logic 	[11:0]			offset;
+	logic 	[`XLEN-1:0]			offset;
 
 	logic 					src_ready;
 	logic 	[`XLEN-1:0] 	src_value; 
@@ -467,7 +467,7 @@ typedef struct packed {
 	
 	logic 					base_ready;
 	logic 	[`XLEN-1:0] 	base_value;   
-	logic 	 [11:0]			offset;
+	logic 	[`XLEN-1:0]			offset;
 
 	logic 	[`LB_LEN-1: 0]	lb_idx;
 	logic 	[`PRF_LEN-1:0] 	dest_preg_idx;  
