@@ -4,53 +4,3966 @@ program.debug.elf:     file format elf32-littleriscv
 
 Disassembly of section .text:
 
-00000000 <fib-0x1c>:
-   0:	00100413          	addi	x8,x0,1
-   4:	00001fb7          	lui	x31,0x1
-   8:	00400893          	addi	x17,x0,4
-   c:	01000def          	jal	x27,1c <fib>
-  10:	40000113          	addi	x2,x0,1024
-  14:	00112023          	sw	x1,0(x2)
-  18:	10500073          	wfi
+00000000 <crt>:
 
-0000001c <fib>:
-  1c:	04088063          	beq	x17,x0,5c <fib_ret_1>
-  20:	02888e63          	beq	x17,x8,5c <fib_ret_1>
-  24:	fe0f8f93          	addi	x31,x31,-32 # fe0 <data+0xbe0>
-  28:	01bfac23          	sw	x27,24(x31)
-  2c:	011fa023          	sw	x17,0(x31)
-  30:	fff88893          	addi	x17,x17,-1
-  34:	fe9ffdef          	jal	x27,1c <fib>
-  38:	001fa423          	sw	x1,8(x31)
-  3c:	000fa883          	lw	x17,0(x31)
-  40:	ffe88893          	addi	x17,x17,-2
-  44:	fd9ffdef          	jal	x27,1c <fib>
-  48:	008fa103          	lw	x2,8(x31)
-  4c:	001100b3          	add	x1,x2,x1
-  50:	018fad83          	lw	x27,24(x31)
-  54:	020f8f93          	addi	x31,x31,32
-  58:	000d8067          	jalr	x0,0(x27)
+.global crt
+.section .text.prologue, "ax"
+.align 4
+crt:
+	nop
+   0:	00000013          	addi	x0,x0,0
+	la ra, exit
+   4:	00000097          	auipc	x1,0x0
+   8:	09c08093          	addi	x1,x1,156 # a0 <exit>
+	la sp, _sp
+   c:	00010117          	auipc	x2,0x10
+  10:	ff410113          	addi	x2,x2,-12 # 10000 <_sp>
+	mv s0, sp
+  14:	00010413          	addi	x8,x2,0
+	la gp, __global_pointer$
+  18:	00001197          	auipc	x3,0x1
+  1c:	ec818193          	addi	x3,x3,-312 # ee0 <__global_pointer$>
+	li tp, 0
+  20:	00000213          	addi	x4,x0,0
+	li t0, 0
+  24:	00000293          	addi	x5,x0,0
+	li t1, 0
+  28:	00000313          	addi	x6,x0,0
+	li t2, 0
+  2c:	00000393          	addi	x7,x0,0
+	li s1, 0
+  30:	00000493          	addi	x9,x0,0
+	li a0, 0
+  34:	00000513          	addi	x10,x0,0
+	li a1, 0
+  38:	00000593          	addi	x11,x0,0
+	li a2, 0
+  3c:	00000613          	addi	x12,x0,0
+	li a3, 0
+  40:	00000693          	addi	x13,x0,0
+	li a4, 0
+  44:	00000713          	addi	x14,x0,0
+	li a5, 0
+  48:	00000793          	addi	x15,x0,0
+	li a6, 0
+  4c:	00000813          	addi	x16,x0,0
+	li a7, 0
+  50:	00000893          	addi	x17,x0,0
+	li s2, 0
+  54:	00000913          	addi	x18,x0,0
+	li s3, 0
+  58:	00000993          	addi	x19,x0,0
+	li s4, 0
+  5c:	00000a13          	addi	x20,x0,0
+	li s5, 0
+  60:	00000a93          	addi	x21,x0,0
+	li s6, 0
+  64:	00000b13          	addi	x22,x0,0
+	li s7, 0
+  68:	00000b93          	addi	x23,x0,0
+	li s8, 0
+  6c:	00000c13          	addi	x24,x0,0
+	li s9, 0
+  70:	00000c93          	addi	x25,x0,0
+	li s10, 0
+  74:	00000d13          	addi	x26,x0,0
+	li s11, 0
+  78:	00000d93          	addi	x27,x0,0
+	li t3, 0
+  7c:	00000e13          	addi	x28,x0,0
+	li t4, 0
+  80:	00000e93          	addi	x29,x0,0
+	li t5, 0
+  84:	00000f13          	addi	x30,x0,0
+	li t6, 0
+  88:	00000f93          	addi	x31,x0,0
+	j main
+  8c:	4480006f          	jal	x0,4d4 <main>
+	...
 
-0000005c <fib_ret_1>:
-  5c:	00100093          	addi	x1,x0,1
-  60:	000d8067          	jalr	x0,0(x27)
+000000a0 <exit>:
+
+.global exit
+.section .text
+.align 4
+exit:
+	la sp, _sp
+  a0:	00010117          	auipc	x2,0x10
+  a4:	f6010113          	addi	x2,x2,-160 # 10000 <_sp>
+	sw a0, -8(sp)
+  a8:	fea12c23          	sw	x10,-8(x2)
+	nop
+  ac:	00000013          	addi	x0,x0,0
+	wfi
+  b0:	10500073          	wfi
+
+000000b4 <tj_free>:
+} Header;
+static Header base; //empty list to get started
+static Header *freep = NULL; //start of the free list
+
+
+void tj_free(void *mem) {
+  b4:	fd010113          	addi	x2,x2,-48
+  b8:	02112623          	sw	x1,44(x2)
+  bc:	02812423          	sw	x8,40(x2)
+  c0:	03010413          	addi	x8,x2,48
+  c4:	fca42e23          	sw	x10,-36(x8)
+	//sanity check, we don't want to free memory that's not
+	//in the heap
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  c8:	fdc42703          	lw	x14,-36(x8)
+  cc:	000007b7          	lui	x15,0x0
+  d0:	72078793          	addi	x15,x15,1824 # 720 <heap>
+  d4:	00f76a63          	bltu	x14,x15,e8 <tj_free+0x34>
+  d8:	000047b7          	lui	x15,0x4
+  dc:	72078793          	addi	x15,x15,1824 # 4720 <base>
+  e0:	fdc42703          	lw	x14,-36(x8)
+  e4:	00e7f863          	bgeu	x15,x14,f4 <tj_free+0x40>
+		exit(1);
+  e8:	00100513          	addi	x10,x0,1
+  ec:	00000097          	auipc	x1,0x0
+  f0:	fb4080e7          	jalr	x1,-76(x1) # a0 <exit>
+
+	Header *bp, *p;
+	bp = (Header *)mem - 1; //point to block header
+  f4:	fdc42783          	lw	x15,-36(x8)
+  f8:	ff878793          	addi	x15,x15,-8
+  fc:	fef42423          	sw	x15,-24(x8)
+	//scan the free list to see where the current block should sit in between
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 100:	000047b7          	lui	x15,0x4
+ 104:	7287a783          	lw	x15,1832(x15) # 4728 <freep>
+ 108:	fef42623          	sw	x15,-20(x8)
+ 10c:	03c0006f          	jal	x0,148 <tj_free+0x94>
+		// self wrapped free list with only one entry
+		//                  or you are just at the very beginning/end
+		if (p >= p->next && (bp > p || bp < p->next))
+ 110:	fec42783          	lw	x15,-20(x8)
+ 114:	0007a783          	lw	x15,0(x15)
+ 118:	fec42703          	lw	x14,-20(x8)
+ 11c:	02f76063          	bltu	x14,x15,13c <tj_free+0x88>
+ 120:	fe842703          	lw	x14,-24(x8)
+ 124:	fec42783          	lw	x15,-20(x8)
+ 128:	02e7ee63          	bltu	x15,x14,164 <tj_free+0xb0>
+ 12c:	fec42783          	lw	x15,-20(x8)
+ 130:	0007a783          	lw	x15,0(x15)
+ 134:	fe842703          	lw	x14,-24(x8)
+ 138:	02f76663          	bltu	x14,x15,164 <tj_free+0xb0>
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 13c:	fec42783          	lw	x15,-20(x8)
+ 140:	0007a783          	lw	x15,0(x15)
+ 144:	fef42623          	sw	x15,-20(x8)
+ 148:	fe842703          	lw	x14,-24(x8)
+ 14c:	fec42783          	lw	x15,-20(x8)
+ 150:	fce7f0e3          	bgeu	x15,x14,110 <tj_free+0x5c>
+ 154:	fec42783          	lw	x15,-20(x8)
+ 158:	0007a783          	lw	x15,0(x15)
+ 15c:	fe842703          	lw	x14,-24(x8)
+ 160:	faf778e3          	bgeu	x14,x15,110 <tj_free+0x5c>
+			break; //freed block at start of end of the arena
+		//we can merge the 2 free blocks if they are adjacent to each other
+		//or we just can append a new entry into the free list
+	if (bp + bp->size == p->next) { //join to upper nbr
+ 164:	fe842783          	lw	x15,-24(x8)
+ 168:	0047a783          	lw	x15,4(x15)
+ 16c:	00379793          	slli	x15,x15,0x3
+ 170:	fe842703          	lw	x14,-24(x8)
+ 174:	00f70733          	add	x14,x14,x15
+ 178:	fec42783          	lw	x15,-20(x8)
+ 17c:	0007a783          	lw	x15,0(x15)
+ 180:	02f71e63          	bne	x14,x15,1bc <tj_free+0x108>
+		//merge if exactly adjacent
+		bp->size += p->next->size;
+ 184:	fe842783          	lw	x15,-24(x8)
+ 188:	0047a703          	lw	x14,4(x15)
+ 18c:	fec42783          	lw	x15,-20(x8)
+ 190:	0007a783          	lw	x15,0(x15)
+ 194:	0047a783          	lw	x15,4(x15)
+ 198:	00f70733          	add	x14,x14,x15
+ 19c:	fe842783          	lw	x15,-24(x8)
+ 1a0:	00e7a223          	sw	x14,4(x15)
+		bp->next = p->next->next;
+ 1a4:	fec42783          	lw	x15,-20(x8)
+ 1a8:	0007a783          	lw	x15,0(x15)
+ 1ac:	0007a703          	lw	x14,0(x15)
+ 1b0:	fe842783          	lw	x15,-24(x8)
+ 1b4:	00e7a023          	sw	x14,0(x15)
+ 1b8:	0140006f          	jal	x0,1cc <tj_free+0x118>
+	} else
+		bp->next = p->next; //insert bp after p in the linked list
+ 1bc:	fec42783          	lw	x15,-20(x8)
+ 1c0:	0007a703          	lw	x14,0(x15)
+ 1c4:	fe842783          	lw	x15,-24(x8)
+ 1c8:	00e7a023          	sw	x14,0(x15)
+		//if p is freep which is base, then this will make the newly
+		//allocated block point to base
+
+	if (p + p->size == bp) { //join to lower nbr
+ 1cc:	fec42783          	lw	x15,-20(x8)
+ 1d0:	0047a783          	lw	x15,4(x15)
+ 1d4:	00379793          	slli	x15,x15,0x3
+ 1d8:	fec42703          	lw	x14,-20(x8)
+ 1dc:	00f707b3          	add	x15,x14,x15
+ 1e0:	fe842703          	lw	x14,-24(x8)
+ 1e4:	02f71a63          	bne	x14,x15,218 <tj_free+0x164>
+		//merge if exactly adjacent
+		p->size += bp->size;
+ 1e8:	fec42783          	lw	x15,-20(x8)
+ 1ec:	0047a703          	lw	x14,4(x15)
+ 1f0:	fe842783          	lw	x15,-24(x8)
+ 1f4:	0047a783          	lw	x15,4(x15)
+ 1f8:	00f70733          	add	x14,x14,x15
+ 1fc:	fec42783          	lw	x15,-20(x8)
+ 200:	00e7a223          	sw	x14,4(x15)
+		p->next = bp->next;
+ 204:	fe842783          	lw	x15,-24(x8)
+ 208:	0007a703          	lw	x14,0(x15)
+ 20c:	fec42783          	lw	x15,-20(x8)
+ 210:	00e7a023          	sw	x14,0(x15)
+ 214:	0100006f          	jal	x0,224 <tj_free+0x170>
+	} else //or just append to linked list
+		p->next = bp; //again, if the free list is just the base
+ 218:	fec42783          	lw	x15,-20(x8)
+ 21c:	fe842703          	lw	x14,-24(x8)
+ 220:	00e7a023          	sw	x14,0(x15)
+		//then effectively we just created a new entry
+		//and make it point to the base which has a size of 0
+	freep = p;
+ 224:	000047b7          	lui	x15,0x4
+ 228:	fec42703          	lw	x14,-20(x8)
+ 22c:	72e7a423          	sw	x14,1832(x15) # 4728 <freep>
+}
+ 230:	00000013          	addi	x0,x0,0
+ 234:	02c12083          	lw	x1,44(x2)
+ 238:	02812403          	lw	x8,40(x2)
+ 23c:	03010113          	addi	x2,x2,48
+ 240:	00008067          	jalr	x0,0(x1)
+
+00000244 <getmoremem>:
+
+static Header* getmoremem(unsigned int total_size) {
+ 244:	fd010113          	addi	x2,x2,-48
+ 248:	02112623          	sw	x1,44(x2)
+ 24c:	02812423          	sw	x8,40(x2)
+ 250:	03010413          	addi	x8,x2,48
+ 254:	fca42e23          	sw	x10,-36(x8)
+	if (avail_mem < total_size) return NULL; //gg, we ran out of mem :P
+ 258:	000007b7          	lui	x15,0x0
+ 25c:	7047a783          	lw	x15,1796(x15) # 704 <avail_mem>
+ 260:	fdc42703          	lw	x14,-36(x8)
+ 264:	00e7f663          	bgeu	x15,x14,270 <getmoremem+0x2c>
+ 268:	00000793          	addi	x15,x0,0
+ 26c:	0700006f          	jal	x0,2dc <getmoremem+0x98>
+	Header* up = (Header *)next_index;
+ 270:	000007b7          	lui	x15,0x0
+ 274:	7007a783          	lw	x15,1792(x15) # 700 <next_index>
+ 278:	fef42623          	sw	x15,-20(x8)
+	next_index += total_size; //allocate the block
+ 27c:	000007b7          	lui	x15,0x0
+ 280:	7007a703          	lw	x14,1792(x15) # 700 <next_index>
+ 284:	fdc42783          	lw	x15,-36(x8)
+ 288:	00f70733          	add	x14,x14,x15
+ 28c:	000007b7          	lui	x15,0x0
+ 290:	70e7a023          	sw	x14,1792(x15) # 700 <next_index>
+	avail_mem -= total_size; //deduct from avail mem;
+ 294:	000007b7          	lui	x15,0x0
+ 298:	7047a703          	lw	x14,1796(x15) # 704 <avail_mem>
+ 29c:	fdc42783          	lw	x15,-36(x8)
+ 2a0:	40f70733          	sub	x14,x14,x15
+ 2a4:	000007b7          	lui	x15,0x0
+ 2a8:	70e7a223          	sw	x14,1796(x15) # 704 <avail_mem>
+	up->size = total_size - sizeof(Header); //set the size right
+ 2ac:	fdc42783          	lw	x15,-36(x8)
+ 2b0:	ff878713          	addi	x14,x15,-8
+ 2b4:	fec42783          	lw	x15,-20(x8)
+ 2b8:	00e7a223          	sw	x14,4(x15)
+	tj_free((void *)(++up)); //append the new block to the free list first
+ 2bc:	fec42783          	lw	x15,-20(x8)
+ 2c0:	00878793          	addi	x15,x15,8
+ 2c4:	fef42623          	sw	x15,-20(x8)
+ 2c8:	fec42503          	lw	x10,-20(x8)
+ 2cc:	00000097          	auipc	x1,0x0
+ 2d0:	de8080e7          	jalr	x1,-536(x1) # b4 <tj_free>
+	return freep;
+ 2d4:	000047b7          	lui	x15,0x4
+ 2d8:	7287a783          	lw	x15,1832(x15) # 4728 <freep>
+}
+ 2dc:	00078513          	addi	x10,x15,0
+ 2e0:	02c12083          	lw	x1,44(x2)
+ 2e4:	02812403          	lw	x8,40(x2)
+ 2e8:	03010113          	addi	x2,x2,48
+ 2ec:	00008067          	jalr	x0,0(x1)
+
+000002f0 <tj_malloc>:
+
+void *tj_malloc(unsigned int size) {
+ 2f0:	fd010113          	addi	x2,x2,-48
+ 2f4:	02112623          	sw	x1,44(x2)
+ 2f8:	02812423          	sw	x8,40(x2)
+ 2fc:	03010413          	addi	x8,x2,48
+ 300:	fca42e23          	sw	x10,-36(x8)
+	//sanity check, so that you don't blow the memory space
+	if (size > sizeof(heap)) return NULL;
+ 304:	fdc42703          	lw	x14,-36(x8)
+ 308:	000047b7          	lui	x15,0x4
+ 30c:	00e7f663          	bgeu	x15,x14,318 <tj_malloc+0x28>
+ 310:	00000793          	addi	x15,x0,0
+ 314:	15c0006f          	jal	x0,470 <tj_malloc+0x180>
+	//we want strict word alignment just to make things easier
+	//and so that we don't have improper alignment issues
+	if ((size & 3) != 0) {
+ 318:	fdc42783          	lw	x15,-36(x8)
+ 31c:	0037f793          	andi	x15,x15,3
+ 320:	00078a63          	beq	x15,x0,334 <tj_malloc+0x44>
+		size = size + 4 - (size & 3);
+ 324:	fdc42783          	lw	x15,-36(x8)
+ 328:	ffc7f793          	andi	x15,x15,-4
+ 32c:	00478793          	addi	x15,x15,4 # 4004 <__global_pointer$+0x3124>
+ 330:	fcf42e23          	sw	x15,-36(x8)
+	}
+
+	//we want to build a linked list of the existing blocks and free blocks
+	Header *p, *prevp; //iterators
+	
+	unsigned int total_size = size + sizeof(Header); //need to include the header size as well
+ 334:	fdc42783          	lw	x15,-36(x8)
+ 338:	00878793          	addi	x15,x15,8
+ 33c:	fef42223          	sw	x15,-28(x8)
+	//check the linked list
+	prevp = freep;
+ 340:	000047b7          	lui	x15,0x4
+ 344:	7287a783          	lw	x15,1832(x15) # 4728 <freep>
+ 348:	fef42423          	sw	x15,-24(x8)
+	//if there's no linked list yet
+	if (prevp == NULL) {
+ 34c:	fe842783          	lw	x15,-24(x8)
+ 350:	02079e63          	bne	x15,x0,38c <tj_malloc+0x9c>
+		prevp = &base;
+ 354:	000047b7          	lui	x15,0x4
+ 358:	72078793          	addi	x15,x15,1824 # 4720 <base>
+ 35c:	fef42423          	sw	x15,-24(x8)
+		freep = prevp;
+ 360:	000047b7          	lui	x15,0x4
+ 364:	fe842703          	lw	x14,-24(x8)
+ 368:	72e7a423          	sw	x14,1832(x15) # 4728 <freep>
+		base.next = freep;
+ 36c:	000047b7          	lui	x15,0x4
+ 370:	7287a703          	lw	x14,1832(x15) # 4728 <freep>
+ 374:	000047b7          	lui	x15,0x4
+ 378:	72078793          	addi	x15,x15,1824 # 4720 <base>
+ 37c:	00e7a023          	sw	x14,0(x15)
+		base.size = 0;
+ 380:	000047b7          	lui	x15,0x4
+ 384:	72078793          	addi	x15,x15,1824 # 4720 <base>
+ 388:	0007a223          	sw	x0,4(x15)
+	}
+	//traverse through the linked list, note there's no stopping condition
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 38c:	fe842783          	lw	x15,-24(x8)
+ 390:	0007a783          	lw	x15,0(x15)
+ 394:	fef42623          	sw	x15,-20(x8)
+		if (p->size >= size) { //big enough
+ 398:	fec42783          	lw	x15,-20(x8)
+ 39c:	0047a783          	lw	x15,4(x15)
+ 3a0:	fdc42703          	lw	x14,-36(x8)
+ 3a4:	08e7e263          	bltu	x15,x14,428 <tj_malloc+0x138>
+			if (p->size == size) // exact size
+ 3a8:	fec42783          	lw	x15,-20(x8)
+ 3ac:	0047a783          	lw	x15,4(x15)
+ 3b0:	fdc42703          	lw	x14,-36(x8)
+ 3b4:	00f71c63          	bne	x14,x15,3cc <tj_malloc+0xdc>
+				prevp->next = p->next; // just return that block
+ 3b8:	fec42783          	lw	x15,-20(x8)
+ 3bc:	0007a703          	lw	x14,0(x15)
+ 3c0:	fe842783          	lw	x15,-24(x8)
+ 3c4:	00e7a023          	sw	x14,0(x15)
+ 3c8:	0400006f          	jal	x0,408 <tj_malloc+0x118>
+			else {
+				p->size -= total_size; //break up the block
+ 3cc:	fec42783          	lw	x15,-20(x8)
+ 3d0:	0047a703          	lw	x14,4(x15)
+ 3d4:	fe442783          	lw	x15,-28(x8)
+ 3d8:	40f70733          	sub	x14,x14,x15
+ 3dc:	fec42783          	lw	x15,-20(x8)
+ 3e0:	00e7a223          	sw	x14,4(x15)
+				p += p->size;
+ 3e4:	fec42783          	lw	x15,-20(x8)
+ 3e8:	0047a783          	lw	x15,4(x15)
+ 3ec:	00379793          	slli	x15,x15,0x3
+ 3f0:	fec42703          	lw	x14,-20(x8)
+ 3f4:	00f707b3          	add	x15,x14,x15
+ 3f8:	fef42623          	sw	x15,-20(x8)
+				p->size = size;
+ 3fc:	fec42783          	lw	x15,-20(x8)
+ 400:	fdc42703          	lw	x14,-36(x8)
+ 404:	00e7a223          	sw	x14,4(x15)
+			}
+			freep = prevp;
+ 408:	000047b7          	lui	x15,0x4
+ 40c:	fe842703          	lw	x14,-24(x8)
+ 410:	72e7a423          	sw	x14,1832(x15) # 4728 <freep>
+#ifdef DEBUG
+			printf("returned pointer is %i\n", (int)p + 1);
+#endif
+			return (void *)(++p);
+ 414:	fec42783          	lw	x15,-20(x8)
+ 418:	00878793          	addi	x15,x15,8
+ 41c:	fef42623          	sw	x15,-20(x8)
+ 420:	fec42783          	lw	x15,-20(x8)
+ 424:	04c0006f          	jal	x0,470 <tj_malloc+0x180>
+		}
+		if (p == freep) //wrapped around free list
+ 428:	000047b7          	lui	x15,0x4
+ 42c:	7287a783          	lw	x15,1832(x15) # 4728 <freep>
+ 430:	fec42703          	lw	x14,-20(x8)
+ 434:	02f71263          	bne	x14,x15,458 <tj_malloc+0x168>
+			if ((p = getmoremem(total_size)) == NULL) //if the heap runs out
+ 438:	fe442503          	lw	x10,-28(x8)
+ 43c:	00000097          	auipc	x1,0x0
+ 440:	e08080e7          	jalr	x1,-504(x1) # 244 <getmoremem>
+ 444:	fea42623          	sw	x10,-20(x8)
+ 448:	fec42783          	lw	x15,-20(x8)
+ 44c:	00079663          	bne	x15,x0,458 <tj_malloc+0x168>
+				return NULL; //well, you got nothing left, gg
+ 450:	00000793          	addi	x15,x0,0
+ 454:	01c0006f          	jal	x0,470 <tj_malloc+0x180>
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 458:	fec42783          	lw	x15,-20(x8)
+ 45c:	fef42423          	sw	x15,-24(x8)
+ 460:	fec42783          	lw	x15,-20(x8)
+ 464:	0007a783          	lw	x15,0(x15)
+ 468:	fef42623          	sw	x15,-20(x8)
+		if (p->size >= size) { //big enough
+ 46c:	f2dff06f          	jal	x0,398 <tj_malloc+0xa8>
+	}
+}
+ 470:	00078513          	addi	x10,x15,0
+ 474:	02c12083          	lw	x1,44(x2)
+ 478:	02812403          	lw	x8,40(x2)
+ 47c:	03010113          	addi	x2,x2,48
+ 480:	00008067          	jalr	x0,0(x1)
+
+00000484 <tj_calloc>:
+
+void *tj_calloc(unsigned int size) {
+ 484:	fd010113          	addi	x2,x2,-48
+ 488:	02112623          	sw	x1,44(x2)
+ 48c:	02812423          	sw	x8,40(x2)
+ 490:	03010413          	addi	x8,x2,48
+ 494:	fca42e23          	sw	x10,-36(x8)
+	void *mem = tj_malloc(size);
+ 498:	fdc42503          	lw	x10,-36(x8)
+ 49c:	00000097          	auipc	x1,0x0
+ 4a0:	e54080e7          	jalr	x1,-428(x1) # 2f0 <tj_malloc>
+ 4a4:	fea42623          	sw	x10,-20(x8)
+	memset(mem, 0, size);
+ 4a8:	fdc42603          	lw	x12,-36(x8)
+ 4ac:	00000593          	addi	x11,x0,0
+ 4b0:	fec42503          	lw	x10,-20(x8)
+ 4b4:	00000097          	auipc	x1,0x0
+ 4b8:	124080e7          	jalr	x1,292(x1) # 5d8 <memset>
+	return mem;
+ 4bc:	fec42783          	lw	x15,-20(x8)
+}
+ 4c0:	00078513          	addi	x10,x15,0
+ 4c4:	02c12083          	lw	x1,44(x2)
+ 4c8:	02812403          	lw	x8,40(x2)
+ 4cc:	03010113          	addi	x2,x2,48
+ 4d0:	00008067          	jalr	x0,0(x1)
+
+000004d4 <main>:
+	bool goat;
+	int gronk;
+	int edelman;
+} example_t;
+
+int main() {
+ 4d4:	fe010113          	addi	x2,x2,-32
+ 4d8:	00112e23          	sw	x1,28(x2)
+ 4dc:	00812c23          	sw	x8,24(x2)
+ 4e0:	02010413          	addi	x8,x2,32
+	example_t* pats = (example_t*)tj_malloc(sizeof(example_t));
+ 4e4:	01000513          	addi	x10,x0,16
+ 4e8:	00000097          	auipc	x1,0x0
+ 4ec:	e08080e7          	jalr	x1,-504(x1) # 2f0 <tj_malloc>
+ 4f0:	fea42623          	sw	x10,-20(x8)
+#ifdef DEBUG
+	printf("pts is %i\n", (int)pats);
+	printf("what\n");
+#endif
+	pats->brady = 12; // as of 02/2019
+ 4f4:	fec42783          	lw	x15,-20(x8)
+ 4f8:	00c00713          	addi	x14,x0,12
+ 4fc:	00e7a023          	sw	x14,0(x15)
+	pats->rings = 6;
+ 500:	fec42783          	lw	x15,-20(x8)
+ 504:	00600713          	addi	x14,x0,6
+ 508:	00e79223          	sh	x14,4(x15)
+	pats->goat = 1; // hands down the goat
+ 50c:	fec42783          	lw	x15,-20(x8)
+ 510:	00100713          	addi	x14,x0,1
+ 514:	00e78323          	sb	x14,6(x15)
+	pats->gronk = 87; // tide pods
+ 518:	fec42783          	lw	x15,-20(x8)
+ 51c:	05700713          	addi	x14,x0,87
+ 520:	00e7a423          	sw	x14,8(x15)
+	pats->edelman = 11; // the ironman, superbowl 53 mvp
+ 524:	fec42783          	lw	x15,-20(x8)
+ 528:	00b00713          	addi	x14,x0,11
+ 52c:	00e7a623          	sw	x14,12(x15)
+#ifdef DEBUG
+	printf("%i\n", pats->edelman);
+#endif
+	example_t* another = (example_t*)tj_malloc(sizeof(example_t));
+ 530:	01000513          	addi	x10,x0,16
+ 534:	00000097          	auipc	x1,0x0
+ 538:	dbc080e7          	jalr	x1,-580(x1) # 2f0 <tj_malloc>
+ 53c:	fea42423          	sw	x10,-24(x8)
+#ifdef DEBUG
+	printf("pts is %i\n", (int)another);
+#endif
+	tj_free(pats);
+ 540:	fec42503          	lw	x10,-20(x8)
+ 544:	00000097          	auipc	x1,0x0
+ 548:	b70080e7          	jalr	x1,-1168(x1) # b4 <tj_free>
+	example_t* third = (example_t*)tj_malloc(sizeof(example_t));
+ 54c:	01000513          	addi	x10,x0,16
+ 550:	00000097          	auipc	x1,0x0
+ 554:	da0080e7          	jalr	x1,-608(x1) # 2f0 <tj_malloc>
+ 558:	fea42223          	sw	x10,-28(x8)
+	another->rings = 2003;
+ 55c:	fe842783          	lw	x15,-24(x8)
+ 560:	7d300713          	addi	x14,x0,2003
+ 564:	00e79223          	sh	x14,4(x15)
+	third->rings = 2004;
+ 568:	fe442783          	lw	x15,-28(x8)
+ 56c:	7d400713          	addi	x14,x0,2004
+ 570:	00e79223          	sh	x14,4(x15)
+#ifdef DEBUG
+	printf("created third %i\n", (int)third);
+#endif
+	//let's make this test calloc
+	example_t* latest = (example_t*)tj_calloc(sizeof(example_t));
+ 574:	01000513          	addi	x10,x0,16
+ 578:	00000097          	auipc	x1,0x0
+ 57c:	f0c080e7          	jalr	x1,-244(x1) # 484 <tj_calloc>
+ 580:	fea42023          	sw	x10,-32(x8)
+	latest->rings = 2019;
+ 584:	fe042783          	lw	x15,-32(x8)
+ 588:	7e300713          	addi	x14,x0,2019
+ 58c:	00e79223          	sh	x14,4(x15)
+	if (latest->goat != 0) exit(2);
+ 590:	fe042783          	lw	x15,-32(x8)
+ 594:	0067c783          	lbu	x15,6(x15)
+ 598:	00078863          	beq	x15,x0,5a8 <main+0xd4>
+ 59c:	00200513          	addi	x10,x0,2
+ 5a0:	00000097          	auipc	x1,0x0
+ 5a4:	b00080e7          	jalr	x1,-1280(x1) # a0 <exit>
+	tj_free(another);
+ 5a8:	fe842503          	lw	x10,-24(x8)
+ 5ac:	00000097          	auipc	x1,0x0
+ 5b0:	b08080e7          	jalr	x1,-1272(x1) # b4 <tj_free>
+	tj_free(latest);
+ 5b4:	fe042503          	lw	x10,-32(x8)
+ 5b8:	00000097          	auipc	x1,0x0
+ 5bc:	afc080e7          	jalr	x1,-1284(x1) # b4 <tj_free>
+	return 0;
+ 5c0:	00000793          	addi	x15,x0,0
+}
+ 5c4:	00078513          	addi	x10,x15,0
+ 5c8:	01c12083          	lw	x1,28(x2)
+ 5cc:	01812403          	lw	x8,24(x2)
+ 5d0:	02010113          	addi	x2,x2,32
+ 5d4:	00008067          	jalr	x0,0(x1)
+
+000005d8 <memset>:
+ 5d8:	00f00313          	addi	x6,x0,15
+ 5dc:	00050713          	addi	x14,x10,0
+ 5e0:	02c37e63          	bgeu	x6,x12,61c <memset+0x44>
+ 5e4:	00f77793          	andi	x15,x14,15
+ 5e8:	0a079063          	bne	x15,x0,688 <memset+0xb0>
+ 5ec:	08059263          	bne	x11,x0,670 <memset+0x98>
+ 5f0:	ff067693          	andi	x13,x12,-16
+ 5f4:	00f67613          	andi	x12,x12,15
+ 5f8:	00e686b3          	add	x13,x13,x14
+ 5fc:	00b72023          	sw	x11,0(x14)
+ 600:	00b72223          	sw	x11,4(x14)
+ 604:	00b72423          	sw	x11,8(x14)
+ 608:	00b72623          	sw	x11,12(x14)
+ 60c:	01070713          	addi	x14,x14,16
+ 610:	fed766e3          	bltu	x14,x13,5fc <memset+0x24>
+ 614:	00061463          	bne	x12,x0,61c <memset+0x44>
+ 618:	00008067          	jalr	x0,0(x1)
+ 61c:	40c306b3          	sub	x13,x6,x12
+ 620:	00269693          	slli	x13,x13,0x2
+ 624:	00000297          	auipc	x5,0x0
+ 628:	005686b3          	add	x13,x13,x5
+ 62c:	00c68067          	jalr	x0,12(x13)
+ 630:	00b70723          	sb	x11,14(x14)
+ 634:	00b706a3          	sb	x11,13(x14)
+ 638:	00b70623          	sb	x11,12(x14)
+ 63c:	00b705a3          	sb	x11,11(x14)
+ 640:	00b70523          	sb	x11,10(x14)
+ 644:	00b704a3          	sb	x11,9(x14)
+ 648:	00b70423          	sb	x11,8(x14)
+ 64c:	00b703a3          	sb	x11,7(x14)
+ 650:	00b70323          	sb	x11,6(x14)
+ 654:	00b702a3          	sb	x11,5(x14)
+ 658:	00b70223          	sb	x11,4(x14)
+ 65c:	00b701a3          	sb	x11,3(x14)
+ 660:	00b70123          	sb	x11,2(x14)
+ 664:	00b700a3          	sb	x11,1(x14)
+ 668:	00b70023          	sb	x11,0(x14)
+ 66c:	00008067          	jalr	x0,0(x1)
+ 670:	0ff5f593          	andi	x11,x11,255
+ 674:	00859693          	slli	x13,x11,0x8
+ 678:	00d5e5b3          	or	x11,x11,x13
+ 67c:	01059693          	slli	x13,x11,0x10
+ 680:	00d5e5b3          	or	x11,x11,x13
+ 684:	f6dff06f          	jal	x0,5f0 <memset+0x18>
+ 688:	00279693          	slli	x13,x15,0x2
+ 68c:	00000297          	auipc	x5,0x0
+ 690:	005686b3          	add	x13,x13,x5
+ 694:	00008293          	addi	x5,x1,0
+ 698:	fa0680e7          	jalr	x1,-96(x13)
+ 69c:	00028093          	addi	x1,x5,0 # 68c <memset+0xb4>
+ 6a0:	ff078793          	addi	x15,x15,-16
+ 6a4:	40f70733          	sub	x14,x14,x15
+ 6a8:	00f60633          	add	x12,x12,x15
+ 6ac:	f6c378e3          	bgeu	x6,x12,61c <memset+0x44>
+ 6b0:	f3dff06f          	jal	x0,5ec <memset+0x14>
+	...
+
+Disassembly of section .sdata:
+
+00000700 <next_index>:
+static void* next_index = (void *)heap; //the next place to be allocated
+ 700:	0720                	c.addi4spn	x8,x2,904
+	...
+
+00000704 <avail_mem>:
+static unsigned int avail_mem = sizeof(heap); //the most CONTIGUOUS memory available
+ 704:	4000                	c.lw	x8,0(x8)
 	...
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	1e41                	c.addi	x28,-16
+	nop
+   0:	2041                	c.jal	80 <crt+0x80>
    2:	0000                	c.unimp
+	la ra, exit
    4:	7200                	c.flw	f8,32(x12)
    6:	7369                	c.lui	x6,0xffffa
-   8:	01007663          	bgeu	x0,x16,14 <fib-0x8>
-   c:	0014                	0x14
+   8:	01007663          	bgeu	x0,x16,14 <crt+0x14>
+	la sp, _sp
+   c:	0016                	c.slli	x0,0x5
    e:	0000                	c.unimp
-  10:	7205                	c.lui	x4,0xfffe1
-  12:	3376                	c.fldsp	f6,376(x2)
-  14:	6932                	c.flwsp	f18,12(x2)
-  16:	7032                	c.flwsp	f0,44(x2)
-  18:	5f30                	c.lw	x12,120(x14)
-  1a:	326d                	c.jal	fffff9c4 <_sp+0xfffef9c4>
-  1c:	3070                	c.fld	f12,224(x8)
+  10:	1004                	c.addi4spn	x9,x2,32
+  12:	7205                	c.lui	x4,0xfffe1
+	mv s0, sp
+  14:	3376                	c.fldsp	f6,376(x2)
+  16:	6932                	c.flwsp	f18,12(x2)
+	la gp, __global_pointer$
+  18:	7032                	c.flwsp	f0,44(x2)
+  1a:	5f30                	c.lw	x12,120(x14)
+  1c:	326d                	c.jal	fffff9c6 <_sp+0xfffef9c6>
+  1e:	3070                	c.fld	f12,224(x8)
+	...
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+	nop
+   0:	3a434347          	fmsub.d	f6,f6,f4,f7,rmm
+	la ra, exit
+   4:	2820                	c.fld	f8,80(x8)
+   6:	29554e47          	fmsub.s	f28,f10,f21,f5,rmm
+   a:	3920                	c.fld	f8,112(x10)
+	la sp, _sp
+   c:	322e                	c.fldsp	f4,232(x2)
+   e:	302e                	c.fldsp	f0,232(x2)
+	...
+
+Disassembly of section .debug_line:
+
+00000000 <.debug_line>:
+	nop
+   0:	0114                	c.addi4spn	x13,x2,128
+   2:	0000                	c.unimp
+	la ra, exit
+   4:	001c0003          	lb	x0,1(x24)
+   8:	0000                	c.unimp
+   a:	0101                	c.addi	x2,0
+	la sp, _sp
+   c:	000d0efb          	0xd0efb
+  10:	0101                	c.addi	x2,0
+  12:	0101                	c.addi	x2,0
+	mv s0, sp
+  14:	0000                	c.unimp
+  16:	0100                	c.addi4spn	x8,x2,128
+	la gp, __global_pointer$
+  18:	0000                	c.unimp
+  1a:	0001                	c.addi	x0,0
+  1c:	2e747263          	bgeu	x8,x7,300 <tj_malloc+0x10>
+	li tp, 0
+  20:	00000073          	ecall
+	li t0, 0
+  24:	0000                	c.unimp
+  26:	0500                	c.addi4spn	x8,x2,640
+	li t1, 0
+  28:	0002                	c.slli64	x0
+  2a:	0000                	c.unimp
+	li t2, 0
+  2c:	0300                	c.addi4spn	x8,x2,384
+  2e:	010d                	c.addi	x2,3
+	li s1, 0
+  30:	04090103          	lb	x2,64(x18)
+	li a0, 0
+  34:	0100                	c.addi4spn	x8,x2,128
+  36:	08090103          	lb	x2,128(x18)
+	li a1, 0
+  3a:	0100                	c.addi4spn	x8,x2,128
+	li a2, 0
+  3c:	08090103          	lb	x2,128(x18)
+	li a3, 0
+  40:	0100                	c.addi4spn	x8,x2,128
+  42:	04090103          	lb	x2,64(x18)
+	li a4, 0
+  46:	0100                	c.addi4spn	x8,x2,128
+	li a5, 0
+  48:	08090103          	lb	x2,128(x18)
+	li a6, 0
+  4c:	0100                	c.addi4spn	x8,x2,128
+  4e:	04090103          	lb	x2,64(x18)
+	li a7, 0
+  52:	0100                	c.addi4spn	x8,x2,128
+	li s2, 0
+  54:	04090103          	lb	x2,64(x18)
+	li s3, 0
+  58:	0100                	c.addi4spn	x8,x2,128
+  5a:	04090103          	lb	x2,64(x18)
+	li s4, 0
+  5e:	0100                	c.addi4spn	x8,x2,128
+	li s5, 0
+  60:	04090103          	lb	x2,64(x18)
+	li s6, 0
+  64:	0100                	c.addi4spn	x8,x2,128
+  66:	04090103          	lb	x2,64(x18)
+	li s7, 0
+  6a:	0100                	c.addi4spn	x8,x2,128
+	li s8, 0
+  6c:	04090103          	lb	x2,64(x18)
+	li s9, 0
+  70:	0100                	c.addi4spn	x8,x2,128
+  72:	04090103          	lb	x2,64(x18)
+	li s10, 0
+  76:	0100                	c.addi4spn	x8,x2,128
+	li s11, 0
+  78:	04090103          	lb	x2,64(x18)
+	li t3, 0
+  7c:	0100                	c.addi4spn	x8,x2,128
+  7e:	04090103          	lb	x2,64(x18)
+	li t4, 0
+  82:	0100                	c.addi4spn	x8,x2,128
+	li t5, 0
+  84:	04090103          	lb	x2,64(x18)
+	li t6, 0
+  88:	0100                	c.addi4spn	x8,x2,128
+  8a:	04090103          	lb	x2,64(x18)
+	j main
+  8e:	0100                	c.addi4spn	x8,x2,128
+  90:	04090103          	lb	x2,64(x18)
+  94:	0100                	c.addi4spn	x8,x2,128
+  96:	04090103          	lb	x2,64(x18)
+  9a:	0100                	c.addi4spn	x8,x2,128
+  9c:	04090103          	lb	x2,64(x18)
+	la sp, _sp
+  a0:	0100                	c.addi4spn	x8,x2,128
+  a2:	04090103          	lb	x2,64(x18)
+  a6:	0100                	c.addi4spn	x8,x2,128
+	sw a0, -8(sp)
+  a8:	04090103          	lb	x2,64(x18)
+	nop
+  ac:	0100                	c.addi4spn	x8,x2,128
+  ae:	04090103          	lb	x2,64(x18)
+	wfi
+  b2:	0100                	c.addi4spn	x8,x2,128
+void tj_free(void *mem) {
+  b4:	04090103          	lb	x2,64(x18)
+  b8:	0100                	c.addi4spn	x8,x2,128
+  ba:	04090103          	lb	x2,64(x18)
+  be:	0100                	c.addi4spn	x8,x2,128
+  c0:	04090103          	lb	x2,64(x18)
+  c4:	0100                	c.addi4spn	x8,x2,128
+  c6:	04090103          	lb	x2,64(x18)
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  ca:	0100                	c.addi4spn	x8,x2,128
+  cc:	04090103          	lb	x2,64(x18)
+  d0:	0100                	c.addi4spn	x8,x2,128
+  d2:	04090103          	lb	x2,64(x18)
+  d6:	0100                	c.addi4spn	x8,x2,128
+  d8:	04090103          	lb	x2,64(x18)
+  dc:	0100                	c.addi4spn	x8,x2,128
+  de:	04090103          	lb	x2,64(x18)
+  e2:	0100                	c.addi4spn	x8,x2,128
+  e4:	04090103          	lb	x2,64(x18)
+		exit(1);
+  e8:	0100                	c.addi4spn	x8,x2,128
+  ea:	04090103          	lb	x2,64(x18)
+  ee:	0100                	c.addi4spn	x8,x2,128
+  f0:	0409                	c.addi	x8,2
+  f2:	0000                	c.unimp
+	bp = (Header *)mem - 1; //point to block header
+  f4:	0101                	c.addi	x2,0
+  f6:	0500                	c.addi4spn	x8,x2,640
+  f8:	a002                	c.fsdsp	f0,0(x2)
+  fa:	0000                	c.unimp
+  fc:	0300                	c.addi4spn	x8,x2,384
+  fe:	01030133          	add	x2,x6,x16
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 102:	0809                	c.addi	x16,2
+ 104:	0100                	c.addi4spn	x8,x2,128
+ 106:	04090103          	lb	x2,64(x18)
+ 10a:	0100                	c.addi4spn	x8,x2,128
+ 10c:	04090103          	lb	x2,64(x18)
+		if (p >= p->next && (bp > p || bp < p->next))
+ 110:	0100                	c.addi4spn	x8,x2,128
+ 112:	0409                	c.addi	x8,2
+ 114:	0000                	c.unimp
+ 116:	0101                	c.addi	x2,0
+ 118:	053c                	c.addi4spn	x15,x2,648
+ 11a:	0000                	c.unimp
+ 11c:	016b0003          	lb	x0,22(x22)
+ 120:	0000                	c.unimp
+ 122:	0101                	c.addi	x2,0
+ 124:	000d0efb          	0xd0efb
+ 128:	0101                	c.addi	x2,0
+ 12a:	0101                	c.addi	x2,0
+ 12c:	0000                	c.unimp
+ 12e:	0100                	c.addi4spn	x8,x2,128
+ 130:	0000                	c.unimp
+ 132:	7401                	c.lui	x8,0xfffe0
+ 134:	7365                	c.lui	x6,0xffff9
+ 136:	5f74                	c.lw	x13,124(x14)
+ 138:	7270                	c.flw	f12,100(x12)
+ 13a:	0073676f          	jal	x14,36940 <_sp+0x26940>
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 13e:	7273752f          	0x7273752f
+ 142:	2f6d752f          	0x2f6d752f
+ 146:	6972                	c.flwsp	f18,28(x2)
+ 148:	2d766373          	csrrsi	x6,0x2d7,12
+ 14c:	2e39                	c.jal	46a <tj_malloc+0x17a>
+ 14e:	2f32                	c.fldsp	f30,264(x2)
+ 150:	6972                	c.flwsp	f18,28(x2)
+ 152:	36766373          	csrrsi	x6,0x367,12
+ 156:	2d34                	c.fld	f13,88(x10)
+ 158:	6e75                	c.lui	x28,0x1d
+ 15a:	776f6e6b          	0x776f6e6b
+ 15e:	2d6e                	c.fldsp	f26,216(x2)
+ 160:	6c65                	c.lui	x24,0x19
+ 162:	2f66                	c.fldsp	f30,88(x2)
+	if (bp + bp->size == p->next) { //join to upper nbr
+ 164:	6e69                	c.lui	x28,0x1a
+ 166:	64756c63          	bltu	x10,x7,7be <heap+0x9e>
+ 16a:	2f65                	c.jal	922 <heap+0x202>
+ 16c:	616d                	c.addi16sp	x2,240
+ 16e:	6e696863          	bltu	x18,x6,85e <heap+0x13e>
+ 172:	0065                	c.addi	x0,25
+ 174:	7273752f          	0x7273752f
+ 178:	2f6d752f          	0x2f6d752f
+ 17c:	6972                	c.flwsp	f18,28(x2)
+ 17e:	2d766373          	csrrsi	x6,0x2d7,12
+ 182:	2e39                	c.jal	4a0 <tj_calloc+0x1c>
+		bp->size += p->next->size;
+ 184:	2f32                	c.fldsp	f30,264(x2)
+ 186:	6972                	c.flwsp	f18,28(x2)
+ 188:	36766373          	csrrsi	x6,0x367,12
+ 18c:	2d34                	c.fld	f13,88(x10)
+ 18e:	6e75                	c.lui	x28,0x1d
+ 190:	776f6e6b          	0x776f6e6b
+ 194:	2d6e                	c.fldsp	f26,216(x2)
+ 196:	6c65                	c.lui	x24,0x19
+ 198:	2f66                	c.fldsp	f30,88(x2)
+ 19a:	6e69                	c.lui	x28,0x1a
+ 19c:	64756c63          	bltu	x10,x7,7f4 <heap+0xd4>
+ 1a0:	2f65                	c.jal	958 <heap+0x238>
+ 1a2:	00737973          	csrrci	x18,0x7,6
+		bp->next = p->next->next;
+ 1a6:	7273752f          	0x7273752f
+ 1aa:	2f6d752f          	0x2f6d752f
+ 1ae:	6972                	c.flwsp	f18,28(x2)
+ 1b0:	2d766373          	csrrsi	x6,0x2d7,12
+ 1b4:	2e39                	c.jal	4d2 <tj_calloc+0x4e>
+ 1b6:	2f32                	c.fldsp	f30,264(x2)
+ 1b8:	696c                	c.flw	f11,84(x10)
+ 1ba:	2f62                	c.fldsp	f30,24(x2)
+		bp->next = p->next; //insert bp after p in the linked list
+ 1bc:	2f636367          	0x2f636367
+ 1c0:	6972                	c.flwsp	f18,28(x2)
+ 1c2:	36766373          	csrrsi	x6,0x367,12
+ 1c6:	2d34                	c.fld	f13,88(x10)
+ 1c8:	6e75                	c.lui	x28,0x1d
+ 1ca:	776f6e6b          	0x776f6e6b
+	if (p + p->size == bp) { //join to lower nbr
+ 1ce:	2d6e                	c.fldsp	f26,216(x2)
+ 1d0:	6c65                	c.lui	x24,0x19
+ 1d2:	2f66                	c.fldsp	f30,88(x2)
+ 1d4:	2e39                	c.jal	4f2 <main+0x1e>
+ 1d6:	2e32                	c.fldsp	f28,264(x2)
+ 1d8:	2f30                	c.fld	f12,88(x14)
+ 1da:	6e69                	c.lui	x28,0x1a
+ 1dc:	64756c63          	bltu	x10,x7,834 <heap+0x114>
+ 1e0:	0065                	c.addi	x0,25
+ 1e2:	7273752f          	0x7273752f
+ 1e6:	2f6d752f          	0x2f6d752f
+		p->size += bp->size;
+ 1ea:	6972                	c.flwsp	f18,28(x2)
+ 1ec:	2d766373          	csrrsi	x6,0x2d7,12
+ 1f0:	2e39                	c.jal	50e <main+0x3a>
+ 1f2:	2f32                	c.fldsp	f30,264(x2)
+ 1f4:	6972                	c.flwsp	f18,28(x2)
+ 1f6:	36766373          	csrrsi	x6,0x367,12
+ 1fa:	2d34                	c.fld	f13,88(x10)
+ 1fc:	6e75                	c.lui	x28,0x1d
+ 1fe:	776f6e6b          	0x776f6e6b
+ 202:	2d6e                	c.fldsp	f26,216(x2)
+		p->next = bp->next;
+ 204:	6c65                	c.lui	x24,0x19
+ 206:	2f66                	c.fldsp	f30,88(x2)
+ 208:	6e69                	c.lui	x28,0x1a
+ 20a:	64756c63          	bltu	x10,x7,862 <heap+0x142>
+ 20e:	0065                	c.addi	x0,25
+ 210:	7400                	c.flw	f8,40(x8)
+ 212:	5f6a                	c.lwsp	x30,184(x2)
+ 214:	616d                	c.addi16sp	x2,240
+ 216:	6c6c                	c.flw	f11,92(x8)
+		p->next = bp; //again, if the free list is just the base
+ 218:	682e636f          	jal	x6,e689a <_sp+0xd689a>
+ 21c:	0100                	c.addi4spn	x8,x2,128
+ 21e:	0000                	c.unimp
+ 220:	6162                	c.flwsp	f2,24(x2)
+ 222:	5f636973          	csrrsi	x18,0x5f6,6
+	freep = p;
+ 226:	616d                	c.addi16sp	x2,240
+ 228:	6c6c                	c.flw	f11,92(x8)
+ 22a:	632e636f          	jal	x6,e685c <_sp+0xd685c>
+ 22e:	0100                	c.addi4spn	x8,x2,128
+}
+ 230:	0000                	c.unimp
+ 232:	645f 6665 7561      	0x75616665645f
+ 238:	746c                	c.flw	f11,108(x8)
+ 23a:	745f 7079 7365      	0x73657079745f
+ 240:	682e                	c.flwsp	f16,200(x2)
+ 242:	0200                	c.addi4spn	x8,x2,256
+static Header* getmoremem(unsigned int total_size) {
+ 244:	0000                	c.unimp
+ 246:	735f 6474 6e69      	0x6e696474735f
+ 24c:	2e74                	c.fld	f13,216(x12)
+ 24e:	0068                	c.addi4spn	x10,x2,12
+ 250:	73000003          	lb	x0,1840(x0) # 730 <heap+0x10>
+ 254:	6474                	c.flw	f13,76(x8)
+ 256:	6564                	c.flw	f9,76(x10)
+	if (avail_mem < total_size) return NULL; //gg, we ran out of mem :P
+ 258:	2e66                	c.fldsp	f28,88(x2)
+ 25a:	0068                	c.addi4spn	x10,x2,12
+ 25c:	0004                	0x4
+ 25e:	5f00                	c.lw	x8,56(x14)
+ 260:	7974                	c.flw	f13,116(x10)
+ 262:	6570                	c.flw	f12,76(x10)
+ 264:	00682e73          	csrrs	x28,0x6,x16
+ 268:	72000003          	lb	x0,1824(x0) # 720 <heap>
+ 26c:	6565                	c.lui	x10,0x19
+ 26e:	746e                	c.flwsp	f8,248(x2)
+	Header* up = (Header *)next_index;
+ 270:	682e                	c.flwsp	f16,200(x2)
+ 272:	0300                	c.addi4spn	x8,x2,384
+ 274:	0000                	c.unimp
+ 276:	6f6c                	c.flw	f11,92(x14)
+ 278:	682e6b63          	bltu	x28,x2,90e <heap+0x1ee>
+	next_index += total_size; //allocate the block
+ 27c:	0300                	c.addi4spn	x8,x2,384
+ 27e:	0000                	c.unimp
+ 280:	6c647473          	csrrci	x8,0x6c6,8
+ 284:	6269                	c.lui	x4,0x1a
+ 286:	682e                	c.flwsp	f16,200(x2)
+ 288:	0500                	c.addi4spn	x8,x2,640
+ 28a:	0000                	c.unimp
+ 28c:	0500                	c.addi4spn	x8,x2,640
+ 28e:	0019                	c.addi	x0,6
+ 290:	0205                	c.addi	x4,1
+ 292:	00b4                	c.addi4spn	x13,x2,72
+	avail_mem -= total_size; //deduct from avail mem;
+ 294:	0000                	c.unimp
+ 296:	05012903          	lw	x18,80(x2)
+ 29a:	0305                	c.addi	x6,1
+ 29c:	00140903          	lb	x18,1(x8) # fffe0001 <_sp+0xfffd0001>
+ 2a0:	0501                	c.addi	x10,0
+ 2a2:	0022                	c.slli	x0,0x8
+ 2a4:	0402                	c.slli64	x8
+ 2a6:	0301                	c.addi	x6,0
+ 2a8:	0900                	c.addi4spn	x8,x2,144
+ 2aa:	0010                	0x10
+	up->size = total_size - sizeof(Header); //set the size right
+ 2ac:	0501                	c.addi	x10,0
+ 2ae:	0019                	c.addi	x0,6
+ 2b0:	0402                	c.slli64	x8
+ 2b2:	0301                	c.addi	x6,0
+ 2b4:	0900                	c.addi4spn	x8,x2,144
+ 2b6:	0008                	0x8
+ 2b8:	0501                	c.addi	x10,0
+ 2ba:	09010303          	lb	x6,144(x2)
+	tj_free((void *)(++up)); //append the new block to the free list first
+ 2be:	0008                	0x8
+ 2c0:	0501                	c.addi	x10,0
+ 2c2:	0305                	c.addi	x6,1
+ 2c4:	000c0903          	lb	x18,0(x24) # 19000 <_sp+0x9000>
+ 2c8:	0501                	c.addi	x10,0
+ 2ca:	0309                	c.addi	x6,2
+ 2cc:	0902                	c.slli64	x18
+ 2ce:	000c                	0xc
+ 2d0:	0501                	c.addi	x10,0
+ 2d2:	0302                	c.slli64	x6
+	return freep;
+ 2d4:	0900                	c.addi4spn	x8,x2,144
+ 2d6:	000c                	0xc
+ 2d8:	0501                	c.addi	x10,0
+ 2da:	030d                	c.addi	x6,3
+}
+ 2dc:	00040903          	lb	x18,0(x8)
+ 2e0:	0501                	c.addi	x10,0
+ 2e2:	0306                	c.slli	x6,0x1
+ 2e4:	0900                	c.addi4spn	x8,x2,144
+ 2e6:	0008                	0x8
+ 2e8:	0501                	c.addi	x10,0
+ 2ea:	0014                	0x14
+ 2ec:	0402                	c.slli64	x8
+ 2ee:	0301                	c.addi	x6,0
+void *tj_malloc(unsigned int size) {
+ 2f0:	0900                	c.addi4spn	x8,x2,144
+ 2f2:	0008                	0x8
+ 2f4:	0501                	c.addi	x10,0
+ 2f6:	0028                	c.addi4spn	x10,x2,8
+ 2f8:	0402                	c.slli64	x8
+ 2fa:	0302                	c.slli64	x6
+ 2fc:	0900                	c.addi4spn	x8,x2,144
+ 2fe:	000c                	0xc
+ 300:	0501                	c.addi	x10,0
+ 302:	001f 0402 0302      	0x3020402001f
+	if (size > sizeof(heap)) return NULL;
+ 308:	0900                	c.addi4spn	x8,x2,144
+ 30a:	0008                	0x8
+ 30c:	0501                	c.addi	x10,0
+ 30e:	0402002f          	0x402002f
+ 312:	0302                	c.slli64	x6
+ 314:	097d                	c.addi	x18,31
+ 316:	0008                	0x8
+	if ((size & 3) != 0) {
+ 318:	0501                	c.addi	x10,0
+ 31a:	0002                	c.slli64	x0
+ 31c:	0402                	c.slli64	x8
+ 31e:	0301                	c.addi	x6,0
+ 320:	0900                	c.addi4spn	x8,x2,144
+ 322:	000c                	0xc
+		size = size + 4 - (size & 3);
+ 324:	0501                	c.addi	x10,0
+ 326:	0024                	c.addi4spn	x9,x2,8
+ 328:	0402                	c.slli64	x8
+ 32a:	09000303          	lb	x6,144(x0) # 90 <crt+0x90>
+ 32e:	000c                	0xc
+ 330:	0501                	c.addi	x10,0
+ 332:	0012                	c.slli	x0,0x4
+	unsigned int total_size = size + sizeof(Header); //need to include the header size as well
+ 334:	0402                	c.slli64	x8
+ 336:	09000303          	lb	x6,144(x0) # 90 <crt+0x90>
+ 33a:	0008                	0x8
+ 33c:	0501                	c.addi	x10,0
+ 33e:	030d                	c.addi	x6,3
+	prevp = freep;
+ 340:	00080907          	0x80907
+ 344:	0501                	c.addi	x10,0
+ 346:	0309                	c.addi	x6,2
+ 348:	0900                	c.addi4spn	x8,x2,144
+ 34a:	0008                	0x8
+	if (prevp == NULL) {
+ 34c:	0501                	c.addi	x10,0
+ 34e:	0318                	c.addi4spn	x14,x2,384
+ 350:	0900                	c.addi4spn	x8,x2,144
+ 352:	000c                	0xc
+		prevp = &base;
+ 354:	0501                	c.addi	x10,0
+ 356:	0305                	c.addi	x6,1
+ 358:	0900                	c.addi4spn	x8,x2,144
+ 35a:	0008                	0x8
+ 35c:	0501                	c.addi	x10,0
+ 35e:	030c                	c.addi4spn	x11,x2,384
+		freep = prevp;
+ 360:	0902                	c.slli64	x18
+ 362:	0004                	0x4
+ 364:	0501                	c.addi	x10,0
+ 366:	0310                	c.addi4spn	x12,x2,384
+ 368:	0900                	c.addi4spn	x8,x2,144
+ 36a:	0008                	0x8
+		base.next = freep;
+ 36c:	0501                	c.addi	x10,0
+ 36e:	0316                	c.slli	x6,0x5
+ 370:	0900                	c.addi4spn	x8,x2,144
+ 372:	0008                	0x8
+ 374:	0501                	c.addi	x10,0
+ 376:	030c                	c.addi4spn	x11,x2,384
+ 378:	0900                	c.addi4spn	x8,x2,144
+ 37a:	0004                	0x4
+ 37c:	0501                	c.addi	x10,0
+ 37e:	0901030f          	0x901030f
+		base.size = 0;
+ 382:	000c                	0xc
+ 384:	0501                	c.addi	x10,0
+ 386:	0315                	c.addi	x6,5
+ 388:	0900                	c.addi4spn	x8,x2,144
+ 38a:	0008                	0x8
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 38c:	0501                	c.addi	x10,0
+ 38e:	030c                	c.addi4spn	x11,x2,384
+ 390:	0900                	c.addi4spn	x8,x2,144
+ 392:	0004                	0x4
+ 394:	0501                	c.addi	x10,0
+ 396:	0902030f          	0x902030f
+		if (p->size >= size) { //big enough
+ 39a:	000c                	0xc
+ 39c:	0501                	c.addi	x10,0
+ 39e:	030c                	c.addi4spn	x11,x2,384
+ 3a0:	0900                	c.addi4spn	x8,x2,144
+ 3a2:	0008                	0x8
+ 3a4:	0501                	c.addi	x10,0
+ 3a6:	0904030b          	0x904030b
+			if (p->size == size) // exact size
+ 3aa:	0008                	0x8
+ 3ac:	0501                	c.addi	x10,0
+ 3ae:	0308                	c.addi4spn	x10,x2,384
+ 3b0:	0900                	c.addi4spn	x8,x2,144
+ 3b2:	0008                	0x8
+ 3b4:	0501                	c.addi	x10,0
+ 3b6:	0305                	c.addi	x6,1
+				prevp->next = p->next; // just return that block
+ 3b8:	0900                	c.addi4spn	x8,x2,144
+ 3ba:	000c                	0xc
+ 3bc:	0501                	c.addi	x10,0
+ 3be:	0902030b          	0x902030b
+ 3c2:	0008                	0x8
+ 3c4:	0501                	c.addi	x10,0
+ 3c6:	0310                	c.addi4spn	x12,x2,384
+ 3c8:	0900                	c.addi4spn	x8,x2,144
+ 3ca:	0008                	0x8
+				p->size -= total_size; //break up the block
+ 3cc:	0501                	c.addi	x10,0
+ 3ce:	0900030b          	0x900030b
+ 3d2:	0008                	0x8
+ 3d4:	0501                	c.addi	x10,0
+ 3d6:	0901030f          	0x901030f
+ 3da:	000c                	0xc
+ 3dc:	0501                	c.addi	x10,0
+ 3de:	0900030b          	0x900030b
+ 3e2:	0008                	0x8
+				p += p->size;
+ 3e4:	0301                	c.addi	x6,0
+ 3e6:	0902                	c.slli64	x18
+ 3e8:	000c                	0xc
+ 3ea:	0501                	c.addi	x10,0
+ 3ec:	0308                	c.addi4spn	x10,x2,384
+ 3ee:	000c0903          	lb	x18,0(x24)
+ 3f2:	0501                	c.addi	x10,0
+ 3f4:	0301                	c.addi	x6,0
+ 3f6:	0901                	c.addi	x18,0
+ 3f8:	000c                	0xc
+ 3fa:	0501                	c.addi	x10,0
+				p->size = size;
+ 3fc:	0334                	c.addi4spn	x13,x2,392
+ 3fe:	0902                	c.slli64	x18
+ 400:	0014                	0x14
+ 402:	0501                	c.addi	x10,0
+ 404:	0310                	c.addi4spn	x12,x2,384
+ 406:	0901                	c.addi	x18,0
+			freep = prevp;
+ 408:	0014                	0x14
+ 40a:	0501                	c.addi	x10,0
+ 40c:	0305                	c.addi	x6,1
+ 40e:	0900                	c.addi4spn	x8,x2,144
+ 410:	0008                	0x8
+ 412:	0501                	c.addi	x10,0
+			return (void *)(++p);
+ 414:	0025                	c.addi	x0,9
+ 416:	0402                	c.slli64	x8
+ 418:	0301                	c.addi	x6,0
+ 41a:	0900                	c.addi4spn	x8,x2,144
+ 41c:	0008                	0x8
+ 41e:	0501                	c.addi	x10,0
+ 420:	030a                	c.slli	x6,0x2
+ 422:	0901                	c.addi	x18,0
+ 424:	0008                	0x8
+ 426:	0501                	c.addi	x10,0
+		if (p == freep) //wrapped around free list
+ 428:	030d                	c.addi	x6,3
+ 42a:	0901                	c.addi	x18,0
+ 42c:	000c                	0xc
+ 42e:	0501                	c.addi	x10,0
+ 430:	030c                	c.addi4spn	x11,x2,384
+ 432:	0901                	c.addi	x18,0
+ 434:	0018                	0x18
+ 436:	0501                	c.addi	x10,0
+			if ((p = getmoremem(total_size)) == NULL) //if the heap runs out
+ 438:	0318                	c.addi4spn	x14,x2,384
+ 43a:	0901                	c.addi	x18,0
+ 43c:	0018                	0x18
+ 43e:	0501                	c.addi	x10,0
+ 440:	0900030b          	0x900030b
+ 444:	0008                	0x8
+ 446:	0501                	c.addi	x10,0
+ 448:	0302                	c.slli64	x6
+ 44a:	0901                	c.addi	x18,0
+ 44c:	0008                	0x8
+ 44e:	0501                	c.addi	x10,0
+				return NULL; //well, you got nothing left, gg
+ 450:	0309                	c.addi	x6,2
+ 452:	0901                	c.addi	x18,0
+ 454:	0018                	0x18
+ 456:	0501                	c.addi	x10,0
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 458:	0301                	c.addi	x6,0
+ 45a:	0901                	c.addi	x18,0
+ 45c:	0008                	0x8
+ 45e:	0501                	c.addi	x10,0
+ 460:	0324                	c.addi4spn	x9,x2,392
+ 462:	0902                	c.slli64	x18
+ 464:	0014                	0x14
+ 466:	0501                	c.addi	x10,0
+ 468:	0305                	c.addi	x6,1
+ 46a:	0902                	c.slli64	x18
+		if (p->size >= size) { //big enough
+ 46c:	0014                	0x14
+ 46e:	0501                	c.addi	x10,0
+}
+ 470:	0022                	c.slli	x0,0x8
+ 472:	0402                	c.slli64	x8
+ 474:	0301                	c.addi	x6,0
+ 476:	0900                	c.addi4spn	x8,x2,144
+ 478:	000c                	0xc
+ 47a:	0501                	c.addi	x10,0
+ 47c:	030c                	c.addi4spn	x11,x2,384
+ 47e:	00080903          	lb	x18,0(x16)
+ 482:	0501                	c.addi	x10,0
+void *tj_calloc(unsigned int size) {
+ 484:	0305                	c.addi	x6,1
+ 486:	0900                	c.addi4spn	x8,x2,144
+ 488:	0008                	0x8
+ 48a:	0501                	c.addi	x10,0
+ 48c:	09010313          	addi	x6,x2,144
+ 490:	0004                	0x4
+ 492:	0501                	c.addi	x10,0
+ 494:	0308                	c.addi4spn	x10,x2,384
+ 496:	0900                	c.addi4spn	x8,x2,144
+	void *mem = tj_malloc(size);
+ 498:	0008                	0x8
+ 49a:	0501                	c.addi	x10,0
+ 49c:	0906030f          	0x906030f
+ 4a0:	0008                	0x8
+ 4a2:	0501                	c.addi	x10,0
+ 4a4:	0308                	c.addi4spn	x10,x2,384
+ 4a6:	0902                	c.slli64	x18
+	memset(mem, 0, size);
+ 4a8:	000c                	0xc
+ 4aa:	0501                	c.addi	x10,0
+ 4ac:	0305                	c.addi	x6,1
+ 4ae:	0902                	c.slli64	x18
+ 4b0:	000c                	0xc
+ 4b2:	0501                	c.addi	x10,0
+ 4b4:	0309                	c.addi	x6,2
+ 4b6:	0901                	c.addi	x18,0
+ 4b8:	0008                	0x8
+ 4ba:	0301                	c.addi	x6,0
+	return mem;
+ 4bc:	0901                	c.addi	x18,0
+ 4be:	000c                	0xc
+}
+ 4c0:	0501                	c.addi	x10,0
+ 4c2:	030d                	c.addi	x6,3
+ 4c4:	0901                	c.addi	x18,0
+ 4c6:	000c                	0xc
+ 4c8:	0301                	c.addi	x6,0
+ 4ca:	0901                	c.addi	x18,0
+ 4cc:	0014                	0x14
+ 4ce:	0501                	c.addi	x10,0
+ 4d0:	0309                	c.addi	x6,2
+ 4d2:	000c0903          	lb	x18,0(x24)
+int main() {
+ 4d6:	0501                	c.addi	x10,0
+ 4d8:	0308                	c.addi4spn	x10,x2,384
+ 4da:	0901                	c.addi	x18,0
+ 4dc:	000c                	0xc
+ 4de:	0501                	c.addi	x10,0
+ 4e0:	0306                	c.slli	x6,0x1
+ 4e2:	0900                	c.addi4spn	x8,x2,144
+	example_t* pats = (example_t*)tj_malloc(sizeof(example_t));
+ 4e4:	0008                	0x8
+ 4e6:	0501                	c.addi	x10,0
+ 4e8:	0309                	c.addi	x6,2
+ 4ea:	0901                	c.addi	x18,0
+ 4ec:	0008                	0x8
+ 4ee:	0501                	c.addi	x10,0
+ 4f0:	09000307          	0x9000307
+	pats->brady = 12; // as of 02/2019
+ 4f4:	0008                	0x8
+ 4f6:	0501                	c.addi	x10,0
+ 4f8:	0314                	c.addi4spn	x13,x2,384
+ 4fa:	0901                	c.addi	x18,0
+ 4fc:	0008                	0x8
+ 4fe:	0501                	c.addi	x10,0
+	pats->rings = 6;
+ 500:	0311                	c.addi	x6,4
+ 502:	0900                	c.addi4spn	x8,x2,144
+ 504:	0008                	0x8
+ 506:	0501                	c.addi	x10,0
+ 508:	030d                	c.addi	x6,3
+ 50a:	0902                	c.slli64	x18
+	pats->goat = 1; // hands down the goat
+ 50c:	000c                	0xc
+ 50e:	0501                	c.addi	x10,0
+ 510:	0901030b          	0x901030b
+ 514:	0018                	0x18
+ 516:	0501                	c.addi	x10,0
+	pats->gronk = 87; // tide pods
+ 518:	09000307          	0x9000307
+ 51c:	0008                	0x8
+ 51e:	0501                	c.addi	x10,0
+ 520:	030d                	c.addi	x6,3
+ 522:	0901                	c.addi	x18,0
+	pats->edelman = 11; // the ironman, superbowl 53 mvp
+ 524:	0010                	0x10
+ 526:	0501                	c.addi	x10,0
+ 528:	030a                	c.slli	x6,0x2
+ 52a:	0902                	c.slli64	x18
+ 52c:	000c                	0xc
+ 52e:	0501                	c.addi	x10,0
+	example_t* another = (example_t*)tj_malloc(sizeof(example_t));
+ 530:	0904030b          	0x904030b
+ 534:	000c                	0xc
+ 536:	0501                	c.addi	x10,0
+ 538:	0309                	c.addi	x6,2
+ 53a:	0902                	c.slli64	x18
+ 53c:	0014                	0x14
+ 53e:	0501                	c.addi	x10,0
+	tj_free(pats);
+ 540:	0306                	c.slli	x6,0x1
+ 542:	0900                	c.addi4spn	x8,x2,144
+ 544:	0008                	0x8
+ 546:	0501                	c.addi	x10,0
+ 548:	030d                	c.addi	x6,3
+ 54a:	0901                	c.addi	x18,0
+	example_t* third = (example_t*)tj_malloc(sizeof(example_t));
+ 54c:	0008                	0x8
+ 54e:	0501                	c.addi	x10,0
+ 550:	09000307          	0x9000307
+ 554:	0010                	0x10
+ 556:	0501                	c.addi	x10,0
+ 558:	030c                	c.addi4spn	x11,x2,384
+ 55a:	0901                	c.addi	x18,0
+	another->rings = 2003;
+ 55c:	0008                	0x8
+ 55e:	0501                	c.addi	x10,0
+ 560:	031f 096f 0008      	0x8096f031f
+ 566:	0501                	c.addi	x10,0
+	third->rings = 2004;
+ 568:	0326                	c.slli	x6,0x9
+ 56a:	0900                	c.addi4spn	x8,x2,144
+ 56c:	0008                	0x8
+ 56e:	0501                	c.addi	x10,0
+ 570:	0306                	c.slli	x6,0x1
+ 572:	0901                	c.addi	x18,0
+	example_t* latest = (example_t*)tj_calloc(sizeof(example_t));
+ 574:	000c                	0xc
+ 576:	0501                	c.addi	x10,0
+ 578:	0301                	c.addi	x6,0
+ 57a:	0912                	c.slli	x18,0x4
+ 57c:	0004                	0x4
+ 57e:	0501                	c.addi	x10,0
+ 580:	0324                	c.addi4spn	x9,x2,392
+ 582:	0902                	c.slli64	x18
+	latest->rings = 2019;
+ 584:	0014                	0x14
+ 586:	0501                	c.addi	x10,0
+ 588:	030e                	c.slli	x6,0x3
+ 58a:	0901                	c.addi	x18,0
+ 58c:	0014                	0x14
+ 58e:	0501                	c.addi	x10,0
+	if (latest->goat != 0) exit(2);
+ 590:	0302                	c.slli64	x6
+ 592:	0901                	c.addi	x18,0
+ 594:	0010                	0x10
+ 596:	0501                	c.addi	x10,0
+ 598:	0309                	c.addi	x6,2
+ 59a:	0901                	c.addi	x18,0
+ 59c:	0014                	0x14
+ 59e:	0501                	c.addi	x10,0
+ 5a0:	0301                	c.addi	x6,0
+ 5a2:	0901                	c.addi	x18,0
+ 5a4:	0004                	0x4
+ 5a6:	0401                	c.addi	x8,0
+	tj_free(another);
+ 5a8:	0502                	c.slli64	x10
+ 5aa:	030c                	c.addi4spn	x11,x2,384
+ 5ac:	7f8d                	c.lui	x31,0xfffe3
+ 5ae:	1409                	c.addi	x8,-30
+ 5b0:	0100                	c.addi4spn	x8,x2,128
+ 5b2:	2005                	c.jal	5d2 <main+0xfe>
+	tj_free(latest);
+ 5b4:	10090103          	lb	x2,256(x18)
+ 5b8:	0100                	c.addi4spn	x8,x2,128
+ 5ba:	0e05                	c.addi	x28,1
+ 5bc:	10090503          	lb	x10,256(x18)
+	return 0;
+ 5c0:	0100                	c.addi4spn	x8,x2,128
+ 5c2:	0c090103          	lb	x2,192(x18)
+}
+ 5c6:	0100                	c.addi4spn	x8,x2,128
+ 5c8:	0d05                	c.addi	x26,1
+ 5ca:	0c090103          	lb	x2,192(x18)
+ 5ce:	0100                	c.addi4spn	x8,x2,128
+ 5d0:	0e05                	c.addi	x28,1
+ 5d2:	0c090103          	lb	x2,192(x18)
+ 5d6:	0100                	c.addi4spn	x8,x2,128
+ 5d8:	1005                	c.addi	x0,-31
+ 5da:	0c090103          	lb	x2,192(x18)
+ 5de:	0100                	c.addi4spn	x8,x2,128
+ 5e0:	2305                	c.jal	b00 <heap+0x3e0>
+ 5e2:	0c090403          	lb	x8,192(x18)
+ 5e6:	0100                	c.addi4spn	x8,x2,128
+ 5e8:	0205                	c.addi	x4,1
+ 5ea:	10090403          	lb	x8,256(x18)
+ 5ee:	0100                	c.addi4spn	x8,x2,128
+ 5f0:	2105                	c.jal	a10 <heap+0x2f0>
+ 5f2:	0c090103          	lb	x2,192(x18)
+ 5f6:	0100                	c.addi4spn	x8,x2,128
+ 5f8:	1105                	c.addi	x2,-31
+ 5fa:	10090103          	lb	x2,256(x18)
+ 5fe:	0100                	c.addi4spn	x8,x2,128
+ 600:	0f05                	c.addi	x30,1
+ 602:	0c090103          	lb	x2,192(x18)
+ 606:	0100                	c.addi4spn	x8,x2,128
+ 608:	2205                	c.jal	728 <heap+0x8>
+ 60a:	0c090503          	lb	x10,192(x18)
+ 60e:	0100                	c.addi4spn	x8,x2,128
+ 610:	1005                	c.addi	x0,-31
+ 612:	10090103          	lb	x2,256(x18)
+ 616:	0100                	c.addi4spn	x8,x2,128
+ 618:	0c05                	c.addi	x24,1
+ 61a:	0c090103          	lb	x2,192(x18)
+ 61e:	0100                	c.addi4spn	x8,x2,128
+ 620:	0505                	c.addi	x10,1
+ 622:	08090003          	lb	x0,128(x18)
+ 626:	0100                	c.addi4spn	x8,x2,128
+ 628:	1905                	c.addi	x18,-31
+ 62a:	0200                	c.addi4spn	x8,x2,256
+ 62c:	0104                	c.addi4spn	x9,x2,128
+ 62e:	04090003          	lb	x0,64(x18)
+ 632:	0100                	c.addi4spn	x8,x2,128
+ 634:	0205                	c.addi	x4,1
+ 636:	0c090103          	lb	x2,192(x18)
+ 63a:	0100                	c.addi4spn	x8,x2,128
+ 63c:	0c090103          	lb	x2,192(x18)
+ 640:	0100                	c.addi4spn	x8,x2,128
+ 642:	0905                	c.addi	x18,1
+ 644:	0c090103          	lb	x2,192(x18)
+ 648:	0100                	c.addi4spn	x8,x2,128
+ 64a:	0105                	c.addi	x2,1
+ 64c:	04090103          	lb	x2,64(x18)
+ 650:	0100                	c.addi4spn	x8,x2,128
+ 652:	1409                	c.addi	x8,-30
+ 654:	0000                	c.unimp
+ 656:	0101                	c.addi	x2,0
+
+Disassembly of section .debug_info:
+
+00000000 <.debug_info>:
+	nop
+   0:	001e                	c.slli	x0,0x7
+   2:	0000                	c.unimp
+	la ra, exit
+   4:	0002                	c.slli64	x0
+   6:	0000                	c.unimp
+   8:	0000                	c.unimp
+   a:	0104                	c.addi4spn	x9,x2,128
+	...
+	la gp, __global_pointer$
+  18:	0006                	c.slli	x0,0x1
+  1a:	0000                	c.unimp
+  1c:	00000027          	0x27
+	li tp, 0
+  20:	8001                	c.srli64	x8
+  22:	00000ba3          	sb	x0,23(x0) # 17 <crt+0x17>
+	li t0, 0
+  26:	0004                	0x4
+	li t1, 0
+  28:	0012                	c.slli	x0,0x4
+  2a:	0000                	c.unimp
+	li t2, 0
+  2c:	0104                	c.addi4spn	x9,x2,128
+  2e:	006c                	c.addi4spn	x11,x2,12
+	li s1, 0
+  30:	0000                	c.unimp
+  32:	4a0c                	c.lw	x11,16(x12)
+	li a0, 0
+  34:	0000                	c.unimp
+  36:	0600                	c.addi4spn	x8,x2,768
+	li a1, 0
+  38:	0000                	c.unimp
+  3a:	b400                	c.fsd	f8,40(x8)
+	li a2, 0
+  3c:	0000                	c.unimp
+  3e:	2400                	c.fld	f8,8(x8)
+	li a3, 0
+  40:	0005                	c.addi	x0,1
+  42:	1800                	c.addi4spn	x8,x2,48
+	li a4, 0
+  44:	0001                	c.addi	x0,0
+  46:	0200                	c.addi4spn	x8,x2,256
+	li a5, 0
+  48:	0601                	c.addi	x12,0
+  4a:	000003ab          	0x3ab
+	li a6, 0
+  4e:	0102                	c.slli64	x2
+	li a7, 0
+  50:	a908                	c.fsd	f10,16(x10)
+  52:	02000003          	lb	x0,32(x0) # 20 <crt+0x20>
+	li s2, 0
+  56:	0502                	c.slli64	x10
+	li s3, 0
+  58:	03c5                	c.addi	x7,17
+  5a:	0000                	c.unimp
+	li s4, 0
+  5c:	00049c03          	lh	x24,0(x9)
+	li s5, 0
+  60:	0300                	c.addi4spn	x8,x2,384
+  62:	1939                	c.addi	x18,-18
+	li s6, 0
+  64:	0046                	c.slli	x0,0x11
+  66:	0000                	c.unimp
+	li s7, 0
+  68:	0202                	c.slli64	x4
+  6a:	0002a707          	flw	f14,0(x5)
+	li s8, 0
+  6e:	0200                	c.addi4spn	x8,x2,256
+	li s9, 0
+  70:	0504                	c.addi4spn	x9,x2,640
+  72:	00000177          	0x177
+	li s10, 0
+  76:	0402                	c.slli64	x8
+	li s11, 0
+  78:	00011b07          	0x11b07
+	li t3, 0
+  7c:	0200                	c.addi4spn	x8,x2,256
+  7e:	0508                	c.addi4spn	x10,x2,640
+	li t4, 0
+  80:	0172                	c.slli	x2,0x1c
+  82:	0000                	c.unimp
+	li t5, 0
+  84:	0802                	c.slli64	x16
+  86:	00011607          	0x11607
+	li t6, 0
+  8a:	0400                	c.addi4spn	x8,x2,512
+	j main
+  8c:	0504                	c.addi4spn	x9,x2,640
+  8e:	6e69                	c.lui	x28,0x1a
+  90:	0074                	c.addi4spn	x13,x2,12
+  92:	0402                	c.slli64	x8
+  94:	00012007          	flw	f0,0(x2)
+  98:	0300                	c.addi4spn	x8,x2,384
+  9a:	049e                	c.slli	x9,0x7
+  9c:	0000                	c.unimp
+  9e:	2404                	c.fld	f9,8(x8)
+	la sp, _sp
+  a0:	3a14                	c.fld	f13,48(x12)
+  a2:	0000                	c.unimp
+  a4:	0200                	c.addi4spn	x8,x2,256
+  a6:	0410                	c.addi4spn	x12,x2,512
+	sw a0, -8(sp)
+  a8:	032d                	c.addi	x6,11
+  aa:	0000                	c.unimp
+	nop
+  ac:	ea05                	c.bnez	x12,dc <tj_free+0x28>
+  ae:	0002                	c.slli64	x0
+	wfi
+  b0:	0500                	c.addi4spn	x8,x2,640
+  b2:	015e                	c.slli	x2,0x17
+void tj_free(void *mem) {
+  b4:	00007017          	auipc	x0,0x7
+  b8:	0300                	c.addi4spn	x8,x2,384
+  ba:	036e                	c.slli	x6,0x1b
+  bc:	0000                	c.unimp
+  be:	2e06                	c.fldsp	f28,64(x2)
+  c0:	4d0e                	c.lwsp	x26,192(x2)
+  c2:	0000                	c.unimp
+  c4:	0300                	c.addi4spn	x8,x2,384
+  c6:	0000048b          	0x48b
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  ca:	7406                	c.flwsp	f8,96(x2)
+  cc:	4d0e                	c.lwsp	x26,192(x2)
+  ce:	0000                	c.unimp
+  d0:	0300                	c.addi4spn	x8,x2,384
+  d2:	00000523          	sb	x0,10(x0) # a <crt+0xa>
+  d6:	9306                	c.add	x6,x1
+  d8:	00006917          	auipc	x18,0x6
+  dc:	0600                	c.addi4spn	x8,x2,768
+  de:	0604                	c.addi4spn	x9,x2,768
+  e0:	03a5                	c.addi	x7,9
+  e2:	00dd                	c.addi	x1,23
+  e4:	0000                	c.unimp
+  e6:	0002e407          	0x2e407
+		exit(1);
+  ea:	0600                	c.addi4spn	x8,x2,768
+  ec:	008a0ca7          	0x8a0ca7
+  f0:	0000                	c.unimp
+  f2:	00027507          	0x27507
+	bp = (Header *)mem - 1; //point to block header
+  f6:	0600                	c.addi4spn	x8,x2,768
+  f8:	13a8                	c.addi4spn	x10,x2,488
+  fa:	00dd                	c.addi	x1,23
+  fc:	0000                	c.unimp
+  fe:	0800                	c.addi4spn	x8,x2,16
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 100:	002c                	c.addi4spn	x11,x2,8
+ 102:	0000                	c.unimp
+ 104:	00ed                	c.addi	x1,27
+ 106:	0000                	c.unimp
+ 108:	7009                	c.lui	x0,0xfffe2
+ 10a:	0000                	c.unimp
+ 10c:	0300                	c.addi4spn	x8,x2,384
+ 10e:	0a00                	c.addi4spn	x8,x2,272
+		if (p >= p->next && (bp > p || bp < p->next))
+ 110:	0608                	c.addi4spn	x10,x2,768
+ 112:	09a2                	c.slli	x19,0x8
+ 114:	0111                	c.addi	x2,4
+ 116:	0000                	c.unimp
+ 118:	0004750b          	0x4750b
+ 11c:	0600                	c.addi4spn	x8,x2,768
+ 11e:	07a4                	c.addi4spn	x9,x2,968
+ 120:	0069                	c.addi	x0,26
+ 122:	0000                	c.unimp
+ 124:	0b00                	c.addi4spn	x8,x2,400
+ 126:	047d                	c.addi	x8,31
+ 128:	0000                	c.unimp
+ 12a:	a906                	c.fsdsp	f1,144(x2)
+ 12c:	bb05                	c.j	fffffe5c <_sp+0xfffefe5c>
+ 12e:	0000                	c.unimp
+ 130:	0400                	c.addi4spn	x8,x2,512
+ 132:	0300                	c.addi4spn	x8,x2,384
+ 134:	03ed                	c.addi	x7,27
+ 136:	0000                	c.unimp
+ 138:	aa06                	c.fsdsp	f1,272(x2)
+ 13a:	0000ed03          	0xed03
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 13e:	0c00                	c.addi4spn	x8,x2,528
+ 140:	0304                	c.addi4spn	x9,x2,384
+ 142:	000004d3          	fadd.s	f9,f0,f0,rne
+ 146:	54191607          	0x54191607
+ 14a:	0000                	c.unimp
+ 14c:	0300                	c.addi4spn	x8,x2,384
+ 14e:	0391                	c.addi	x7,4
+ 150:	0000                	c.unimp
+ 152:	0c08                	c.addi4spn	x10,x2,528
+ 154:	690d                	c.lui	x18,0x3
+ 156:	0000                	c.unimp
+ 158:	0300                	c.addi4spn	x8,x2,384
+ 15a:	0238                	c.addi4spn	x14,x2,264
+ 15c:	0000                	c.unimp
+ 15e:	2b1b2307          	flw	f6,689(x22)
+ 162:	0001                	c.addi	x0,0
+	if (bp + bp->size == p->next) { //join to upper nbr
+ 164:	0d00                	c.addi4spn	x8,x2,656
+ 166:	0249                	c.addi	x4,18
+ 168:	0000                	c.unimp
+ 16a:	0718                	c.addi4spn	x14,x2,896
+ 16c:	0834                	c.addi4spn	x13,x2,24
+ 16e:	019d                	c.addi	x3,7
+ 170:	0000                	c.unimp
+ 172:	00040e0b          	0x40e0b
+ 176:	0700                	c.addi4spn	x8,x2,896
+ 178:	1336                	c.slli	x6,0x2d
+ 17a:	019d                	c.addi	x3,7
+ 17c:	0000                	c.unimp
+ 17e:	0e00                	c.addi4spn	x8,x2,784
+ 180:	6b5f 0700 0737      	0x73707006b5f
+		bp->size += p->next->size;
+ 186:	0069                	c.addi	x0,26
+ 188:	0000                	c.unimp
+ 18a:	0b04                	c.addi4spn	x9,x2,400
+ 18c:	0460                	c.addi4spn	x8,x2,524
+ 18e:	0000                	c.unimp
+ 190:	690b3707          	fld	f14,1680(x22)
+ 194:	0000                	c.unimp
+ 196:	0800                	c.addi4spn	x8,x2,16
+ 198:	0002320b          	0x2320b
+ 19c:	0700                	c.addi4spn	x8,x2,896
+ 19e:	00691437          	lui	x8,0x691
+ 1a2:	0000                	c.unimp
+		bp->next = p->next->next;
+ 1a4:	0b0c                	c.addi4spn	x11,x2,400
+ 1a6:	0508                	c.addi4spn	x10,x2,640
+ 1a8:	0000                	c.unimp
+ 1aa:	691b3707          	fld	f14,1681(x22)
+ 1ae:	0000                	c.unimp
+ 1b0:	1000                	c.addi4spn	x8,x2,32
+ 1b2:	5f0e                	c.lwsp	x30,224(x2)
+ 1b4:	0078                	c.addi4spn	x14,x2,12
+ 1b6:	a30b3807          	fld	f16,-1488(x22)
+ 1ba:	0001                	c.addi	x0,0
+		bp->next = p->next; //insert bp after p in the linked list
+ 1bc:	1400                	c.addi4spn	x8,x2,544
+ 1be:	0f00                	c.addi4spn	x8,x2,912
+ 1c0:	4304                	c.lw	x9,0(x14)
+ 1c2:	0001                	c.addi	x0,0
+ 1c4:	0800                	c.addi4spn	x8,x2,16
+ 1c6:	011f 0000 01b3      	0x1b30000011f
+	if (p + p->size == bp) { //join to lower nbr
+ 1cc:	0000                	c.unimp
+ 1ce:	7009                	c.lui	x0,0xfffe2
+ 1d0:	0000                	c.unimp
+ 1d2:	0000                	c.unimp
+ 1d4:	0d00                	c.addi4spn	x8,x2,656
+ 1d6:	0270                	c.addi4spn	x12,x2,268
+ 1d8:	0000                	c.unimp
+ 1da:	0724                	c.addi4spn	x9,x2,904
+ 1dc:	083c                	c.addi4spn	x15,x2,24
+ 1de:	0236                	c.slli	x4,0xd
+ 1e0:	0000                	c.unimp
+ 1e2:	0001690b          	0x1690b
+ 1e6:	0700                	c.addi4spn	x8,x2,896
+		p->size += bp->size;
+ 1e8:	093e                	c.slli	x18,0xf
+ 1ea:	0069                	c.addi	x0,26
+ 1ec:	0000                	c.unimp
+ 1ee:	0b00                	c.addi4spn	x8,x2,400
+ 1f0:	00000493          	addi	x9,x0,0
+ 1f4:	69093f07          	fld	f30,1680(x18) # 3690 <__global_pointer$+0x27b0>
+ 1f8:	0000                	c.unimp
+ 1fa:	0400                	c.addi4spn	x8,x2,512
+ 1fc:	00018c0b          	0x18c0b
+ 200:	0700                	c.addi4spn	x8,x2,896
+ 202:	0940                	c.addi4spn	x8,x2,148
+		p->next = bp->next;
+ 204:	0069                	c.addi	x0,26
+ 206:	0000                	c.unimp
+ 208:	0b08                	c.addi4spn	x10,x2,400
+ 20a:	059d                	c.addi	x11,7
+ 20c:	0000                	c.unimp
+ 20e:	69094107          	flq	f2,1680(x18)
+ 212:	0000                	c.unimp
+ 214:	0c00                	c.addi4spn	x8,x2,528
+ 216:	0003480b          	0x3480b
+		p->next = bp; //again, if the free list is just the base
+ 21a:	0700                	c.addi4spn	x8,x2,896
+ 21c:	0942                	c.slli	x18,0x10
+ 21e:	0069                	c.addi	x0,26
+ 220:	0000                	c.unimp
+ 222:	0b10                	c.addi4spn	x12,x2,400
+	freep = p;
+ 224:	0306                	c.slli	x6,0x1
+ 226:	0000                	c.unimp
+ 228:	69094307          	flq	f6,1680(x18)
+ 22c:	0000                	c.unimp
+ 22e:	1400                	c.addi4spn	x8,x2,544
+}
+ 230:	00050d0b          	0x50d0b
+ 234:	0700                	c.addi4spn	x8,x2,896
+ 236:	0944                	c.addi4spn	x9,x2,148
+ 238:	0069                	c.addi	x0,26
+ 23a:	0000                	c.unimp
+ 23c:	0b18                	c.addi4spn	x14,x2,400
+ 23e:	000003cf          	fnmadd.s	f7,f0,f0,f0,rne
+ 242:	69094507          	flq	f10,1680(x18)
+static Header* getmoremem(unsigned int total_size) {
+ 246:	0000                	c.unimp
+ 248:	1c00                	c.addi4spn	x8,x2,560
+ 24a:	00054e0b          	0x54e0b
+ 24e:	0700                	c.addi4spn	x8,x2,896
+ 250:	0946                	c.slli	x18,0x11
+ 252:	0069                	c.addi	x0,26
+ 254:	0000                	c.unimp
+ 256:	0020                	c.addi4spn	x8,x2,8
+	if (avail_mem < total_size) return NULL; //gg, we ran out of mem :P
+ 258:	9b10                	0x9b10
+ 25a:	0001                	c.addi	x0,0
+ 25c:	0800                	c.addi4spn	x8,x2,16
+ 25e:	0701                	c.addi	x14,0
+ 260:	027b084f          	fnmadd.d	f16,f22,f7,f0,rne
+ 264:	0000                	c.unimp
+ 266:	0002250b          	0x2250b
+ 26a:	0700                	c.addi4spn	x8,x2,896
+ 26c:	0a50                	c.addi4spn	x12,x2,276
+ 26e:	0000027b          	0x27b
+	Header* up = (Header *)next_index;
+ 272:	0b00                	c.addi4spn	x8,x2,400
+ 274:	00000033          	add	x0,x0,x0
+ 278:	7b095107          	0x7b095107
+	next_index += total_size; //allocate the block
+ 27c:	0002                	c.slli64	x0
+ 27e:	8000                	0x8000
+ 280:	c011                	c.beqz	x8,284 <getmoremem+0x40>
+ 282:	0004                	0x4
+ 284:	0700                	c.addi4spn	x8,x2,896
+ 286:	011f0a53          	fadd.s	f20,f30,f17,rne
+ 28a:	0000                	c.unimp
+ 28c:	0100                	c.addi4spn	x8,x2,128
+ 28e:	c611                	c.beqz	x12,29a <getmoremem+0x56>
+ 290:	0001                	c.addi	x0,0
+ 292:	0700                	c.addi4spn	x8,x2,896
+	avail_mem -= total_size; //deduct from avail mem;
+ 294:	0a56                	c.slli	x20,0x15
+ 296:	011f 0000 0104      	0x1040000011f
+ 29c:	0800                	c.addi4spn	x8,x2,16
+ 29e:	011d                	c.addi	x2,7
+ 2a0:	0000                	c.unimp
+ 2a2:	0000028b          	0x28b
+ 2a6:	7009                	c.lui	x0,0xfffe2
+ 2a8:	0000                	c.unimp
+ 2aa:	1f00                	c.addi4spn	x8,x2,944
+	up->size = total_size - sizeof(Header); //set the size right
+ 2ac:	1000                	c.addi4spn	x8,x2,32
+ 2ae:	0351                	c.addi	x6,20
+ 2b0:	0000                	c.unimp
+ 2b2:	0190                	c.addi4spn	x12,x2,192
+ 2b4:	ce086207          	0xce086207
+ 2b8:	0002                	c.slli64	x0
+ 2ba:	0b00                	c.addi4spn	x8,x2,400
+	tj_free((void *)(++up)); //append the new block to the free list first
+ 2bc:	040e                	c.slli	x8,0x3
+ 2be:	0000                	c.unimp
+ 2c0:	ce126307          	0xce126307
+ 2c4:	0002                	c.slli64	x0
+ 2c6:	0000                	c.unimp
+ 2c8:	0004260b          	0x4260b
+ 2cc:	0700                	c.addi4spn	x8,x2,896
+ 2ce:	0664                	c.addi4spn	x9,x2,780
+ 2d0:	0069                	c.addi	x0,26
+ 2d2:	0000                	c.unimp
+	return freep;
+ 2d4:	0b04                	c.addi4spn	x9,x2,400
+ 2d6:	022d                	c.addi	x4,11
+ 2d8:	0000                	c.unimp
+ 2da:	d4096607          	0xd4096607
+}
+ 2de:	0002                	c.slli64	x0
+ 2e0:	0800                	c.addi4spn	x8,x2,16
+ 2e2:	00019b0b          	0x19b0b
+ 2e6:	0700                	c.addi4spn	x8,x2,896
+ 2e8:	02361e67          	0x2361e67
+ 2ec:	0000                	c.unimp
+ 2ee:	0088                	c.addi4spn	x10,x2,64
+void *tj_malloc(unsigned int size) {
+ 2f0:	028b040f          	0x28b040f
+ 2f4:	0000                	c.unimp
+ 2f6:	e408                	c.fsw	f10,8(x8)
+ 2f8:	0002                	c.slli64	x0
+ 2fa:	e400                	c.fsw	f8,8(x8)
+ 2fc:	0002                	c.slli64	x0
+ 2fe:	0900                	c.addi4spn	x8,x2,144
+ 300:	0070                	c.addi4spn	x12,x2,12
+ 302:	0000                	c.unimp
+	if (size > sizeof(heap)) return NULL;
+ 304:	001f 040f 02ea      	0x2ea040f001f
+ 30a:	0000                	c.unimp
+ 30c:	0d12                	c.slli	x26,0x4
+ 30e:	03d9                	c.addi	x7,22
+ 310:	0000                	c.unimp
+ 312:	0708                	c.addi4spn	x10,x2,896
+ 314:	087a                	c.slli	x16,0x1e
+ 316:	00000313          	addi	x6,x0,0
+	if ((size & 3) != 0) {
+ 31a:	0001860b          	0x1860b
+ 31e:	0700                	c.addi4spn	x8,x2,896
+ 320:	0313117b          	0x313117b
+		size = size + 4 - (size & 3);
+ 324:	0000                	c.unimp
+ 326:	0b00                	c.addi4spn	x8,x2,400
+ 328:	01ea                	c.slli	x3,0x1a
+ 32a:	0000                	c.unimp
+ 32c:	69067c07          	0x69067c07
+ 330:	0000                	c.unimp
+ 332:	0400                	c.addi4spn	x8,x2,512
+	unsigned int total_size = size + sizeof(Header); //need to include the header size as well
+ 334:	0f00                	c.addi4spn	x8,x2,912
+ 336:	2c04                	c.fld	f9,24(x8)
+ 338:	0000                	c.unimp
+ 33a:	0d00                	c.addi4spn	x8,x2,656
+ 33c:	03f8                	c.addi4spn	x14,x2,460
+ 33e:	0000                	c.unimp
+	prevp = freep;
+ 340:	0768                	c.addi4spn	x10,x2,908
+ 342:	08ba                	c.slli	x17,0xe
+ 344:	045c                	c.addi4spn	x15,x2,516
+ 346:	0000                	c.unimp
+ 348:	5f0e                	c.lwsp	x30,224(x2)
+ 34a:	0070                	c.addi4spn	x12,x2,12
+	if (prevp == NULL) {
+ 34c:	1312bb07          	fld	f22,305(x5)
+ 350:	00000003          	lb	x0,0(x0) # 0 <crt>
+		prevp = &base;
+ 354:	5f0e                	c.lwsp	x30,224(x2)
+ 356:	0072                	c.slli	x0,0x1c
+ 358:	6907bc07          	fld	f24,1680(x15)
+ 35c:	0000                	c.unimp
+ 35e:	0400                	c.addi4spn	x8,x2,512
+		freep = prevp;
+ 360:	5f0e                	c.lwsp	x30,224(x2)
+ 362:	bd070077          	0xbd070077
+ 366:	00006907          	0x6907
+ 36a:	0800                	c.addi4spn	x8,x2,16
+		base.next = freep;
+ 36c:	0001bf0b          	0x1bf0b
+ 370:	0700                	c.addi4spn	x8,x2,896
+ 372:	09be                	c.slli	x19,0xf
+ 374:	00000033          	add	x0,x0,x0
+ 378:	0b0c                	c.addi4spn	x11,x2,400
+ 37a:	029a                	c.slli	x5,0x6
+ 37c:	0000                	c.unimp
+ 37e:	3309bf07          	fld	f30,816(x19)
+		base.size = 0;
+ 382:	0000                	c.unimp
+ 384:	0e00                	c.addi4spn	x8,x2,784
+ 386:	5f0e                	c.lwsp	x30,224(x2)
+ 388:	6662                	c.flwsp	f12,24(x2)
+ 38a:	0700                	c.addi4spn	x8,x2,896
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 38c:	11c0                	c.addi4spn	x8,x2,228
+ 38e:	000002eb          	0x2eb
+ 392:	0b10                	c.addi4spn	x12,x2,400
+ 394:	012d                	c.addi	x2,11
+ 396:	0000                	c.unimp
+		if (p->size >= size) { //big enough
+ 398:	6907c107          	flq	f2,1680(x15)
+ 39c:	0000                	c.unimp
+ 39e:	1800                	c.addi4spn	x8,x2,48
+ 3a0:	0001a90b          	0x1a90b
+ 3a4:	0700                	c.addi4spn	x8,x2,896
+ 3a6:	0ac8                	c.addi4spn	x10,x2,340
+			if (p->size == size) // exact size
+ 3a8:	011d                	c.addi	x2,7
+ 3aa:	0000                	c.unimp
+ 3ac:	0b1c                	c.addi4spn	x15,x2,400
+ 3ae:	0260                	c.addi4spn	x8,x2,268
+ 3b0:	0000                	c.unimp
+ 3b2:	e01dca07          	flq	f20,-511(x27)
+ 3b6:	0005                	c.addi	x0,1
+				prevp->next = p->next; // just return that block
+ 3b8:	2000                	c.fld	f8,0(x8)
+ 3ba:	0002ff0b          	0x2ff0b
+ 3be:	0700                	c.addi4spn	x8,x2,896
+ 3c0:	1dcc                	c.addi4spn	x11,x2,756
+ 3c2:	060a                	c.slli	x12,0x2
+ 3c4:	0000                	c.unimp
+ 3c6:	0b24                	c.addi4spn	x9,x2,408
+ 3c8:	0485                	c.addi	x9,1
+ 3ca:	0000                	c.unimp
+				p->size -= total_size; //break up the block
+ 3cc:	2e0dcf07          	flq	f30,736(x27)
+ 3d0:	0006                	c.slli	x0,0x1
+ 3d2:	2800                	c.fld	f8,16(x8)
+ 3d4:	0005680b          	0x5680b
+ 3d8:	0700                	c.addi4spn	x8,x2,896
+ 3da:	09d0                	c.addi4spn	x12,x2,212
+ 3dc:	0648                	c.addi4spn	x10,x2,772
+ 3de:	0000                	c.unimp
+ 3e0:	0e2c                	c.addi4spn	x11,x2,792
+ 3e2:	755f 0062 d307      	0xd3070062755f
+				p += p->size;
+ 3e8:	eb11                	c.bnez	x14,3fc <tj_malloc+0x10c>
+ 3ea:	0002                	c.slli64	x0
+ 3ec:	3000                	c.fld	f8,32(x8)
+ 3ee:	5f0e                	c.lwsp	x30,224(x2)
+ 3f0:	7075                	c.lui	x0,0xffffd
+ 3f2:	0700                	c.addi4spn	x8,x2,896
+ 3f4:	12d4                	c.addi4spn	x13,x2,356
+ 3f6:	00000313          	addi	x6,x0,0
+ 3fa:	0e38                	c.addi4spn	x14,x2,792
+				p->size = size;
+ 3fc:	755f 0072 d507      	0xd5070072755f
+ 402:	00006907          	0x6907
+ 406:	3c00                	c.fld	f8,56(x8)
+			freep = prevp;
+ 408:	0001800b          	0x1800b
+ 40c:	0700                	c.addi4spn	x8,x2,896
+ 40e:	11d8                	c.addi4spn	x14,x2,228
+ 410:	064e                	c.slli	x12,0x13
+ 412:	0000                	c.unimp
+			return (void *)(++p);
+ 414:	0b40                	c.addi4spn	x8,x2,404
+ 416:	0540                	c.addi4spn	x8,x2,644
+ 418:	0000                	c.unimp
+ 41a:	5e11d907          	0x5e11d907
+ 41e:	0006                	c.slli	x0,0x1
+ 420:	4300                	c.lw	x8,0(x14)
+ 422:	5f0e                	c.lwsp	x30,224(x2)
+ 424:	626c                	c.flw	f11,68(x12)
+ 426:	0700                	c.addi4spn	x8,x2,896
+		if (p == freep) //wrapped around free list
+ 428:	11dc                	c.addi4spn	x15,x2,228
+ 42a:	000002eb          	0x2eb
+ 42e:	0b44                	c.addi4spn	x9,x2,404
+ 430:	01d5                	c.addi	x3,21
+ 432:	0000                	c.unimp
+ 434:	6907df07          	0x6907df07
+			if ((p = getmoremem(total_size)) == NULL) //if the heap runs out
+ 438:	0000                	c.unimp
+ 43a:	4c00                	c.lw	x8,24(x8)
+ 43c:	0001fe0b          	0x1fe0b
+ 440:	0700                	c.addi4spn	x8,x2,896
+ 442:	0ae0                	c.addi4spn	x8,x2,348
+ 444:	00000097          	auipc	x1,0x0
+ 448:	0b50                	c.addi4spn	x12,x2,404
+ 44a:	00f0                	c.addi4spn	x12,x2,76
+ 44c:	0000                	c.unimp
+ 44e:	7a12e307          	0x7a12e307
+				return NULL; //well, you got nothing left, gg
+ 452:	0004                	0x4
+ 454:	5400                	c.lw	x8,40(x8)
+ 456:	0002f10b          	0x2f10b
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 45a:	0700                	c.addi4spn	x8,x2,896
+ 45c:	01370ce7          	jalr	x25,19(x14)
+ 460:	0000                	c.unimp
+ 462:	0b58                	c.addi4spn	x14,x2,404
+ 464:	0400                	c.addi4spn	x8,x2,512
+ 466:	0000                	c.unimp
+ 468:	110ee907          	0x110ee907
+		if (p->size >= size) { //big enough
+ 46c:	0001                	c.addi	x0,0
+ 46e:	5c00                	c.lw	x8,56(x8)
+}
+ 470:	0002f70b          	0x2f70b
+ 474:	0700                	c.addi4spn	x8,x2,896
+ 476:	09ea                	c.slli	x19,0x1a
+ 478:	0069                	c.addi	x0,26
+ 47a:	0000                	c.unimp
+ 47c:	0064                	c.addi4spn	x9,x2,12
+ 47e:	0000af13          	slti	x30,x1,0
+ 482:	7a00                	c.flw	f8,48(x12)
+void *tj_calloc(unsigned int size) {
+ 484:	0004                	0x4
+ 486:	1400                	c.addi4spn	x8,x2,544
+ 488:	047a                	c.slli	x8,0x1e
+ 48a:	0000                	c.unimp
+ 48c:	1d14                	c.addi4spn	x13,x2,688
+ 48e:	0001                	c.addi	x0,0
+ 490:	1400                	c.addi4spn	x8,x2,544
+ 492:	05ce                	c.slli	x11,0x13
+ 494:	0000                	c.unimp
+ 496:	6914                	c.flw	f13,16(x10)
+	void *mem = tj_malloc(size);
+ 498:	0000                	c.unimp
+ 49a:	0000                	c.unimp
+ 49c:	0485040f          	0x485040f
+ 4a0:	0000                	c.unimp
+ 4a2:	7a15                	c.lui	x20,0xfffe5
+ 4a4:	0004                	0x4
+ 4a6:	1600                	c.addi4spn	x8,x2,800
+	memset(mem, 0, size);
+ 4a8:	0468                	c.addi4spn	x10,x2,524
+ 4aa:	0000                	c.unimp
+ 4ac:	0428                	c.addi4spn	x10,x2,520
+ 4ae:	08026507          	0x8026507
+ 4b2:	05ce                	c.slli	x11,0x13
+ 4b4:	0000                	c.unimp
+ 4b6:	0003be17          	auipc	x28,0x3b
+ 4ba:	0700                	c.addi4spn	x8,x2,896
+	return mem;
+ 4bc:	69070267          	jalr	x4,1680(x14)
+}
+ 4c0:	0000                	c.unimp
+ 4c2:	0000                	c.unimp
+ 4c4:	0001ce17          	auipc	x28,0x1c
+ 4c8:	0700                	c.addi4spn	x8,x2,896
+ 4ca:	026c                	c.addi4spn	x11,x2,268
+ 4cc:	0006ba0b          	0x6ba0b
+ 4d0:	0400                	c.addi4spn	x8,x2,512
+ 4d2:	00027c17          	auipc	x24,0x27
+int main() {
+ 4d6:	0700                	c.addi4spn	x8,x2,896
+ 4d8:	026c                	c.addi4spn	x11,x2,268
+ 4da:	ba14                	c.fsd	f13,48(x12)
+ 4dc:	0006                	c.slli	x0,0x1
+ 4de:	0800                	c.addi4spn	x8,x2,16
+ 4e0:	00024117          	auipc	x2,0x24
+	example_t* pats = (example_t*)tj_malloc(sizeof(example_t));
+ 4e4:	0700                	c.addi4spn	x8,x2,896
+ 4e6:	026c                	c.addi4spn	x11,x2,268
+ 4e8:	ba1e                	c.fsdsp	f7,304(x2)
+ 4ea:	0006                	c.slli	x0,0x1
+ 4ec:	0c00                	c.addi4spn	x8,x2,528
+ 4ee:	00042117          	auipc	x2,0x42
+ 4f2:	0700                	c.addi4spn	x8,x2,896
+	pats->brady = 12; // as of 02/2019
+ 4f4:	026e                	c.slli	x4,0x1b
+ 4f6:	6908                	c.flw	f10,16(x10)
+ 4f8:	0000                	c.unimp
+ 4fa:	1000                	c.addi4spn	x8,x2,32
+ 4fc:	0000ce17          	auipc	x28,0xc
+	pats->rings = 6;
+ 500:	0700                	c.addi4spn	x8,x2,896
+ 502:	ba08026f          	jal	x4,fff808a2 <_sp+0xfff708a2>
+ 506:	0008                	0x8
+ 508:	1400                	c.addi4spn	x8,x2,544
+ 50a:	00044717          	auipc	x14,0x44
+	pats->goat = 1; // hands down the goat
+ 50e:	0700                	c.addi4spn	x8,x2,896
+ 510:	0272                	c.slli	x4,0x1c
+ 512:	00006907          	0x6907
+ 516:	3000                	c.fld	f8,32(x8)
+	pats->gronk = 87; // tide pods
+ 518:	00043517          	auipc	x10,0x43
+ 51c:	0700                	c.addi4spn	x8,x2,896
+ 51e:	cf160273          	0xcf160273
+ 522:	0008                	0x8
+	pats->edelman = 11; // the ironman, superbowl 53 mvp
+ 524:	3400                	c.fld	f8,40(x8)
+ 526:	00036317          	auipc	x6,0x36
+ 52a:	0700                	c.addi4spn	x8,x2,896
+ 52c:	0275                	c.addi	x4,29
+ 52e:	00006907          	0x6907
+	example_t* another = (example_t*)tj_malloc(sizeof(example_t));
+ 532:	3800                	c.fld	f8,48(x8)
+ 534:	00043d17          	auipc	x26,0x43
+ 538:	0700                	c.addi4spn	x8,x2,896
+ 53a:	e00a0277          	0xe00a0277
+ 53e:	0008                	0x8
+	tj_free(pats);
+ 540:	3c00                	c.fld	f8,56(x8)
+ 542:	0002dc17          	auipc	x24,0x2d
+ 546:	0700                	c.addi4spn	x8,x2,896
+ 548:	027a                	c.slli	x4,0x1e
+ 54a:	00019d13          	slli	x26,x3,0x0
+	example_t* third = (example_t*)tj_malloc(sizeof(example_t));
+ 54e:	4000                	c.lw	x8,0(x8)
+ 550:	00026617          	auipc	x12,0x26
+ 554:	0700                	c.addi4spn	x8,x2,896
+ 556:	6907027b          	0x6907027b
+ 55a:	0000                	c.unimp
+	another->rings = 2003;
+ 55c:	4400                	c.lw	x8,8(x8)
+ 55e:	00058c17          	auipc	x24,0x58
+ 562:	0700                	c.addi4spn	x8,x2,896
+ 564:	027c                	c.addi4spn	x15,x2,268
+ 566:	00019d13          	slli	x26,x3,0x0
+	third->rings = 2004;
+ 56a:	4800                	c.lw	x8,16(x8)
+ 56c:	00038717          	auipc	x14,0x38
+ 570:	0700                	c.addi4spn	x8,x2,896
+ 572:	027d                	c.addi	x4,31
+	example_t* latest = (example_t*)tj_calloc(sizeof(example_t));
+ 574:	e614                	c.fsw	f13,8(x12)
+ 576:	0008                	0x8
+ 578:	4c00                	c.lw	x8,24(x8)
+ 57a:	00028c17          	auipc	x24,0x28
+ 57e:	0700                	c.addi4spn	x8,x2,896
+ 580:	0280                	c.addi4spn	x8,x2,320
+ 582:	00006907          	0x6907
+	latest->rings = 2019;
+ 586:	5000                	c.lw	x8,32(x8)
+ 588:	0001f617          	auipc	x12,0x1f
+ 58c:	0700                	c.addi4spn	x8,x2,896
+ 58e:	0281                	c.addi	x5,0
+	if (latest->goat != 0) exit(2);
+ 590:	ce09                	c.beqz	x12,5aa <main+0xd6>
+ 592:	0005                	c.addi	x0,1
+ 594:	5400                	c.lw	x8,40(x8)
+ 596:	0003b717          	auipc	x14,0x3b
+ 59a:	0700                	c.addi4spn	x8,x2,896
+ 59c:	02a4                	c.addi4spn	x9,x2,328
+ 59e:	00089507          	0x89507
+ 5a2:	5800                	c.lw	x8,48(x8)
+ 5a4:	5118                	c.lw	x14,32(x10)
+ 5a6:	07000003          	lb	x0,112(x0) # 70 <crt+0x70>
+	tj_free(another);
+ 5aa:	02a8                	c.addi4spn	x10,x2,328
+ 5ac:	0002ce13          	xori	x28,x5,0
+ 5b0:	4800                	c.lw	x8,16(x8)
+ 5b2:	1801                	c.addi	x16,-32
+	tj_free(latest);
+ 5b4:	02ba                	c.slli	x5,0xe
+ 5b6:	0000                	c.unimp
+ 5b8:	1202a907          	flw	f18,288(x5)
+ 5bc:	0000028b          	0x28b
+	return 0;
+ 5c0:	014c                	c.addi4spn	x11,x2,132
+ 5c2:	3618                	c.fld	f14,40(x12)
+}
+ 5c4:	0005                	c.addi	x0,1
+ 5c6:	0700                	c.addi4spn	x8,x2,896
+ 5c8:	02ad                	c.addi	x5,11
+ 5ca:	f70c                	c.fsw	f11,40(x14)
+ 5cc:	0008                	0x8
+ 5ce:	dc00                	c.sw	x8,56(x8)
+ 5d0:	1802                	c.slli	x16,0x20
+ 5d2:	01b1                	c.addi	x3,12
+ 5d4:	0000                	c.unimp
+ 5d6:	1002b207          	fld	f4,256(x5)
+ 5da:	0000067b          	0x67b
+ 5de:	02e0                	c.addi4spn	x8,x2,332
+ 5e0:	9618                	0x9618
+ 5e2:	0001                	c.addi	x0,0
+ 5e4:	0700                	c.addi4spn	x8,x2,896
+ 5e6:	02b4                	c.addi4spn	x13,x2,328
+ 5e8:	030a                	c.slli	x6,0x2
+ 5ea:	0009                	c.addi	x0,2
+ 5ec:	ec00                	c.fsw	f8,24(x8)
+ 5ee:	0002                	c.slli64	x0
+ 5f0:	05d4040f          	0x5d4040f
+ 5f4:	0000                	c.unimp
+ 5f6:	0102                	c.slli64	x2
+ 5f8:	b208                	c.fsd	f10,32(x12)
+ 5fa:	15000003          	lb	x0,336(x0) # 150 <tj_free+0x9c>
+ 5fe:	05d4                	c.addi4spn	x13,x2,708
+ 600:	0000                	c.unimp
+ 602:	045c040f          	0x45c040f
+ 606:	0000                	c.unimp
+ 608:	0000af13          	slti	x30,x1,0
+ 60c:	0400                	c.addi4spn	x8,x2,512
+ 60e:	0006                	c.slli	x0,0x1
+ 610:	1400                	c.addi4spn	x8,x2,544
+ 612:	047a                	c.slli	x8,0x1e
+ 614:	0000                	c.unimp
+ 616:	1d14                	c.addi4spn	x13,x2,688
+ 618:	0001                	c.addi	x0,0
+ 61a:	1400                	c.addi4spn	x8,x2,544
+ 61c:	0604                	c.addi4spn	x9,x2,768
+ 61e:	0000                	c.unimp
+ 620:	6914                	c.flw	f13,16(x10)
+ 622:	0000                	c.unimp
+ 624:	0000                	c.unimp
+ 626:	05db040f          	0x5db040f
+ 62a:	0000                	c.unimp
+ 62c:	05e6040f          	0x5e6040f
+ 630:	0000                	c.unimp
+ 632:	0000a313          	slti	x6,x1,0
+ 636:	2e00                	c.fld	f8,24(x12)
+ 638:	0006                	c.slli	x0,0x1
+ 63a:	1400                	c.addi4spn	x8,x2,544
+ 63c:	047a                	c.slli	x8,0x1e
+ 63e:	0000                	c.unimp
+ 640:	1d14                	c.addi4spn	x13,x2,688
+ 642:	0001                	c.addi	x0,0
+ 644:	1400                	c.addi4spn	x8,x2,544
+ 646:	000000a3          	sb	x0,1(x0) # 1 <crt+0x1>
+ 64a:	6914                	c.flw	f13,16(x10)
+ 64c:	0000                	c.unimp
+ 64e:	0000                	c.unimp
+ 650:	0610040f          	0x610040f
+ 654:	0000                	c.unimp
+ 656:	00006913          	ori	x18,x0,0
+ 65a:	4800                	c.lw	x8,16(x8)
+ 65c:	0006                	c.slli	x0,0x1
+ 65e:	1400                	c.addi4spn	x8,x2,544
+ 660:	047a                	c.slli	x8,0x1e
+ 662:	0000                	c.unimp
+ 664:	1d14                	c.addi4spn	x13,x2,688
+ 666:	0001                	c.addi	x0,0
+ 668:	0000                	c.unimp
+ 66a:	0634040f          	0x634040f
+ 66e:	0000                	c.unimp
+ 670:	2c08                	c.fld	f10,24(x8)
+ 672:	0000                	c.unimp
+ 674:	5e00                	c.lw	x8,56(x12)
+ 676:	0006                	c.slli	x0,0x1
+ 678:	0900                	c.addi4spn	x8,x2,144
+ 67a:	0070                	c.addi4spn	x12,x2,12
+ 67c:	0000                	c.unimp
+ 67e:	0002                	c.slli64	x0
+ 680:	2c08                	c.fld	f10,24(x8)
+ 682:	0000                	c.unimp
+ 684:	6e00                	c.flw	f8,24(x12)
+ 686:	0006                	c.slli	x0,0x1
+ 688:	0900                	c.addi4spn	x8,x2,144
+ 68a:	0070                	c.addi4spn	x12,x2,12
+ 68c:	0000                	c.unimp
+ 68e:	0000                	c.unimp
+ 690:	e605                	c.bnez	x12,6b8 <memset+0xe0>
+ 692:	07000003          	lb	x0,112(x0) # 70 <crt+0x70>
+ 696:	0124                	c.addi4spn	x9,x2,136
+ 698:	191a                	c.slli	x18,0x26
+ 69a:	19000003          	lb	x0,400(x0) # 190 <tj_free+0xdc>
+ 69e:	00000517          	auipc	x10,0x0
+ 6a2:	070c                	c.addi4spn	x11,x2,896
+ 6a4:	0128                	c.addi4spn	x10,x2,136
+ 6a6:	b408                	c.fsd	f10,40(x8)
+ 6a8:	0006                	c.slli	x0,0x1
+ 6aa:	1700                	c.addi4spn	x8,x2,928
+ 6ac:	040e                	c.slli	x8,0x3
+ 6ae:	0000                	c.unimp
+ 6b0:	11012a07          	flw	f20,272(x2) # 425fe <_sp+0x325fe>
+ 6b4:	06b4                	c.addi4spn	x13,x2,840
+ 6b6:	0000                	c.unimp
+ 6b8:	1700                	c.addi4spn	x8,x2,928
+ 6ba:	02a0                	c.addi4spn	x8,x2,328
+ 6bc:	0000                	c.unimp
+ 6be:	07012b07          	flw	f22,112(x2)
+ 6c2:	0069                	c.addi	x0,26
+ 6c4:	0000                	c.unimp
+ 6c6:	1704                	c.addi4spn	x9,x2,928
+ 6c8:	03e0                	c.addi4spn	x8,x2,460
+ 6ca:	0000                	c.unimp
+ 6cc:	0b012c07          	flw	f24,176(x2)
+ 6d0:	06ba                	c.slli	x13,0xe
+ 6d2:	0000                	c.unimp
+ 6d4:	0008                	0x8
+ 6d6:	067b040f          	0x67b040f
+ 6da:	0000                	c.unimp
+ 6dc:	066e040f          	0x66e040f
+ 6e0:	0000                	c.unimp
+ 6e2:	6419                	c.lui	x8,0x6
+ 6e4:	0000                	c.unimp
+ 6e6:	0e00                	c.addi4spn	x8,x2,784
+ 6e8:	08014407          	flq	f8,128(x2)
+ 6ec:	06f9                	c.addi	x13,30
+ 6ee:	0000                	c.unimp
+ 6f0:	00046f17          	auipc	x30,0x46
+ 6f4:	0700                	c.addi4spn	x8,x2,896
+ 6f6:	0145                	c.addi	x2,17
+ 6f8:	f912                	c.fswsp	f4,176(x2)
+ 6fa:	0006                	c.slli	x0,0x1
+ 6fc:	0000                	c.unimp
+ 6fe:	0004ad17          	auipc	x26,0x4a
+ 702:	0700                	c.addi4spn	x8,x2,896
+ 704:	0146                	c.slli	x2,0x11
+ 706:	f912                	c.fswsp	f4,176(x2)
+ 708:	0006                	c.slli	x0,0x1
+ 70a:	0600                	c.addi4spn	x8,x2,768
+ 70c:	0004ce17          	auipc	x28,0x4c
+ 710:	0700                	c.addi4spn	x8,x2,896
+ 712:	46120147          	fmsub.q	f2,f4,f1,f8,rne
+ 716:	0000                	c.unimp
+ 718:	0c00                	c.addi4spn	x8,x2,528
+ 71a:	0800                	c.addi4spn	x8,x2,16
+ 71c:	0046                	c.slli	x0,0x11
+ 71e:	0000                	c.unimp
+ 720:	0709                	c.addi	x14,2
+ 722:	0000                	c.unimp
+ 724:	7009                	c.lui	x0,0xfffe2
+ 726:	0000                	c.unimp
+ 728:	0200                	c.addi4spn	x8,x2,256
+ 72a:	1a00                	c.addi4spn	x8,x2,304
+ 72c:	07d0                	c.addi4spn	x12,x2,964
+ 72e:	0285                	c.addi	x5,1
+ 730:	00081e07          	0x81e07
+ 734:	1700                	c.addi4spn	x8,x2,928
+ 736:	000004fb          	0x4fb
+ 73a:	18028707          	0x18028707
+ 73e:	0070                	c.addi4spn	x12,x2,12
+ 740:	0000                	c.unimp
+ 742:	1700                	c.addi4spn	x8,x2,928
+ 744:	000004b3          	add	x9,x0,x0
+ 748:	12028807          	0x12028807
+ 74c:	05ce                	c.slli	x11,0x13
+ 74e:	0000                	c.unimp
+ 750:	1704                	c.addi4spn	x9,x2,928
+ 752:	000002cf          	fnmadd.s	f5,f0,f0,f0,rne
+ 756:	10028907          	0x10028907
+ 75a:	081e                	c.slli	x16,0x7
+ 75c:	0000                	c.unimp
+ 75e:	1708                	c.addi4spn	x10,x2,928
+ 760:	0559                	c.addi	x10,22
+ 762:	0000                	c.unimp
+ 764:	17028a07          	0x17028a07
+ 768:	000001b3          	add	x3,x0,x0
+ 76c:	1724                	c.addi4spn	x9,x2,936
+ 76e:	0251                	c.addi	x4,20
+ 770:	0000                	c.unimp
+ 772:	0f028b07          	0xf028b07
+ 776:	0069                	c.addi	x0,26
+ 778:	0000                	c.unimp
+ 77a:	1748                	c.addi4spn	x10,x2,932
+ 77c:	0409                	c.addi	x8,2
+ 77e:	0000                	c.unimp
+ 780:	2c028c07          	0x2c028c07
+ 784:	0062                	c.slli	x0,0x18
+ 786:	0000                	c.unimp
+ 788:	1750                	c.addi4spn	x12,x2,932
+ 78a:	0000056f          	jal	x10,78a <heap+0x6a>
+ 78e:	1a028d07          	0x1a028d07
+ 792:	06c0                	c.addi4spn	x8,x2,836
+ 794:	0000                	c.unimp
+ 796:	1758                	c.addi4spn	x14,x2,932
+ 798:	0414                	c.addi4spn	x13,x2,512
+ 79a:	0000                	c.unimp
+ 79c:	16028e07          	0x16028e07
+ 7a0:	0111                	c.addi	x2,4
+ 7a2:	0000                	c.unimp
+ 7a4:	1768                	c.addi4spn	x10,x2,940
+ 7a6:	057e                	c.slli	x10,0x1f
+ 7a8:	0000                	c.unimp
+ 7aa:	16028f07          	0x16028f07
+ 7ae:	0111                	c.addi	x2,4
+ 7b0:	0000                	c.unimp
+ 7b2:	1770                	c.addi4spn	x12,x2,940
+ 7b4:	0000015b          	0x15b
+ 7b8:	16029007          	0x16029007
+ 7bc:	0111                	c.addi	x2,4
+ 7be:	0000                	c.unimp
+ 7c0:	1778                	c.addi4spn	x14,x2,940
+ 7c2:	052c                	c.addi4spn	x11,x2,648
+ 7c4:	0000                	c.unimp
+ 7c6:	10029107          	0x10029107
+ 7ca:	082e                	c.slli	x16,0xb
+ 7cc:	0000                	c.unimp
+ 7ce:	1780                	c.addi4spn	x8,x2,992
+ 7d0:	000002c3          	fmadd.s	f5,f0,f0,f0,rne
+ 7d4:	10029207          	0x10029207
+ 7d8:	083e                	c.slli	x16,0xf
+ 7da:	0000                	c.unimp
+ 7dc:	1788                	c.addi4spn	x10,x2,992
+ 7de:	000004db          	0x4db
+ 7e2:	0f029307          	0xf029307
+ 7e6:	0069                	c.addi	x0,26
+ 7e8:	0000                	c.unimp
+ 7ea:	17a0                	c.addi4spn	x8,x2,1000
+ 7ec:	00000217          	auipc	x4,0x0
+ 7f0:	16029407          	0x16029407
+ 7f4:	0111                	c.addi	x2,4
+ 7f6:	0000                	c.unimp
+ 7f8:	17a4                	c.addi4spn	x9,x2,1000
+ 7fa:	014c                	c.addi4spn	x11,x2,132
+ 7fc:	0000                	c.unimp
+ 7fe:	16029507          	0x16029507
+ 802:	0111                	c.addi	x2,4
+ 804:	0000                	c.unimp
+ 806:	17ac                	c.addi4spn	x11,x2,1000
+ 808:	0206                	c.slli	x4,0x1
+ 80a:	0000                	c.unimp
+ 80c:	16029607          	0x16029607
+ 810:	0111                	c.addi	x2,4
+ 812:	0000                	c.unimp
+ 814:	17b4                	c.addi4spn	x13,x2,1000
+ 816:	00f6                	c.slli	x1,0x1d
+ 818:	0000                	c.unimp
+ 81a:	16029707          	0x16029707
+ 81e:	0111                	c.addi	x2,4
+ 820:	0000                	c.unimp
+ 822:	17bc                	c.addi4spn	x15,x2,1000
+ 824:	0105                	c.addi	x2,1
+ 826:	0000                	c.unimp
+ 828:	16029807          	0x16029807
+ 82c:	0111                	c.addi	x2,4
+ 82e:	0000                	c.unimp
+ 830:	17c4                	c.addi4spn	x9,x2,996
+ 832:	03bc                	c.addi4spn	x15,x2,456
+ 834:	0000                	c.unimp
+ 836:	08029907          	0x8029907
+ 83a:	0069                	c.addi	x0,26
+ 83c:	0000                	c.unimp
+ 83e:	00cc                	c.addi4spn	x11,x2,68
+ 840:	d408                	c.sw	x10,40(x8)
+ 842:	0005                	c.addi	x0,1
+ 844:	2e00                	c.fld	f8,24(x12)
+ 846:	0008                	0x8
+ 848:	0900                	c.addi4spn	x8,x2,144
+ 84a:	0070                	c.addi4spn	x12,x2,12
+ 84c:	0000                	c.unimp
+ 84e:	0019                	c.addi	x0,6
+ 850:	d408                	c.sw	x10,40(x8)
+ 852:	0005                	c.addi	x0,1
+ 854:	3e00                	c.fld	f8,56(x12)
+ 856:	0008                	0x8
+ 858:	0900                	c.addi4spn	x8,x2,144
+ 85a:	0070                	c.addi4spn	x12,x2,12
+ 85c:	0000                	c.unimp
+ 85e:	d4080007          	0xd4080007
+ 862:	0005                	c.addi	x0,1
+ 864:	4e00                	c.lw	x8,24(x12)
+ 866:	0008                	0x8
+ 868:	0900                	c.addi4spn	x8,x2,144
+ 86a:	0070                	c.addi4spn	x12,x2,12
+ 86c:	0000                	c.unimp
+ 86e:	f01a0017          	auipc	x0,0xf01a0
+ 872:	07029e07          	0x7029e07
+ 876:	0875                	c.addi	x16,29
+ 878:	0000                	c.unimp
+ 87a:	00034117          	auipc	x2,0x34
+ 87e:	0700                	c.addi4spn	x8,x2,896
+ 880:	02a1                	c.addi	x5,8
+ 882:	0008751b          	0x8751b
+ 886:	0000                	c.unimp
+ 888:	00032417          	auipc	x8,0x32
+ 88c:	0700                	c.addi4spn	x8,x2,896
+ 88e:	02a2                	c.slli	x5,0x8
+ 890:	8518                	0x8518
+ 892:	0008                	0x8
+ 894:	7800                	c.flw	f8,48(x8)
+ 896:	0800                	c.addi4spn	x8,x2,16
+ 898:	00000313          	addi	x6,x0,0
+ 89c:	0885                	c.addi	x17,1
+ 89e:	0000                	c.unimp
+ 8a0:	7009                	c.lui	x0,0xfffe2
+ 8a2:	0000                	c.unimp
+ 8a4:	1d00                	c.addi4spn	x8,x2,688
+ 8a6:	0800                	c.addi4spn	x8,x2,16
+ 8a8:	0070                	c.addi4spn	x12,x2,12
+ 8aa:	0000                	c.unimp
+ 8ac:	0895                	c.addi	x17,5
+ 8ae:	0000                	c.unimp
+ 8b0:	7009                	c.lui	x0,0xfffe2
+ 8b2:	0000                	c.unimp
+ 8b4:	1d00                	c.addi4spn	x8,x2,688
+ 8b6:	1b00                	c.addi4spn	x8,x2,432
+ 8b8:	07f0                	c.addi4spn	x12,x2,972
+ 8ba:	ba030283          	lb	x5,-1120(x6) # 360c6 <_sp+0x260c6>
+ 8be:	0008                	0x8
+ 8c0:	1c00                	c.addi4spn	x8,x2,560
+ 8c2:	0468                	c.addi4spn	x10,x2,524
+ 8c4:	0000                	c.unimp
+ 8c6:	0b029a07          	0xb029a07
+ 8ca:	0709                	c.addi	x14,2
+ 8cc:	0000                	c.unimp
+ 8ce:	461c                	c.lw	x15,8(x12)
+ 8d0:	0005                	c.addi	x0,1
+ 8d2:	0700                	c.addi4spn	x8,x2,896
+ 8d4:	4e0b02a3          	sb	x0,1253(x22)
+ 8d8:	0008                	0x8
+ 8da:	0000                	c.unimp
+ 8dc:	d408                	c.sw	x10,40(x8)
+ 8de:	0005                	c.addi	x0,1
+ 8e0:	ca00                	c.sw	x8,16(x12)
+ 8e2:	0008                	0x8
+ 8e4:	0900                	c.addi4spn	x8,x2,144
+ 8e6:	0070                	c.addi4spn	x12,x2,12
+ 8e8:	0000                	c.unimp
+ 8ea:	0018                	0x18
+ 8ec:	3b1d                	c.jal	622 <memset+0x4a>
+ 8ee:	0001                	c.addi	x0,0
+ 8f0:	0f00                	c.addi4spn	x8,x2,912
+ 8f2:	ca04                	c.sw	x9,16(x12)
+ 8f4:	0008                	0x8
+ 8f6:	1e00                	c.addi4spn	x8,x2,816
+ 8f8:	08e0                	c.addi4spn	x8,x2,92
+ 8fa:	0000                	c.unimp
+ 8fc:	7a14                	c.flw	f13,48(x12)
+ 8fe:	0004                	0x4
+ 900:	0000                	c.unimp
+ 902:	08d5040f          	0x8d5040f
+ 906:	0000                	c.unimp
+ 908:	019d040f          	0x19d040f
+ 90c:	0000                	c.unimp
+ 90e:	f71e                	c.fswsp	f7,172(x2)
+ 910:	0008                	0x8
+ 912:	1400                	c.addi4spn	x8,x2,544
+ 914:	0069                	c.addi	x0,26
+ 916:	0000                	c.unimp
+ 918:	0f00                	c.addi4spn	x8,x2,912
+ 91a:	fd04                	c.fsw	f9,56(x10)
+ 91c:	0008                	0x8
+ 91e:	0f00                	c.addi4spn	x8,x2,912
+ 920:	ec04                	c.fsw	f9,24(x8)
+ 922:	0008                	0x8
+ 924:	0800                	c.addi4spn	x8,x2,16
+ 926:	066e                	c.slli	x12,0x1b
+ 928:	0000                	c.unimp
+ 92a:	00000913          	addi	x18,x0,0
+ 92e:	7009                	c.lui	x0,0xfffe2
+ 930:	0000                	c.unimp
+ 932:	0200                	c.addi4spn	x8,x2,256
+ 934:	1f00                	c.addi4spn	x8,x2,944
+ 936:	000004ef          	jal	x9,936 <heap+0x216>
+ 93a:	17033307          	fld	f6,368(x6)
+ 93e:	047a                	c.slli	x8,0x1e
+ 940:	0000                	c.unimp
+ 942:	e81f 0004 0700      	0x7000004e81f
+ 948:	0334                	c.addi4spn	x13,x2,392
+ 94a:	801d                	c.srli	x8,0x7
+ 94c:	0004                	0x4
+ 94e:	2000                	c.fld	f8,0(x8)
+ 950:	0359                	c.addi	x6,22
+ 952:	0000                	c.unimp
+ 954:	6709                	c.lui	x14,0x2
+ 956:	ce0e                	c.swsp	x3,28(x2)
+ 958:	0005                	c.addi	x0,1
+ 95a:	0800                	c.addi4spn	x8,x2,16
+ 95c:	002c                	c.addi4spn	x11,x2,8
+ 95e:	0000                	c.unimp
+ 960:	094a                	c.slli	x18,0x12
+ 962:	0000                	c.unimp
+ 964:	7021                	c.lui	x0,0xfffe8
+ 966:	0000                	c.unimp
+ 968:	ff00                	c.fsw	f8,56(x14)
+ 96a:	c922003f 01000004 	0x1000004c922003f
+ 972:	161e                	c.slli	x12,0x27
+ 974:	0939                	c.addi	x18,14
+ 976:	0000                	c.unimp
+ 978:	0305                	c.addi	x6,1
+ 97a:	0720                	c.addi4spn	x8,x2,904
+ 97c:	0000                	c.unimp
+ 97e:	3f22                	c.fldsp	f30,40(x2)
+ 980:	0000                	c.unimp
+ 982:	0100                	c.addi4spn	x8,x2,128
+ 984:	0e1f 011d 0000      	0x11d0e1f
+ 98a:	0305                	c.addi	x6,1
+ 98c:	0700                	c.addi4spn	x8,x2,896
+ 98e:	0000                	c.unimp
+ 990:	7422                	c.flwsp	f8,40(x2)
+ 992:	0005                	c.addi	x0,1
+ 994:	0100                	c.addi4spn	x8,x2,128
+ 996:	1520                	c.addi4spn	x8,x2,680
+ 998:	0070                	c.addi4spn	x12,x2,12
+ 99a:	0000                	c.unimp
+ 99c:	0305                	c.addi	x6,1
+ 99e:	0704                	c.addi4spn	x9,x2,896
+ 9a0:	0000                	c.unimp
+ 9a2:	960d                	c.srai	x12,0x23
+ 9a4:	0005                	c.addi	x0,1
+ 9a6:	0800                	c.addi4spn	x8,x2,16
+ 9a8:	2201                	c.jal	aa8 <heap+0x388>
+ 9aa:	a810                	c.fsd	f12,16(x8)
+ 9ac:	0009                	c.addi	x0,2
+ 9ae:	0b00                	c.addi4spn	x8,x2,400
+ 9b0:	0000040f          	0x40f
+ 9b4:	2301                	c.jal	eb4 <heap+0x794>
+ 9b6:	a811                	c.j	9ca <heap+0x2aa>
+ 9b8:	0009                	c.addi	x0,2
+ 9ba:	0000                	c.unimp
+ 9bc:	0001eb0b          	0x1eb0b
+ 9c0:	0100                	c.addi4spn	x8,x2,128
+ 9c2:	0f24                	c.addi4spn	x9,x2,920
+ 9c4:	0070                	c.addi4spn	x12,x2,12
+ 9c6:	0000                	c.unimp
+ 9c8:	0004                	0x4
+ 9ca:	0980040f          	0x980040f
+ 9ce:	0000                	c.unimp
+ 9d0:	0000e903          	0xe903
+ 9d4:	0100                	c.addi4spn	x8,x2,128
+ 9d6:	0325                	c.addi	x6,9
+ 9d8:	0980                	c.addi4spn	x8,x2,208
+ 9da:	0000                	c.unimp
+ 9dc:	8722                	c.mv	x14,x8
+ 9de:	0001                	c.addi	x0,0
+ 9e0:	0100                	c.addi4spn	x8,x2,128
+ 9e2:	0f26                	c.slli	x30,0x9
+ 9e4:	09ae                	c.slli	x19,0xb
+ 9e6:	0000                	c.unimp
+ 9e8:	0305                	c.addi	x6,1
+ 9ea:	4720                	c.lw	x8,72(x14)
+ 9ec:	0000                	c.unimp
+ 9ee:	b922                	c.fsdsp	f8,176(x2)
+ 9f0:	0001                	c.addi	x0,0
+ 9f2:	0100                	c.addi4spn	x8,x2,128
+ 9f4:	09de1027          	0x9de1027
+ 9f8:	0000                	c.unimp
+ 9fa:	0305                	c.addi	x6,1
+ 9fc:	4728                	c.lw	x10,72(x14)
+ 9fe:	0000                	c.unimp
+ a00:	09ae040f          	0x9ae040f
+ a04:	0000                	c.unimp
+ a06:	100d                	c.addi	x0,-29
+ a08:	10000003          	lb	x0,256(x0) # 100 <tj_free+0x4c>
+ a0c:	0d02                	c.slli64	x26
+ a0e:	3310                	c.fld	f12,32(x14)
+ a10:	000a                	c.slli	x0,0x2
+ a12:	0b00                	c.addi4spn	x8,x2,400
+ a14:	0294                	c.addi4spn	x13,x2,320
+ a16:	0000                	c.unimp
+ a18:	0e02                	c.slli64	x28
+ a1a:	6906                	c.flwsp	f18,64(x2)
+ a1c:	0000                	c.unimp
+ a1e:	0000                	c.unimp
+ a20:	00051d0b          	0x51d0b
+ a24:	0200                	c.addi4spn	x8,x2,256
+ a26:	00770b0f          	0x770b0f
+ a2a:	0000                	c.unimp
+ a2c:	0b04                	c.addi4spn	x9,x2,400
+ a2e:	00e4                	c.addi4spn	x9,x2,76
+ a30:	0000                	c.unimp
+ a32:	1002                	c.slli	x0,0x20
+ a34:	000a3307          	fld	f6,0(x20) # fffe5000 <_sp+0xfffd5000>
+ a38:	0600                	c.addi4spn	x8,x2,768
+ a3a:	0001f00b          	0x1f00b
+ a3e:	0200                	c.addi4spn	x8,x2,256
+ a40:	0611                	c.addi	x12,4
+ a42:	0069                	c.addi	x0,26
+ a44:	0000                	c.unimp
+ a46:	0b08                	c.addi4spn	x10,x2,400
+ a48:	0284                	c.addi4spn	x9,x2,320
+ a4a:	0000                	c.unimp
+ a4c:	1202                	c.slli	x4,0x20
+ a4e:	6906                	c.flwsp	f18,64(x2)
+ a50:	0000                	c.unimp
+ a52:	0c00                	c.addi4spn	x8,x2,528
+ a54:	0200                	c.addi4spn	x8,x2,256
+ a56:	0201                	c.addi	x4,0
+ a58:	000003a3          	sb	x0,7(x0) # 7 <crt+0x7>
+ a5c:	00031a03          	lh	x20,0(x6)
+ a60:	0200                	c.addi4spn	x8,x2,256
+ a62:	09e40313          	addi	x6,x8,158 # 32926 <_sp+0x22926>
+ a66:	0000                	c.unimp
+ a68:	00059123          	sh	x0,2(x11)
+ a6c:	0200                	c.addi4spn	x8,x2,256
+ a6e:	0515                	c.addi	x10,5
+ a70:	0069                	c.addi	x0,26
+ a72:	0000                	c.unimp
+ a74:	04d4                	c.addi4spn	x13,x2,580
+ a76:	0000                	c.unimp
+ a78:	0104                	c.addi4spn	x9,x2,128
+ a7a:	0000                	c.unimp
+ a7c:	9c01                	0x9c01
+ a7e:	0a9d                	c.addi	x21,7
+ a80:	0000                	c.unimp
+ a82:	3622                	c.fldsp	f12,40(x2)
+ a84:	0001                	c.addi	x0,0
+ a86:	0200                	c.addi4spn	x8,x2,256
+ a88:	0d16                	c.slli	x26,0x5
+ a8a:	0a9d                	c.addi	x21,7
+ a8c:	0000                	c.unimp
+ a8e:	9102                	c.jalr	x2
+ a90:	226c                	c.fld	f11,192(x12)
+ a92:	0339                	c.addi	x6,14
+ a94:	0000                	c.unimp
+ a96:	2302                	c.fldsp	f6,0(x2)
+ a98:	9d0d                	0x9d0d
+ a9a:	000a                	c.slli	x0,0x2
+ a9c:	0200                	c.addi4spn	x8,x2,256
+ a9e:	6891                	c.lui	x17,0x4
+ aa0:	4622                	c.lwsp	x12,8(x2)
+ aa2:	0001                	c.addi	x0,0
+ aa4:	0200                	c.addi4spn	x8,x2,256
+ aa6:	0d28                	c.addi4spn	x10,x2,664
+ aa8:	0a9d                	c.addi	x21,7
+ aaa:	0000                	c.unimp
+ aac:	9102                	c.jalr	x2
+ aae:	2264                	c.fld	f9,192(x12)
+ ab0:	01de                	c.slli	x3,0x17
+ ab2:	0000                	c.unimp
+ ab4:	2f02                	c.fldsp	f30,0(x2)
+ ab6:	9d0d                	0x9d0d
+ ab8:	000a                	c.slli	x0,0x2
+ aba:	0200                	c.addi4spn	x8,x2,256
+ abc:	6091                	c.lui	x1,0x4
+ abe:	0f00                	c.addi4spn	x8,x2,912
+ ac0:	3a04                	c.fld	f9,48(x12)
+ ac2:	000a                	c.slli	x0,0x2
+ ac4:	2400                	c.fld	f8,8(x8)
+ ac6:	037d                	c.addi	x6,31
+ ac8:	0000                	c.unimp
+ aca:	8401                	c.srai64	x8
+ acc:	00011d07          	0x11d07
+ ad0:	8400                	0x8400
+ ad2:	0004                	0x4
+ ad4:	5000                	c.lw	x8,32(x8)
+ ad6:	0000                	c.unimp
+ ad8:	0100                	c.addi4spn	x8,x2,128
+ ada:	dc9c                	c.sw	x15,56(x9)
+ adc:	000a                	c.slli	x0,0x2
+ ade:	2500                	c.fld	f8,8(x10)
+ ae0:	000001eb          	0x1eb
+ ae4:	8401                	c.srai64	x8
+ ae6:	701e                	c.flwsp	f0,228(x2)
+ ae8:	0000                	c.unimp
+ aea:	0200                	c.addi4spn	x8,x2,256
+ aec:	5c91                	c.li	x25,-28
+ aee:	6d26                	c.flwsp	f26,72(x2)
+ af0:	6d65                	c.lui	x26,0x19
+ af2:	0100                	c.addi4spn	x8,x2,128
+ af4:	0885                	c.addi	x17,1
+ af6:	011d                	c.addi	x2,7
+ af8:	0000                	c.unimp
+ afa:	9102                	c.jalr	x2
+ afc:	006c                	c.addi4spn	x11,x2,12
+ afe:	2b24                	c.fld	f9,80(x14)
+ b00:	0004                	0x4
+ b02:	0100                	c.addi4spn	x8,x2,128
+ b04:	0758                	c.addi4spn	x14,x2,900
+ b06:	011d                	c.addi	x2,7
+ b08:	0000                	c.unimp
+ b0a:	02f0                	c.addi4spn	x12,x2,332
+ b0c:	0000                	c.unimp
+ b0e:	0194                	c.addi4spn	x13,x2,192
+ b10:	0000                	c.unimp
+ b12:	9c01                	0x9c01
+ b14:	0b31                	c.addi	x22,12
+ b16:	0000                	c.unimp
+ b18:	eb25                	c.bnez	x14,b88 <heap+0x468>
+ b1a:	0001                	c.addi	x0,0
+ b1c:	0100                	c.addi4spn	x8,x2,128
+ b1e:	1e58                	c.addi4spn	x14,x2,820
+ b20:	0070                	c.addi4spn	x12,x2,12
+ b22:	0000                	c.unimp
+ b24:	9102                	c.jalr	x2
+ b26:	265c                	c.fld	f15,136(x12)
+ b28:	0070                	c.addi4spn	x12,x2,12
+ b2a:	6201                	0x6201
+ b2c:	de0a                	c.swsp	x2,60(x2)
+ b2e:	0009                	c.addi	x0,2
+ b30:	0200                	c.addi4spn	x8,x2,256
+ b32:	6c91                	c.lui	x25,0x4
+ b34:	a722                	c.fsdsp	f8,392(x2)
+ b36:	0004                	0x4
+ b38:	0100                	c.addi4spn	x8,x2,128
+ b3a:	0e62                	c.slli	x28,0x18
+ b3c:	09de                	c.slli	x19,0x17
+ b3e:	0000                	c.unimp
+ b40:	9102                	c.jalr	x2
+ b42:	2268                	c.fld	f10,192(x12)
+ b44:	01e5                	c.addi	x3,25
+ b46:	0000                	c.unimp
+ b48:	6401                	0x6401
+ b4a:	0000700f          	0x700f
+ b4e:	0200                	c.addi4spn	x8,x2,256
+ b50:	6491                	c.lui	x9,0x4
+ b52:	2700                	c.fld	f8,8(x14)
+ b54:	00d9                	c.addi	x1,22
+ b56:	0000                	c.unimp
+ b58:	4e01                	c.li	x28,0
+ b5a:	de10                	c.sw	x12,56(x12)
+ b5c:	0009                	c.addi	x0,2
+ b5e:	4400                	c.lw	x8,8(x8)
+ b60:	0002                	c.slli64	x0
+ b62:	ac00                	c.fsd	f8,24(x8)
+ b64:	0000                	c.unimp
+ b66:	0100                	c.addi4spn	x8,x2,128
+ b68:	699c                	c.flw	f15,16(x11)
+ b6a:	2500000b          	0x2500000b
+ b6e:	01e5                	c.addi	x3,25
+ b70:	0000                	c.unimp
+ b72:	4e01                	c.li	x28,0
+ b74:	7028                	c.flw	f10,96(x8)
+ b76:	0000                	c.unimp
+ b78:	0200                	c.addi4spn	x8,x2,256
+ b7a:	5c91                	c.li	x25,-28
+ b7c:	7526                	c.flwsp	f10,104(x2)
+ b7e:	0070                	c.addi4spn	x12,x2,12
+ b80:	5001                	c.li	x0,-32
+ b82:	de0a                	c.swsp	x2,60(x2)
+ b84:	0009                	c.addi	x0,2
+ b86:	0200                	c.addi4spn	x8,x2,256
+ b88:	6c91                	c.lui	x25,0x4
+ b8a:	2800                	c.fld	f8,16(x8)
+ b8c:	0375                	c.addi	x6,29
+ b8e:	0000                	c.unimp
+ b90:	2a01                	c.jal	ca0 <heap+0x580>
+ b92:	b406                	c.fsdsp	f1,40(x2)
+ b94:	0000                	c.unimp
+ b96:	9000                	0x9000
+ b98:	0001                	c.addi	x0,0
+ b9a:	0100                	c.addi4spn	x8,x2,128
+ b9c:	299c                	c.fld	f15,16(x11)
+ b9e:	656d                	c.lui	x10,0x1b
+ ba0:	006d                	c.addi	x0,27
+ ba2:	2a01                	c.jal	cb2 <heap+0x592>
+ ba4:	1d14                	c.addi4spn	x13,x2,688
+ ba6:	0001                	c.addi	x0,0
+ ba8:	0200                	c.addi4spn	x8,x2,256
+ baa:	5c91                	c.li	x25,-28
+ bac:	6226                	c.flwsp	f4,72(x2)
+ bae:	0070                	c.addi4spn	x12,x2,12
+ bb0:	3001                	c.jal	3b0 <tj_malloc+0xc0>
+ bb2:	de0a                	c.swsp	x2,60(x2)
+ bb4:	0009                	c.addi	x0,2
+ bb6:	0200                	c.addi4spn	x8,x2,256
+ bb8:	6891                	c.lui	x17,0x4
+ bba:	7026                	c.flwsp	f0,104(x2)
+ bbc:	0100                	c.addi4spn	x8,x2,128
+ bbe:	0f30                	c.addi4spn	x12,x2,920
+ bc0:	09de                	c.slli	x19,0x17
+ bc2:	0000                	c.unimp
+ bc4:	9102                	c.jalr	x2
+ bc6:	006c                	c.addi4spn	x11,x2,12
+	...
+
+Disassembly of section .debug_abbrev:
+
+00000000 <.debug_abbrev>:
+	nop
+   0:	1101                	c.addi	x2,-32
+   2:	1000                	c.addi4spn	x8,x2,32
+	la ra, exit
+   4:	5506                	c.lwsp	x10,96(x2)
+   6:	0306                	c.slli	x6,0x1
+   8:	1b0e                	c.slli	x22,0x23
+   a:	250e                	c.fldsp	f10,192(x2)
+	la sp, _sp
+   c:	130e                	c.slli	x6,0x23
+   e:	0005                	c.addi	x0,1
+  10:	0000                	c.unimp
+  12:	1101                	c.addi	x2,-32
+	mv s0, sp
+  14:	2501                	c.jal	614 <memset+0x3c>
+  16:	130e                	c.slli	x6,0x23
+	la gp, __global_pointer$
+  18:	1b0e030b          	0x1b0e030b
+  1c:	110e                	c.slli	x2,0x23
+  1e:	1201                	c.addi	x4,-32
+	li tp, 0
+  20:	1006                	c.slli	x0,0x21
+  22:	02000017          	auipc	x0,0x2000
+	li t0, 0
+  26:	0024                	c.addi4spn	x9,x2,8
+	li t1, 0
+  28:	0b3e0b0b          	0xb3e0b0b
+	li t2, 0
+  2c:	00000e03          	lb	x28,0(x0) # 0 <crt>
+	li s1, 0
+  30:	03001603          	lh	x12,48(x0) # 30 <crt+0x30>
+	li a0, 0
+  34:	3a0e                	c.fldsp	f20,224(x2)
+  36:	390b3b0b          	0x390b3b0b
+	li a1, 0
+  3a:	0013490b          	0x13490b
+	li a2, 0
+  3e:	0400                	c.addi4spn	x8,x2,512
+	li a3, 0
+  40:	0024                	c.addi4spn	x9,x2,8
+  42:	0b3e0b0b          	0xb3e0b0b
+	li a4, 0
+  46:	00000803          	lb	x16,0(x0) # 0 <crt>
+	li a5, 0
+  4a:	1605                	c.addi	x12,-31
+	li a6, 0
+  4c:	0300                	c.addi4spn	x8,x2,384
+  4e:	3a0e                	c.fldsp	f20,224(x2)
+	li a7, 0
+  50:	39053b0b          	0x39053b0b
+	li s2, 0
+  54:	0013490b          	0x13490b
+	li s3, 0
+  58:	0600                	c.addi4spn	x8,x2,768
+  5a:	0b0b0117          	auipc	x2,0xb0b0
+	li s4, 0
+  5e:	0b3a                	c.slli	x22,0xe
+	li s5, 0
+  60:	0b390b3b          	0xb390b3b
+	li s6, 0
+  64:	1301                	c.addi	x6,-32
+  66:	0000                	c.unimp
+	li s7, 0
+  68:	03000d07          	0x3000d07
+	li s8, 0
+  6c:	3a0e                	c.fldsp	f20,224(x2)
+  6e:	390b3b0b          	0x390b3b0b
+	li s9, 0
+  72:	0013490b          	0x13490b
+	li s10, 0
+  76:	0800                	c.addi4spn	x8,x2,16
+	li s11, 0
+  78:	0101                	c.addi	x2,0
+  7a:	1349                	c.addi	x6,-14
+	li t3, 0
+  7c:	1301                	c.addi	x6,-32
+  7e:	0000                	c.unimp
+	li t4, 0
+  80:	2109                	c.jal	482 <tj_malloc+0x192>
+  82:	4900                	c.lw	x8,16(x10)
+	li t5, 0
+  84:	000b2f13          	slti	x30,x22,0
+	li t6, 0
+  88:	0a00                	c.addi4spn	x8,x2,272
+  8a:	0b0b0113          	addi	x2,x22,176
+	j main
+  8e:	0b3a                	c.slli	x22,0xe
+  90:	0b390b3b          	0xb390b3b
+  94:	1301                	c.addi	x6,-32
+  96:	0000                	c.unimp
+  98:	03000d0b          	0x3000d0b
+  9c:	3a0e                	c.fldsp	f20,224(x2)
+  9e:	390b3b0b          	0x390b3b0b
+	la sp, _sp
+  a2:	3813490b          	0x3813490b
+  a6:	0c00000b          	0xc00000b
+	sw a0, -8(sp)
+  aa:	0b0b000f          	0xb0b000f
+	nop
+  ae:	0000                	c.unimp
+	wfi
+  b0:	130d                	c.addi	x6,-29
+  b2:	0301                	c.addi	x6,0
+void tj_free(void *mem) {
+  b4:	0b0e                	c.slli	x22,0x3
+  b6:	3b0b3a0b          	0x3b0b3a0b
+  ba:	010b390b          	0x10b390b
+  be:	0e000013          	addi	x0,x0,224
+  c2:	000d                	c.addi	x0,3
+  c4:	0b3a0803          	lb	x16,179(x20)
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  c8:	0b390b3b          	0xb390b3b
+  cc:	1349                	c.addi	x6,-14
+  ce:	0b38                	c.addi4spn	x14,x2,408
+  d0:	0000                	c.unimp
+  d2:	0b000f0f          	0xb000f0f
+  d6:	0013490b          	0x13490b
+  da:	1000                	c.addi4spn	x8,x2,32
+  dc:	0e030113          	addi	x2,x6,224
+  e0:	0b3a050b          	0xb3a050b
+  e4:	0b390b3b          	0xb390b3b
+		exit(1);
+  e8:	1301                	c.addi	x6,-32
+  ea:	0000                	c.unimp
+  ec:	0d11                	c.addi	x26,4
+  ee:	0300                	c.addi4spn	x8,x2,384
+  f0:	3a0e                	c.fldsp	f20,224(x2)
+  f2:	390b3b0b          	0x390b3b0b
+	bp = (Header *)mem - 1; //point to block header
+  f6:	3813490b          	0x3813490b
+  fa:	0005                	c.addi	x0,1
+  fc:	1200                	c.addi4spn	x8,x2,288
+  fe:	0015                	c.addi	x0,5
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 100:	00001927          	0x1927
+ 104:	27011513          	0x27011513
+ 108:	4919                	c.li	x18,6
+ 10a:	00130113          	addi	x2,x6,1
+ 10e:	1400                	c.addi4spn	x8,x2,544
+		if (p >= p->next && (bp > p || bp < p->next))
+ 110:	0005                	c.addi	x0,1
+ 112:	1349                	c.addi	x6,-14
+ 114:	0000                	c.unimp
+ 116:	2615                	c.jal	43a <tj_malloc+0x14a>
+ 118:	4900                	c.lw	x8,16(x10)
+ 11a:	16000013          	addi	x0,x0,352
+ 11e:	0e030113          	addi	x2,x6,224
+ 122:	0b3a050b          	0xb3a050b
+ 126:	0b39053b          	0xb39053b
+ 12a:	1301                	c.addi	x6,-32
+ 12c:	0000                	c.unimp
+ 12e:	03000d17          	auipc	x26,0x3000
+ 132:	3a0e                	c.fldsp	f20,224(x2)
+ 134:	39053b0b          	0x39053b0b
+ 138:	3813490b          	0x3813490b
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 13c:	1800000b          	0x1800000b
+ 140:	000d                	c.addi	x0,3
+ 142:	0b3a0e03          	lb	x28,179(x20)
+ 146:	0b39053b          	0xb39053b
+ 14a:	1349                	c.addi	x6,-14
+ 14c:	0538                	c.addi4spn	x14,x2,648
+ 14e:	0000                	c.unimp
+ 150:	1319                	c.addi	x6,-26
+ 152:	0301                	c.addi	x6,0
+ 154:	0b0e                	c.slli	x22,0x3
+ 156:	3b0b3a0b          	0x3b0b3a0b
+ 15a:	3905                	c.jal	fffffd8a <_sp+0xfffefd8a>
+ 15c:	0013010b          	0x13010b
+ 160:	1a00                	c.addi4spn	x8,x2,304
+ 162:	0b0b0113          	addi	x2,x22,176
+	if (bp + bp->size == p->next) { //join to upper nbr
+ 166:	0b3a                	c.slli	x22,0xe
+ 168:	0b39053b          	0xb39053b
+ 16c:	1301                	c.addi	x6,-32
+ 16e:	0000                	c.unimp
+ 170:	0b01171b          	0xb01171b
+ 174:	3b0b3a0b          	0x3b0b3a0b
+ 178:	3905                	c.jal	fffffda8 <_sp+0xfffefda8>
+ 17a:	0013010b          	0x13010b
+ 17e:	1c00                	c.addi4spn	x8,x2,560
+ 180:	000d                	c.addi	x0,3
+ 182:	0b3a0e03          	lb	x28,179(x20)
+		bp->size += p->next->size;
+ 186:	0b39053b          	0xb39053b
+ 18a:	1349                	c.addi	x6,-14
+ 18c:	0000                	c.unimp
+ 18e:	131d                	c.addi	x6,-25
+ 190:	0300                	c.addi4spn	x8,x2,384
+ 192:	3c0e                	c.fldsp	f24,224(x2)
+ 194:	0019                	c.addi	x0,6
+ 196:	1e00                	c.addi4spn	x8,x2,816
+ 198:	0115                	c.addi	x2,5
+ 19a:	13011927          	0x13011927
+ 19e:	0000                	c.unimp
+ 1a0:	341f 0300 3a0e      	0x3a0e0300341f
+		bp->next = p->next->next;
+ 1a6:	39053b0b          	0x39053b0b
+ 1aa:	3f13490b          	0x3f13490b
+ 1ae:	3c19                	c.jal	fffffbc4 <_sp+0xfffefbc4>
+ 1b0:	0019                	c.addi	x0,6
+ 1b2:	2000                	c.fld	f8,0(x8)
+ 1b4:	0034                	c.addi4spn	x13,x2,8
+ 1b6:	0b3a0e03          	lb	x28,179(x20)
+ 1ba:	0b390b3b          	0xb390b3b
+		bp->next = p->next; //insert bp after p in the linked list
+ 1be:	1349                	c.addi	x6,-14
+ 1c0:	193c193f 21210000 	0x21210000193c193f
+ 1c8:	4900                	c.lw	x8,16(x10)
+ 1ca:	00052f13          	slti	x30,x10,0
+	if (p + p->size == bp) { //join to lower nbr
+ 1ce:	2200                	c.fld	f8,0(x12)
+ 1d0:	0034                	c.addi4spn	x13,x2,8
+ 1d2:	0b3a0e03          	lb	x28,179(x20)
+ 1d6:	0b390b3b          	0xb390b3b
+ 1da:	1349                	c.addi	x6,-14
+ 1dc:	1802                	c.slli	x16,0x20
+ 1de:	0000                	c.unimp
+ 1e0:	3f012e23          	sw	x16,1020(x2) # b0b0456 <_sp+0xb0a0456>
+ 1e4:	0319                	c.addi	x6,6
+ 1e6:	3a0e                	c.fldsp	f20,224(x2)
+		p->size += bp->size;
+ 1e8:	390b3b0b          	0x390b3b0b
+ 1ec:	1113490b          	0x1113490b
+ 1f0:	1201                	c.addi	x4,-32
+ 1f2:	4006                	0x4006
+ 1f4:	9618                	0x9618
+ 1f6:	1942                	c.slli	x18,0x30
+ 1f8:	1301                	c.addi	x6,-32
+ 1fa:	0000                	c.unimp
+ 1fc:	2e24                	c.fld	f9,88(x12)
+ 1fe:	3f01                	c.jal	10e <tj_free+0x5a>
+ 200:	0319                	c.addi	x6,6
+ 202:	3a0e                	c.fldsp	f20,224(x2)
+		p->next = bp->next;
+ 204:	390b3b0b          	0x390b3b0b
+ 208:	4919270b          	0x4919270b
+ 20c:	12011113          	0x12011113
+ 210:	4006                	0x4006
+ 212:	9618                	0x9618
+ 214:	1942                	c.slli	x18,0x30
+ 216:	1301                	c.addi	x6,-32
+		p->next = bp; //again, if the free list is just the base
+ 218:	0000                	c.unimp
+ 21a:	0525                	c.addi	x10,9
+ 21c:	0300                	c.addi4spn	x8,x2,384
+ 21e:	3a0e                	c.fldsp	f20,224(x2)
+ 220:	390b3b0b          	0x390b3b0b
+	freep = p;
+ 224:	0213490b          	0x213490b
+ 228:	0018                	0x18
+ 22a:	2600                	c.fld	f8,8(x12)
+ 22c:	0034                	c.addi4spn	x13,x2,8
+ 22e:	0b3a0803          	lb	x16,179(x20)
+}
+ 232:	0b390b3b          	0xb390b3b
+ 236:	1349                	c.addi	x6,-14
+ 238:	1802                	c.slli	x16,0x20
+ 23a:	0000                	c.unimp
+ 23c:	03012e27          	fsw	f16,60(x2)
+ 240:	3a0e                	c.fldsp	f20,224(x2)
+ 242:	390b3b0b          	0x390b3b0b
+static Header* getmoremem(unsigned int total_size) {
+ 246:	4919270b          	0x4919270b
+ 24a:	12011113          	0x12011113
+ 24e:	4006                	0x4006
+ 250:	9618                	0x9618
+ 252:	1942                	c.slli	x18,0x30
+ 254:	1301                	c.addi	x6,-32
+ 256:	0000                	c.unimp
+	if (avail_mem < total_size) return NULL; //gg, we ran out of mem :P
+ 258:	2e28                	c.fld	f10,88(x12)
+ 25a:	3f01                	c.jal	16a <tj_free+0xb6>
+ 25c:	0319                	c.addi	x6,6
+ 25e:	3a0e                	c.fldsp	f20,224(x2)
+ 260:	390b3b0b          	0x390b3b0b
+ 264:	1119270b          	0x1119270b
+ 268:	1201                	c.addi	x4,-32
+ 26a:	4006                	0x4006
+ 26c:	9618                	0x9618
+ 26e:	1942                	c.slli	x18,0x30
+	Header* up = (Header *)next_index;
+ 270:	0000                	c.unimp
+ 272:	0529                	c.addi	x10,10
+ 274:	0300                	c.addi4spn	x8,x2,384
+ 276:	3a08                	c.fld	f10,48(x12)
+ 278:	390b3b0b          	0x390b3b0b
+	next_index += total_size; //allocate the block
+ 27c:	0213490b          	0x213490b
+ 280:	0018                	0x18
+	...
+
+Disassembly of section .debug_aranges:
+
+00000000 <.debug_aranges>:
+	nop
+   0:	0024                	c.addi4spn	x9,x2,8
+   2:	0000                	c.unimp
+	la ra, exit
+   4:	0002                	c.slli64	x0
+   6:	0000                	c.unimp
+   8:	0000                	c.unimp
+   a:	0004                	0x4
+	...
+	mv s0, sp
+  14:	0090                	c.addi4spn	x12,x2,64
+  16:	0000                	c.unimp
+	la gp, __global_pointer$
+  18:	00a0                	c.addi4spn	x8,x2,72
+  1a:	0000                	c.unimp
+  1c:	0014                	0x14
+	...
+	li t0, 0
+  26:	0000                	c.unimp
+	li t1, 0
+  28:	001c                	0x1c
+  2a:	0000                	c.unimp
+	li t2, 0
+  2c:	0002                	c.slli64	x0
+  2e:	0022                	c.slli	x0,0x8
+	li s1, 0
+  30:	0000                	c.unimp
+  32:	0004                	0x4
+	li a0, 0
+  34:	0000                	c.unimp
+  36:	0000                	c.unimp
+	li a1, 0
+  38:	00b4                	c.addi4spn	x13,x2,72
+  3a:	0000                	c.unimp
+	li a2, 0
+  3c:	0524                	c.addi4spn	x9,x2,648
+	...
+
+Disassembly of section .debug_str:
+
+00000000 <.debug_str>:
+	nop
+   0:	2e747263          	bgeu	x8,x7,2e4 <getmoremem+0xa0>
+	la ra, exit
+   4:	682f0073          	0x682f0073
+   8:	2f656d6f          	jal	x26,562fe <_sp+0x462fe>
+	la sp, _sp
+   c:	79696873          	csrrsi	x16,0x796,18
+  10:	6c75                	c.lui	x24,0x1d
+  12:	7569                	c.lui	x10,0xffffa
+	mv s0, sp
+  14:	7365442f          	0x7365442f
+	la gp, __global_pointer$
+  18:	706f746b          	0x706f746b
+  1c:	6f72672f          	0x6f72672f
+	li tp, 0
+  20:	7075                	c.lui	x0,0xffffd
+  22:	7738                	c.flw	f14,104(x14)
+	li t0, 0
+  24:	3032                	c.fldsp	f0,296(x2)
+  26:	4700                	c.lw	x8,8(x14)
+	li t1, 0
+  28:	554e                	c.lwsp	x10,240(x2)
+  2a:	4120                	c.lw	x8,64(x10)
+	li t2, 0
+  2c:	2e322053          	0x2e322053
+	li s1, 0
+  30:	5f003433          	0x5f003433
+	li a0, 0
+  34:	7364                	c.flw	f9,100(x14)
+  36:	61685f6f          	jal	x30,8564c <_sp+0x7564c>
+	li a1, 0
+  3a:	646e                	c.flwsp	f8,216(x2)
+	li a2, 0
+  3c:	656c                	c.flw	f11,76(x10)
+  3e:	6e00                	c.flw	f8,24(x12)
+	li a3, 0
+  40:	7865                	c.lui	x16,0xffff9
+  42:	5f74                	c.lw	x13,124(x14)
+	li a4, 0
+  44:	6e69                	c.lui	x28,0x1a
+  46:	6564                	c.flw	f9,76(x10)
+	li a5, 0
+  48:	0078                	c.addi4spn	x14,x2,12
+  4a:	6574                	c.flw	f13,76(x10)
+	li a6, 0
+  4c:	705f7473          	csrrci	x8,0x705,30
+	li a7, 0
+  50:	6f72                	c.flwsp	f30,28(x2)
+  52:	622f7367          	0x622f7367
+	li s2, 0
+  56:	7361                	c.lui	x6,0xffff8
+	li s3, 0
+  58:	6369                	c.lui	x6,0x1a
+  5a:	6d5f 6c61 6f6c      	0x6f6c6c616d5f
+	li s5, 0
+  60:	00632e63          	0x632e63
+	li s6, 0
+  64:	725f 6e61 3464      	0x34646e61725f
+	li s7, 0
+  6a:	0038                	c.addi4spn	x14,x2,8
+	li s8, 0
+  6c:	20554e47          	fmsub.s	f28,f10,f5,f4,rmm
+	li s9, 0
+  70:	20313143          	fmadd.s	f2,f2,f3,f4,rup
+	li s10, 0
+  74:	2e39                	c.jal	392 <tj_malloc+0xa2>
+  76:	2e32                	c.fldsp	f28,264(x2)
+	li s11, 0
+  78:	2030                	c.fld	f12,64(x8)
+  7a:	6d2d                	c.lui	x26,0xb
+	li t3, 0
+  7c:	6f6e                	c.flwsp	f30,216(x2)
+  7e:	722d                	c.lui	x4,0xfffeb
+	li t4, 0
+  80:	6c65                	c.lui	x24,0x19
+  82:	7861                	c.lui	x16,0xffff8
+	li t5, 0
+  84:	2d20                	c.fld	f8,88(x10)
+  86:	616d                	c.addi16sp	x2,240
+	li t6, 0
+  88:	6372                	c.flwsp	f6,28(x2)
+  8a:	3d68                	c.fld	f10,248(x10)
+	j main
+  8c:	7672                	c.flwsp	f12,60(x2)
+  8e:	6d693233          	0x6d693233
+  92:	2d20                	c.fld	f8,88(x10)
+  94:	616d                	c.addi16sp	x2,240
+  96:	6962                	c.flwsp	f18,24(x2)
+  98:	693d                	c.lui	x18,0xf
+  9a:	706c                	c.flw	f11,100(x8)
+  9c:	2d203233          	0x2d203233
+	la sp, _sp
+  a0:	736d                	c.lui	x6,0xffffb
+  a2:	7274                	c.flw	f13,100(x12)
+  a4:	6369                	c.lui	x6,0x1a
+  a6:	2d74                	c.fld	f13,216(x10)
+	sw a0, -8(sp)
+  a8:	6c61                	c.lui	x24,0x18
+  aa:	6769                	c.lui	x14,0x1a
+	nop
+  ac:	206e                	c.fldsp	f0,216(x2)
+  ae:	6d2d                	c.lui	x26,0xb
+	wfi
+  b0:	7574                	c.flw	f13,108(x10)
+  b2:	656e                	c.flwsp	f10,216(x2)
+void tj_free(void *mem) {
+  b4:	723d                	c.lui	x4,0xfffef
+  b6:	656b636f          	jal	x6,b670c <_sp+0xa670c>
+  ba:	2074                	c.fld	f13,192(x8)
+  bc:	672d                	c.lui	x14,0xb
+  be:	2d20                	c.fld	f8,88(x10)
+  c0:	2d20304f          	0x2d20304f
+  c4:	3d647473          	csrrci	x8,0x3d6,8
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  c8:	31756e67          	0x31756e67
+  cc:	0031                	c.addi	x0,12
+  ce:	655f 656d 6772      	0x6772656d655f
+  d4:	6e65                	c.lui	x28,0x19
+  d6:	67007963          	bgeu	x0,x16,748 <heap+0x28>
+  da:	7465                	c.lui	x8,0xffff9
+  dc:	6f6d                	c.lui	x30,0x1b
+  de:	6572                	c.flwsp	f10,28(x2)
+  e0:	656d                	c.lui	x10,0x1b
+  e2:	006d                	c.addi	x0,27
+  e4:	74616f67          	0x74616f67
+		exit(1);
+  e8:	4800                	c.lw	x8,16(x8)
+  ea:	6165                	c.addi16sp	x2,112
+  ec:	6564                	c.flw	f9,76(x10)
+  ee:	0072                	c.slli	x0,0x1c
+  f0:	645f 7461 0061      	0x617461645f
+	bp = (Header *)mem - 1; //point to block header
+  f6:	775f 7263 6f74      	0x6f747263775f
+  fc:	626d                	c.lui	x4,0x1b
+  fe:	735f 6174 6574      	0x65746174735f
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 104:	5f00                	c.lw	x8,56(x14)
+ 106:	72736377          	0x72736377
+ 10a:	6f74                	c.flw	f13,92(x14)
+ 10c:	626d                	c.lui	x4,0x1b
+ 10e:	74735f73          	csrrwi	x30,0x747,6
+		if (p >= p->next && (bp > p || bp < p->next))
+ 112:	7461                	c.lui	x8,0xffff8
+ 114:	0065                	c.addi	x0,25
+ 116:	6f6c                	c.flw	f11,92(x14)
+ 118:	676e                	c.flwsp	f14,216(x2)
+ 11a:	6c20                	c.flw	f8,88(x8)
+ 11c:	20676e6f          	jal	x28,76322 <_sp+0x66322>
+ 120:	6e75                	c.lui	x28,0x1d
+ 122:	6e676973          	csrrsi	x18,0x6e6,14
+ 126:	6465                	c.lui	x8,0x19
+ 128:	6920                	c.flw	f8,80(x10)
+ 12a:	746e                	c.flwsp	f8,248(x2)
+ 12c:	5f00                	c.lw	x8,56(x14)
+ 12e:	626c                	c.flw	f11,68(x12)
+ 130:	7366                	c.flwsp	f6,120(x2)
+ 132:	7a69                	c.lui	x20,0xffffa
+ 134:	0065                	c.addi	x0,25
+ 136:	6170                	c.flw	f12,68(x10)
+ 138:	7374                	c.flw	f13,100(x14)
+ 13a:	5f00                	c.lw	x8,56(x14)
+	for (p = freep; !(bp > p && bp < p->next); p = p->next) 
+ 13c:	6c5f 636f 6c61      	0x6c61636f6c5f
+ 142:	5f65                	c.li	x30,-7
+ 144:	0074                	c.addi4spn	x13,x2,12
+ 146:	6874                	c.flw	f13,84(x8)
+ 148:	7269                	c.lui	x4,0xffffa
+ 14a:	0064                	c.addi4spn	x9,x2,12
+ 14c:	6d5f 7262 6f74      	0x6f7472626d5f
+ 152:	735f6377          	0x735f6377
+ 156:	6174                	c.flw	f13,68(x10)
+ 158:	6574                	c.flw	f13,76(x10)
+ 15a:	5f00                	c.lw	x8,56(x14)
+ 15c:	6f746377          	0x6f746377
+ 160:	626d                	c.lui	x4,0x1b
+ 162:	735f 6174 6574      	0x65746174735f
+	if (bp + bp->size == p->next) { //join to upper nbr
+ 168:	5f00                	c.lw	x8,56(x14)
+ 16a:	745f 5f6d 6573      	0x65735f6d745f
+ 170:	6f6c0063          	beq	x24,x22,850 <heap+0x130>
+ 174:	676e                	c.flwsp	f14,216(x2)
+ 176:	6c20                	c.flw	f8,88(x8)
+ 178:	20676e6f          	jal	x28,7637e <_sp+0x6637e>
+ 17c:	6e69                	c.lui	x28,0x1a
+ 17e:	0074                	c.addi4spn	x13,x2,12
+ 180:	755f 7562 0066      	0x667562755f
+		bp->size += p->next->size;
+ 186:	625f 7361 0065      	0x657361625f
+ 18c:	5f5f 6d74 685f      	0x685f6d745f5f
+ 192:	0072756f          	jal	x10,27998 <_sp+0x17998>
+ 196:	5f5f 6673 5f00      	0x5f0066735f5f
+ 19c:	655f6e6f          	jal	x28,f6ff0 <_sp+0xe6ff0>
+ 1a0:	6978                	c.flw	f14,84(x10)
+ 1a2:	5f74                	c.lw	x13,124(x14)
+		bp->next = p->next->next;
+ 1a4:	7261                	c.lui	x4,0xffff8
+ 1a6:	5f007367          	0x5f007367
+ 1aa:	6b6f6f63          	bltu	x30,x22,868 <heap+0x148>
+ 1ae:	6569                	c.lui	x10,0x1a
+ 1b0:	5f00                	c.lw	x8,56(x14)
+ 1b2:	735f 6c67 6575      	0x65756c67735f
+ 1b8:	6600                	c.flw	f8,8(x12)
+ 1ba:	6572                	c.flwsp	f10,28(x2)
+		bp->next = p->next; //insert bp after p in the linked list
+ 1bc:	7065                	c.lui	x0,0xffff9
+ 1be:	5f00                	c.lw	x8,56(x14)
+ 1c0:	6c66                	c.flwsp	f24,88(x2)
+ 1c2:	6761                	c.lui	x14,0x18
+ 1c4:	695f0073          	0x695f0073
+ 1c8:	78635f73          	csrrwi	x30,0x786,6
+	if (p + p->size == bp) { //join to lower nbr
+ 1cc:	0061                	c.addi	x0,24
+ 1ce:	735f 6474 6e69      	0x6e696474735f
+ 1d4:	5f00                	c.lw	x8,56(x14)
+ 1d6:	6c62                	c.flwsp	f24,24(x2)
+ 1d8:	7a69736b          	0x7a69736b
+ 1dc:	0065                	c.addi	x0,25
+ 1de:	616c                	c.flw	f11,68(x10)
+ 1e0:	6574                	c.flw	f13,76(x10)
+ 1e2:	74007473          	csrrci	x8,0x740,0
+ 1e6:	6c61746f          	jal	x8,178ac <_sp+0x78ac>
+		p->size += bp->size;
+ 1ea:	735f 7a69 0065      	0x657a69735f
+ 1f0:	6e6f7267          	0x6e6f7267
+ 1f4:	635f006b          	0x635f006b
+ 1f8:	7476                	c.flwsp	f8,124(x2)
+ 1fa:	7562                	c.flwsp	f10,56(x2)
+ 1fc:	0066                	c.slli	x0,0x19
+ 1fe:	6f5f 6666 6573      	0x657366666f5f
+		p->next = bp->next;
+ 204:	0074                	c.addi4spn	x13,x2,12
+ 206:	6d5f 7362 7472      	0x747273626d5f
+ 20c:	7363776f          	jal	x14,37942 <_sp+0x27942>
+ 210:	735f 6174 6574      	0x65746174735f
+ 216:	5f00                	c.lw	x8,56(x14)
+		p->next = bp; //again, if the free list is just the base
+ 218:	626d                	c.lui	x4,0x1b
+ 21a:	6c72                	c.flwsp	f24,28(x2)
+ 21c:	6e65                	c.lui	x28,0x19
+ 21e:	735f 6174 6574      	0x65746174735f
+	freep = p;
+ 224:	5f00                	c.lw	x8,56(x14)
+ 226:	6e66                	c.flwsp	f28,88(x2)
+ 228:	7261                	c.lui	x4,0xffff8
+ 22a:	5f007367          	0x5f007367
+ 22e:	6e66                	c.flwsp	f28,88(x2)
+}
+ 230:	735f0073          	0x735f0073
+ 234:	6769                	c.lui	x14,0x1a
+ 236:	006e                	c.slli	x0,0x1b
+ 238:	665f 6f6c 6b63      	0x6b636f6c665f
+ 23e:	745f 5f00 7473      	0x74735f00745f
+static Header* getmoremem(unsigned int total_size) {
+ 244:	6564                	c.flw	f9,76(x10)
+ 246:	7272                	c.flwsp	f4,60(x2)
+ 248:	5f00                	c.lw	x8,56(x14)
+ 24a:	6942                	c.flwsp	f18,16(x2)
+ 24c:	746e6967          	0x746e6967
+ 250:	5f00                	c.lw	x8,56(x14)
+ 252:	6d6d6167          	0x6d6d6167
+ 256:	5f61                	c.li	x30,-8
+	if (avail_mem < total_size) return NULL; //gg, we ran out of mem :P
+ 258:	6e676973          	csrrsi	x18,0x6e6,14
+ 25c:	006d6167          	0x6d6167
+ 260:	725f 6165 0064      	0x646165725f
+ 266:	725f 7365 6c75      	0x6c757365725f
+ 26c:	5f74                	c.lw	x13,124(x14)
+ 26e:	5f5f006b          	0x5f5f006b
+	Header* up = (Header *)next_index;
+ 272:	6d74                	c.flw	f13,92(x10)
+ 274:	5f00                	c.lw	x8,56(x14)
+ 276:	775f 6863 0062      	0x626863775f
+	next_index += total_size; //allocate the block
+ 27c:	735f 6474 756f      	0x756f6474735f
+ 282:	0074                	c.addi4spn	x13,x2,12
+ 284:	6465                	c.lui	x8,0x19
+ 286:	6c65                	c.lui	x24,0x19
+ 288:	616d                	c.addi16sp	x2,240
+ 28a:	006e                	c.slli	x0,0x1b
+ 28c:	635f 7476 656c      	0x656c7476635f
+ 292:	006e                	c.slli	x0,0x1b
+	avail_mem -= total_size; //deduct from avail mem;
+ 294:	7262                	c.flwsp	f4,56(x2)
+ 296:	6461                	c.lui	x8,0x18
+ 298:	0079                	c.addi	x0,30
+ 29a:	665f 6c69 0065      	0x656c69665f
+ 2a0:	6e5f 6f69 7362      	0x73626f696e5f
+ 2a6:	7300                	c.flw	f8,32(x14)
+ 2a8:	6f68                	c.flw	f10,92(x14)
+ 2aa:	7472                	c.flwsp	f8,60(x2)
+	up->size = total_size - sizeof(Header); //set the size right
+ 2ac:	7520                	c.flw	f8,104(x10)
+ 2ae:	736e                	c.flwsp	f6,248(x2)
+ 2b0:	6769                	c.lui	x14,0x1a
+ 2b2:	656e                	c.flwsp	f10,216(x2)
+ 2b4:	2064                	c.fld	f9,192(x8)
+ 2b6:	6e69                	c.lui	x28,0x1a
+ 2b8:	0074                	c.addi4spn	x13,x2,12
+ 2ba:	615f 6574 6978      	0x69786574615f
+	tj_free((void *)(++up)); //append the new block to the free list first
+ 2c0:	3074                	c.fld	f13,224(x8)
+ 2c2:	5f00                	c.lw	x8,56(x14)
+ 2c4:	6e676973          	csrrsi	x18,0x6e6,14
+ 2c8:	6c61                	c.lui	x24,0x18
+ 2ca:	625f 6675 5f00      	0x5f006675625f
+ 2d0:	7361                	c.lui	x6,0xffff8
+ 2d2:	6d697463          	bgeu	x18,x22,99a <heap+0x27a>
+	return freep;
+ 2d6:	5f65                	c.li	x30,-7
+ 2d8:	7562                	c.flwsp	f10,56(x2)
+ 2da:	0066                	c.slli	x0,0x19
+}
+ 2dc:	725f 7365 6c75      	0x6c757365725f
+ 2e2:	0074                	c.addi4spn	x13,x2,12
+ 2e4:	5f5f 6377 0068      	0x6863775f5f
+ 2ea:	746e6977          	0x746e6977
+ 2ee:	745f 5f00 6f6c      	0x6f6c5f00745f
+void *tj_malloc(unsigned int size) {
+ 2f4:	5f006b63          	bltu	x0,x16,8ea <heap+0x1ca>
+ 2f8:	6c66                	c.flwsp	f24,88(x2)
+ 2fa:	6761                	c.lui	x14,0x18
+ 2fc:	5f003273          	csrrc	x4,0x5f0,x0
+ 300:	74697277          	0x74697277
+	if (size > sizeof(heap)) return NULL;
+ 304:	0065                	c.addi	x0,25
+ 306:	5f5f 6d74 795f      	0x795f6d745f5f
+ 30c:	6165                	c.addi16sp	x2,112
+ 30e:	0072                	c.slli	x0,0x1c
+ 310:	7865                	c.lui	x16,0xffff9
+ 312:	6d61                	c.lui	x26,0x18
+ 314:	6c70                	c.flw	f12,92(x8)
+ 316:	5f65                	c.li	x30,-7
+	if ((size & 3) != 0) {
+ 318:	78650073          	0x78650073
+ 31c:	6d61                	c.lui	x26,0x18
+ 31e:	6c70                	c.flw	f12,92(x8)
+ 320:	5f65                	c.li	x30,-7
+ 322:	0074                	c.addi4spn	x13,x2,12
+		size = size + 4 - (size & 3);
+ 324:	6e5f 616d 6c6c      	0x6c6c616d6e5f
+ 32a:	6c00636f          	jal	x6,69ea <_ebss+0x22be>
+ 32e:	20676e6f          	jal	x28,76534 <_sp+0x66534>
+ 332:	6f64                	c.flw	f9,92(x14)
+	unsigned int total_size = size + sizeof(Header); //need to include the header size as well
+ 334:	6275                	c.lui	x4,0x1d
+ 336:	656c                	c.flw	f11,76(x10)
+ 338:	6100                	c.flw	f8,0(x10)
+ 33a:	6f6e                	c.flwsp	f30,216(x2)
+ 33c:	6874                	c.flw	f13,84(x8)
+ 33e:	7265                	c.lui	x4,0xffff9
+	prevp = freep;
+ 340:	5f00                	c.lw	x8,56(x14)
+ 342:	656e                	c.flwsp	f10,216(x2)
+ 344:	7478                	c.flw	f14,108(x8)
+ 346:	0066                	c.slli	x0,0x19
+ 348:	5f5f 6d74 6d5f      	0x6d5f6d745f5f
+	if (prevp == NULL) {
+ 34e:	5f006e6f          	jal	x28,693e <_ebss+0x2212>
+ 352:	7461                	c.lui	x8,0xffff8
+		prevp = &base;
+ 354:	7865                	c.lui	x16,0xffff9
+ 356:	7469                	c.lui	x8,0xffffa
+ 358:	7300                	c.flw	f8,32(x14)
+ 35a:	6275                	c.lui	x4,0x1d
+ 35c:	6174706f          	jal	x0,48172 <_sp+0x38172>
+		freep = prevp;
+ 360:	6772                	c.flwsp	f14,28(x2)
+ 362:	5f00                	c.lw	x8,56(x14)
+ 364:	735f 6964 6964      	0x69646964735f
+ 36a:	696e                	c.flwsp	f18,216(x2)
+		base.next = freep;
+ 36c:	0074                	c.addi4spn	x13,x2,12
+ 36e:	6f5f 6666 745f      	0x745f66666f5f
+ 374:	7400                	c.flw	f8,40(x8)
+ 376:	5f6a                	c.lwsp	x30,184(x2)
+ 378:	7266                	c.flwsp	f4,120(x2)
+ 37a:	6565                	c.lui	x10,0x19
+ 37c:	7400                	c.flw	f8,40(x8)
+ 37e:	5f6a                	c.lwsp	x30,184(x2)
+		base.size = 0;
+ 380:	6c6c6163          	bltu	x24,x6,a42 <heap+0x322>
+ 384:	5f00636f          	jal	x6,6974 <_ebss+0x2248>
+ 388:	7266                	c.flwsp	f4,120(x2)
+ 38a:	6565                	c.lui	x10,0x19
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 38c:	696c                	c.flw	f11,84(x10)
+ 38e:	5f007473          	csrrci	x8,0x5f0,0
+ 392:	4f4c                	c.lw	x11,28(x14)
+ 394:	525f4b43          	fmadd.d	f22,f30,f5,f10,rmm
+		if (p->size >= size) { //big enough
+ 398:	4345                	c.li	x6,17
+ 39a:	5255                	c.li	x4,-11
+ 39c:	45564953          	0x45564953
+ 3a0:	545f 5f00 6f42      	0x6f425f00545f
+ 3a6:	75006c6f          	jal	x24,6af6 <_ebss+0x23ca>
+			if (p->size == size) // exact size
+ 3aa:	736e                	c.flwsp	f6,248(x2)
+ 3ac:	6769                	c.lui	x14,0x1a
+ 3ae:	656e                	c.flwsp	f10,216(x2)
+ 3b0:	2064                	c.fld	f9,192(x8)
+ 3b2:	72616863          	bltu	x2,x6,ae2 <heap+0x3c2>
+ 3b6:	5f00                	c.lw	x8,56(x14)
+				prevp->next = p->next; // just return that block
+ 3b8:	656e                	c.flwsp	f10,216(x2)
+ 3ba:	685f0077          	0x685f0077
+ 3be:	655f 7272 6f6e      	0x6f6e7272655f
+ 3c4:	7300                	c.flw	f8,32(x14)
+ 3c6:	6f68                	c.flw	f10,92(x14)
+ 3c8:	7472                	c.flwsp	f8,60(x2)
+ 3ca:	6920                	c.flw	f8,80(x10)
+				p->size -= total_size; //break up the block
+ 3cc:	746e                	c.flwsp	f8,248(x2)
+ 3ce:	5f00                	c.lw	x8,56(x14)
+ 3d0:	745f 5f6d 6479      	0x64795f6d745f
+ 3d6:	7961                	c.lui	x18,0xffff8
+ 3d8:	5f00                	c.lw	x8,56(x14)
+ 3da:	735f 7562 0066      	0x667562735f
+ 3e0:	695f 626f 0073      	0x73626f695f
+				p += p->size;
+ 3e6:	5f5f 4946 454c      	0x454c49465f5f
+ 3ec:	5f00                	c.lw	x8,56(x14)
+ 3ee:	626d                	c.lui	x4,0x1b
+ 3f0:	74617473          	csrrci	x8,0x746,2
+ 3f4:	5f65                	c.li	x30,-7
+ 3f6:	0074                	c.addi4spn	x13,x2,12
+ 3f8:	5f5f 4673 4c49      	0x4c4946735f5f
+				p->size = size;
+ 3fe:	0045                	c.addi	x0,17
+ 400:	6d5f 7362 6174      	0x617473626d5f
+ 406:	6574                	c.flw	f13,76(x10)
+			freep = prevp;
+ 408:	5f00                	c.lw	x8,56(x14)
+ 40a:	6172                	c.flwsp	f2,28(x2)
+ 40c:	646e                	c.flwsp	f8,216(x2)
+ 40e:	6e5f 7865 0074      	0x7478656e5f
+			return (void *)(++p);
+ 414:	6d5f 6c62 6e65      	0x6e656c626d5f
+ 41a:	735f 6174 6574      	0x65746174735f
+ 420:	5f00                	c.lw	x8,56(x14)
+ 422:	6e69                	c.lui	x28,0x1a
+ 424:	695f0063          	beq	x30,x21,aa4 <heap+0x384>
+		if (p == freep) //wrapped around free list
+ 428:	646e                	c.flwsp	f8,216(x2)
+ 42a:	7400                	c.flw	f8,40(x8)
+ 42c:	5f6a                	c.lwsp	x30,184(x2)
+ 42e:	616d                	c.addi16sp	x2,240
+ 430:	6c6c                	c.flw	f11,92(x8)
+ 432:	5f00636f          	jal	x6,6a22 <_ebss+0x22f6>
+ 436:	6f6c                	c.flw	f11,92(x14)
+			if ((p = getmoremem(total_size)) == NULL) //if the heap runs out
+ 438:	656c6163          	bltu	x24,x22,a7a <heap+0x35a>
+ 43c:	5f00                	c.lw	x8,56(x14)
+ 43e:	635f 656c 6e61      	0x6e61656c635f
+ 444:	7075                	c.lui	x0,0xffffd
+ 446:	5f00                	c.lw	x8,56(x14)
+ 448:	6e75                	c.lui	x28,0x1d
+ 44a:	63657073          	csrrci	x0,0x636,10
+ 44e:	6669                	c.lui	x12,0x1a
+				return NULL; //well, you got nothing left, gg
+ 450:	6569                	c.lui	x10,0x1a
+ 452:	5f64                	c.lw	x9,124(x14)
+ 454:	6f6c                	c.flw	f11,92(x14)
+ 456:	656c6163          	bltu	x24,x22,a98 <heap+0x378>
+	for (p = prevp->next; ;prevp = p, p = p->next) {
+ 45a:	695f 666e 006f      	0x6f666e695f
+ 460:	6d5f 7861 6477      	0x647778616d5f
+ 466:	725f0073          	0x725f0073
+ 46a:	6565                	c.lui	x10,0x19
+		if (p->size >= size) { //big enough
+ 46c:	746e                	c.flwsp	f8,248(x2)
+ 46e:	5f00                	c.lw	x8,56(x14)
+}
+ 470:	64656573          	csrrsi	x10,0x646,10
+ 474:	5f00                	c.lw	x8,56(x14)
+ 476:	635f 756f 746e      	0x746e756f635f
+ 47c:	5f00                	c.lw	x8,56(x14)
+ 47e:	765f 6c61 6575      	0x65756c61765f
+void *tj_calloc(unsigned int size) {
+ 484:	5f00                	c.lw	x8,56(x14)
+ 486:	6b656573          	csrrsi	x10,0x6b6,10
+ 48a:	5f00                	c.lw	x8,56(x14)
+ 48c:	7066                	c.flwsp	f0,120(x2)
+ 48e:	745f736f          	jal	x6,f83d2 <_sp+0xe83d2>
+ 492:	5f00                	c.lw	x8,56(x14)
+ 494:	745f 5f6d 696d      	0x696d5f6d745f
+	void *mem = tj_malloc(size);
+ 49a:	006e                	c.slli	x0,0x1b
+ 49c:	5f5f 6975 746e      	0x746e69755f5f
+ 4a2:	3631                	c.jal	ffffffae <_sp+0xfffeffae>
+ 4a4:	745f 7000 6572      	0x65727000745f
+	memset(mem, 0, size);
+ 4aa:	7076                	c.flwsp	f0,124(x2)
+ 4ac:	5f00                	c.lw	x8,56(x14)
+ 4ae:	756d                	c.lui	x10,0xffffb
+ 4b0:	746c                	c.flw	f11,108(x8)
+ 4b2:	5f00                	c.lw	x8,56(x14)
+ 4b4:	74727473          	csrrci	x8,0x747,4
+ 4b8:	6c5f6b6f          	jal	x22,f737c <_sp+0xe737c>
+	return mem;
+ 4bc:	7361                	c.lui	x6,0xffff8
+ 4be:	0074                	c.addi4spn	x13,x2,12
+}
+ 4c0:	665f 746e 7079      	0x7079746e665f
+ 4c6:	7365                	c.lui	x6,0xffff9
+ 4c8:	6800                	c.flw	f8,16(x8)
+ 4ca:	6165                	c.addi16sp	x2,112
+ 4cc:	0070                	c.addi4spn	x12,x2,12
+ 4ce:	615f 6464 5f00      	0x5f006464615f
+int main() {
+ 4d4:	555f 6f4c 676e      	0x676e6f4c555f
+ 4da:	5f00                	c.lw	x8,56(x14)
+ 4dc:	64746567          	0x64746567
+ 4e0:	7461                	c.lui	x8,0xffff8
+ 4e2:	5f65                	c.li	x30,-7
+	example_t* pats = (example_t*)tj_malloc(sizeof(example_t));
+ 4e4:	7265                	c.lui	x4,0xffff9
+ 4e6:	0072                	c.slli	x0,0x1c
+ 4e8:	675f 6f6c 6162      	0x61626f6c675f
+ 4ee:	5f6c                	c.lw	x11,124(x14)
+ 4f0:	6d69                	c.lui	x26,0x1a
+ 4f2:	7570                	c.flw	f12,108(x10)
+	pats->brady = 12; // as of 02/2019
+ 4f4:	6572                	c.flwsp	f10,28(x2)
+ 4f6:	705f 7274 5f00      	0x5f007274705f
+ 4fc:	6e75                	c.lui	x28,0x1d
+ 4fe:	7375                	c.lui	x6,0xffffd
+	pats->rings = 6;
+ 500:	6465                	c.lui	x8,0x19
+ 502:	725f 6e61 0064      	0x646e61725f
+ 508:	775f 7364 5f00      	0x5f007364775f
+	pats->goat = 1; // hands down the goat
+ 50e:	745f 5f6d 6477      	0x64775f6d745f
+ 514:	7961                	c.lui	x18,0xffff8
+ 516:	5f00                	c.lw	x8,56(x14)
+	pats->gronk = 87; // tide pods
+ 518:	65756c67          	0x65756c67
+ 51c:	7200                	c.flw	f8,32(x12)
+ 51e:	6e69                	c.lui	x28,0x1a
+ 520:	5f007367          	0x5f007367
+	pats->edelman = 11; // the ironman, superbowl 53 mvp
+ 524:	7a697373          	csrrci	x6,0x7a6,18
+ 528:	5f65                	c.li	x30,-7
+ 52a:	0074                	c.addi4spn	x13,x2,12
+ 52c:	6c5f 3436 5f61      	0x5f6134366c5f
+	example_t* another = (example_t*)tj_malloc(sizeof(example_t));
+ 532:	7562                	c.flwsp	f10,56(x2)
+ 534:	0066                	c.slli	x0,0x19
+ 536:	735f 6769 665f      	0x665f6769735f
+ 53c:	6e75                	c.lui	x28,0x1d
+ 53e:	6e5f0063          	beq	x30,x5,c1e <heap+0x4fe>
+	tj_free(pats);
+ 542:	7562                	c.flwsp	f10,56(x2)
+ 544:	0066                	c.slli	x0,0x19
+ 546:	755f 756e 6573      	0x6573756e755f
+	example_t* third = (example_t*)tj_malloc(sizeof(example_t));
+ 54c:	0064                	c.addi4spn	x9,x2,12
+ 54e:	5f5f 6d74 695f      	0x695f6d745f5f
+ 554:	74736473          	csrrsi	x8,0x747,6
+ 558:	5f00                	c.lw	x8,56(x14)
+ 55a:	6f6c                	c.flw	f11,92(x14)
+	another->rings = 2003;
+ 55c:	746c6163          	bltu	x24,x6,c9e <heap+0x57e>
+ 560:	6d69                	c.lui	x26,0x1a
+ 562:	5f65                	c.li	x30,-7
+ 564:	7562                	c.flwsp	f10,56(x2)
+ 566:	0066                	c.slli	x0,0x19
+	third->rings = 2004;
+ 568:	635f 6f6c 6573      	0x65736f6c635f
+ 56e:	5f00                	c.lw	x8,56(x14)
+ 570:	3472                	c.fldsp	f8,312(x2)
+ 572:	0038                	c.addi4spn	x14,x2,8
+	example_t* latest = (example_t*)tj_calloc(sizeof(example_t));
+ 574:	7661                	c.lui	x12,0xffff8
+ 576:	6961                	c.lui	x18,0x18
+ 578:	5f6c                	c.lw	x11,124(x14)
+ 57a:	656d                	c.lui	x10,0x1b
+ 57c:	006d                	c.addi	x0,27
+ 57e:	6d5f 7462 776f      	0x776f74626d5f
+	latest->rings = 2019;
+ 584:	74735f63          	bge	x6,x7,ce2 <heap+0x5c2>
+ 588:	7461                	c.lui	x8,0xffff8
+ 58a:	0065                	c.addi	x0,25
+ 58c:	705f 7335 6d00      	0x6d007335705f
+	if (latest->goat != 0) exit(2);
+ 592:	6961                	c.lui	x18,0x18
+ 594:	006e                	c.slli	x0,0x1b
+ 596:	6568                	c.flw	f10,76(x10)
+ 598:	6461                	c.lui	x8,0x18
+ 59a:	7265                	c.lui	x4,0xffff9
+ 59c:	5f00                	c.lw	x8,56(x14)
+ 59e:	745f 5f6d 646d      	0x646d5f6d745f
+ 5a4:	7961                	c.lui	x18,0xffff8
+	...
+
+Disassembly of section .debug_ranges:
+
+00000000 <.debug_ranges>:
+	nop
+   0:	ffff                	0xffff
+   2:	ffff                	0xffff
+	...
+	la sp, _sp
+   c:	0090                	c.addi4spn	x12,x2,64
+   e:	0000                	c.unimp
+  10:	00a0                	c.addi4spn	x8,x2,72
+  12:	0000                	c.unimp
+	mv s0, sp
+  14:	00b4                	c.addi4spn	x13,x2,72
+	...
+
+Disassembly of section .debug_frame:
+
+00000000 <.debug_frame>:
+	nop
+   0:	000c                	0xc
+   2:	0000                	c.unimp
+	la ra, exit
+   4:	ffff                	0xffff
+   6:	ffff                	0xffff
+   8:	7c010003          	lb	x0,1984(x2)
+	la sp, _sp
+   c:	0d01                	c.addi	x26,0
+   e:	0002                	c.slli64	x0
+  10:	0024                	c.addi4spn	x9,x2,8
+  12:	0000                	c.unimp
+	mv s0, sp
+  14:	0000                	c.unimp
+  16:	0000                	c.unimp
+	la gp, __global_pointer$
+  18:	00b4                	c.addi4spn	x13,x2,72
+  1a:	0000                	c.unimp
+  1c:	0190                	c.addi4spn	x12,x2,192
+  1e:	0000                	c.unimp
+	li tp, 0
+  20:	0e44                	c.addi4spn	x9,x2,788
+  22:	4830                	c.lw	x12,80(x8)
+	li t0, 0
+  24:	0181                	c.addi	x3,0
+  26:	0288                	c.addi4spn	x10,x2,320
+	li t1, 0
+  28:	0c44                	c.addi4spn	x9,x2,532
+  2a:	0008                	0x8
+	li t2, 0
+  2c:	c1017403          	0xc1017403
+	li s1, 0
+  30:	c844                	c.sw	x9,20(x8)
+  32:	020c                	c.addi4spn	x11,x2,256
+	li a0, 0
+  34:	4430                	c.lw	x12,72(x8)
+  36:	000e                	c.slli	x0,0x3
+	li a1, 0
+  38:	0024                	c.addi4spn	x9,x2,8
+  3a:	0000                	c.unimp
+	li a2, 0
+  3c:	0000                	c.unimp
+  3e:	0000                	c.unimp
+	li a3, 0
+  40:	0244                	c.addi4spn	x9,x2,260
+  42:	0000                	c.unimp
+	li a4, 0
+  44:	00ac                	c.addi4spn	x11,x2,72
+  46:	0000                	c.unimp
+	li a5, 0
+  48:	0e44                	c.addi4spn	x9,x2,788
+  4a:	4830                	c.lw	x12,80(x8)
+	li a6, 0
+  4c:	0181                	c.addi	x3,0
+  4e:	0288                	c.addi4spn	x10,x2,320
+	li a7, 0
+  50:	0c44                	c.addi4spn	x9,x2,532
+  52:	0008                	0x8
+	li s2, 0
+  54:	9002                	c.ebreak
+  56:	44c1                	c.li	x9,16
+	li s3, 0
+  58:	0cc8                	c.addi4spn	x10,x2,596
+  5a:	3002                	c.fldsp	f0,32(x2)
+	li s4, 0
+  5c:	0e44                	c.addi4spn	x9,x2,788
+  5e:	0000                	c.unimp
+	li s5, 0
+  60:	0024                	c.addi4spn	x9,x2,8
+  62:	0000                	c.unimp
+	li s6, 0
+  64:	0000                	c.unimp
+  66:	0000                	c.unimp
+	li s7, 0
+  68:	02f0                	c.addi4spn	x12,x2,332
+  6a:	0000                	c.unimp
+	li s8, 0
+  6c:	0194                	c.addi4spn	x13,x2,192
+  6e:	0000                	c.unimp
+	li s9, 0
+  70:	0e44                	c.addi4spn	x9,x2,788
+  72:	4830                	c.lw	x12,80(x8)
+	li s10, 0
+  74:	0181                	c.addi	x3,0
+  76:	0288                	c.addi4spn	x10,x2,320
+	li s11, 0
+  78:	0c44                	c.addi4spn	x9,x2,532
+  7a:	0008                	0x8
+	li t3, 0
+  7c:	c1017803          	0xc1017803
+	li t4, 0
+  80:	c844                	c.sw	x9,20(x8)
+  82:	020c                	c.addi4spn	x11,x2,256
+	li t5, 0
+  84:	4430                	c.lw	x12,72(x8)
+  86:	000e                	c.slli	x0,0x3
+	li t6, 0
+  88:	0024                	c.addi4spn	x9,x2,8
+  8a:	0000                	c.unimp
+	j main
+  8c:	0000                	c.unimp
+  8e:	0000                	c.unimp
+  90:	0484                	c.addi4spn	x9,x2,576
+  92:	0000                	c.unimp
+  94:	0050                	c.addi4spn	x12,x2,4
+  96:	0000                	c.unimp
+  98:	0e44                	c.addi4spn	x9,x2,788
+  9a:	4830                	c.lw	x12,80(x8)
+  9c:	0181                	c.addi	x3,0
+  9e:	0288                	c.addi4spn	x10,x2,320
+	la sp, _sp
+  a0:	0c44                	c.addi4spn	x9,x2,532
+  a2:	0008                	0x8
+  a4:	c174                	c.sw	x13,68(x10)
+  a6:	c844                	c.sw	x9,20(x8)
+	sw a0, -8(sp)
+  a8:	020c                	c.addi4spn	x11,x2,256
+  aa:	4430                	c.lw	x12,72(x8)
+	nop
+  ac:	000e                	c.slli	x0,0x3
+  ae:	0000                	c.unimp
+	wfi
+  b0:	0024                	c.addi4spn	x9,x2,8
+  b2:	0000                	c.unimp
+void tj_free(void *mem) {
+  b4:	0000                	c.unimp
+  b6:	0000                	c.unimp
+  b8:	04d4                	c.addi4spn	x13,x2,580
+  ba:	0000                	c.unimp
+  bc:	0104                	c.addi4spn	x9,x2,128
+  be:	0000                	c.unimp
+  c0:	0e44                	c.addi4spn	x9,x2,788
+  c2:	4820                	c.lw	x8,80(x8)
+  c4:	0181                	c.addi	x3,0
+  c6:	0288                	c.addi4spn	x10,x2,320
+	if (mem < (void *)heap || mem > (void *)(heap + sizeof(heap)))
+  c8:	0c44                	c.addi4spn	x9,x2,532
+  ca:	0008                	0x8
+  cc:	e802                	c.fswsp	f0,16(x2)
+  ce:	44c1                	c.li	x9,16
+  d0:	0cc8                	c.addi4spn	x10,x2,596
+  d2:	2002                	c.fldsp	f0,0(x2)
+  d4:	0e44                	c.addi4spn	x9,x2,788
 	...

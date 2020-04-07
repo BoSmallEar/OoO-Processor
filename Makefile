@@ -13,7 +13,7 @@
 #
 #
 
-SOURCE = test_progs/sampler.s
+SOURCE = test_progs/basic_malloc.c
 
 CRT = crt.s
 LINKERS = linker.lds
