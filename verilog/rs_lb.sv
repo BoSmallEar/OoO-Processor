@@ -132,14 +132,15 @@ module rs_lb(
             
             // cdb broadcast
             if (cdb_broadcast_valid) begin
-                if (!rs_lb_free[t]) begin
-                    for (t=0; t<`RS_LB_SIZE; t++) begin
+                for (t=0; t<`RS_LB_SIZE; t++) begin
+                    if (!rs_lb_free[t]) begin
                         if (~rs_lb_packets[t].base_ready && (rs_lb_packets[t].base_value==cdb_dest_preg_idx)) begin
                             rs_lb_packets[t].base_ready <= `SD 1'b1;
                             rs_lb_packets[t].base_value <= `SD cdb_value;
                         end
                     end
                 end
+                
             end  
         end    
     end
