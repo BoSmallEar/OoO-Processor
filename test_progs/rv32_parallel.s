@@ -12,22 +12,22 @@
 	    output[i] = ((i + i) + (i + i)) + ((i + i) + (i + i));
 	}
 */
-	data = 0x1000
-    li  x17, 1
-	li	x3, 100000
-	li	x4, data
-loop:	add	x6,	x3,	x3 #
-	add	x9,	x3,	x3 #
-	add	x8,	x3,	x3 #
-	mulhsu x5,	x3,	x3 #
-	mul x7,	x5,	x6 #
-	mulh x10,	x8,	x9 #
-	mulhu x11,	x7,	x10 #
-	sw	x7, 0(x4)
-	addi	x4,	x4,	0x8 #
-	addi	x17,	x17,	0x1 #
-    addi    x3,     x3,     1000
-	slti	x2,	x17,	16 #
-	bne	x2,	x0,	loop #
-	wfi
+	data = 0x1000      
+    li  x17, 1       	# 0
+	li	x3, 100000    	# 4, 8
+	li	x4, data    	# 12 
+loop:	add	x6,	x3,	x3 	# 16
+	add	x9,	x3,	x3 		# 20
+	add	x8,	x3,	x3 		# 24
+	mulhsu x5,	x3,	x3 	# 28
+	mul x7,	x5,	x6 		# 32
+	mulh x10,	x8,	x9 	# 36
+	mulhu x11,	x7,	x10 # 40
+	sw	x7, 0(x4)		# 44
+	addi	x4,	x4,	0x8 # 48
+	addi	x17,	x17,	0x1  # 52
+    addi    x3,     x3,     1000 # 56
+	slti	x2,	x17,	16 # 60
+	bne	x2,	x0,	loop # 64
+	wfi #68
 

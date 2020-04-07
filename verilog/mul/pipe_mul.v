@@ -113,6 +113,8 @@ module mult2cdb(
 	// logic signed [2*`XLEN-1:0] mixed_mul;
 	// logic signed [`XLEN-1:0]   signed_opa;
 	logic done;
+
+	ALU_FUNC  mul_func;
 	
 	mult mult0 (
 		.mcand(absolute_opa),
@@ -127,7 +129,7 @@ module mult2cdb(
 	assign mul_valid = done;
 
 	always_comb begin
-		case (rs_mul_packet.mul_func)
+		case (mul_func)
 			ALU_MUL:	mul_value = (a_sign==b_sign) ? product[`XLEN-1:0] : 1 + ~product[`XLEN-1:0];
 			ALU_MULH:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`XLEN-1:0];
 			ALU_MULHSU:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`DOUBLE_XLEN-1:`XLEN];
@@ -142,6 +144,7 @@ module mult2cdb(
 	    	mul_prf_idx <= `SD rs_mul_packet.dest_preg_idx;
 			mul_rob_idx <= `SD rs_mul_packet.rob_idx;
 			mul_PC	    <= `SD rs_mul_packet.PC;
+			mul_func    <= `SD rs_mul_packet.mul_func;
 		end
 	end
 
