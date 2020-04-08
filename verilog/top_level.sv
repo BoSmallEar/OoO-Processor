@@ -447,8 +447,8 @@ module top_level (
             end
 			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
 			OPA_IS_PC:  begin 
-                fu_opa_value = (id_packet.uncond_branch && ~id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? id_packet.PC : opa_value;
-                fu_opa_ready = (id_packet.uncond_branch && ~id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? 1'b1 : opa_ready;
+                fu_opa_value = (id_packet.uncond_branch && !id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? id_packet.PC : opa_value;
+                fu_opa_ready = (id_packet.uncond_branch && !id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? 1'b1 : opa_ready;
             end
 			OPA_IS_ZERO: fu_opa_value = 0;
             default: begin
@@ -699,6 +699,7 @@ module top_level (
         .commit_mis_pred(mis_pred_is_head),
         .rob_idx(rob_tail),
         .sq_idx(sq_tail),
+        .sq_full(sq_full),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result), 

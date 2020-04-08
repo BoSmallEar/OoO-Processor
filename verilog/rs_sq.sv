@@ -36,6 +36,7 @@ module rs_sq(
     input                           commit_mis_pred,
     input   [`ROB_LEN-1:0]          rob_idx,
     input   [`SQ_LEN-1:0]           sq_idx,
+    input                           sq_full,
     input   [`PRF_LEN-1:0]          cdb_dest_preg_idx,
     input                           cdb_broadcast_valid,
     input   [`XLEN-1:0]             cdb_value,
@@ -79,7 +80,7 @@ module rs_sq(
     always_comb begin
         rs_sq_ex = `RS_SQ_SIZE'h0;
         for (k = 0; k<`RS_SQ_SIZE; k++) begin
-            rs_sq_ex[k] = (~rs_sq_free[k])&&(rs_sq_packets[k].base_ready)&&(rs_sq_packets[k].src_ready);
+            rs_sq_ex[k] = (~rs_sq_free[k])&&(rs_sq_packets[k].base_ready)&&(rs_sq_packets[k].src_ready) && (~sq_full);
         end
     end
 
