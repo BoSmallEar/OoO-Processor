@@ -218,6 +218,7 @@ module dcache(
 
     // Load Buffer Table
     logic load_buffer_full;
+    logic load_buffer_empty;
 	
     // Record value of load buffer send ptr last cycle
     //logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
@@ -272,7 +273,7 @@ module dcache(
                 BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select_byte[7]}}, cache_hit_data_select_byte } : cache_hit_data_select_byte;
                 HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : cache_hit_data_select_half;
                 WORD: dcache_value = cache_hit_data_select_word;
-                default: dcache_value = load_buffer_head_data_select_word;
+                default: dcache_value = cache_hit_data_select_word;
             endcase
 
             //dcache_value = dcache_blocks[load_cache_hit_set][load_cache_hit_way].data[8 * (1<<lb2cache_request_entry.mem_size) +  8 * lb2cache_request_entry.addr[2:0] - 1 : 8 * lb2cache_request_entry.addr[2:0]];
