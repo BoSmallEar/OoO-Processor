@@ -28,7 +28,9 @@ module top_level (
     output logic                    rs_mul_full,
     output logic                    rs_branch_full,
     output logic                    rs_lb_full,
+    output logic                    lb_full,
     output logic                    rs_sq_full,
+    output logic                    sq_full,
     output logic                    result_valid,          // the current output is valid or not    
     output logic  [`XLEN-1:0]       result_PC,              // branch target address that is committed
     output logic                    result_cond_branch,
@@ -208,10 +210,8 @@ module top_level (
     logic                     rs_sq_out_valid;
 
     // LB&SQ OUTPUTS
-    logic                     lb_full;
     logic [`LB_LEN-1:0]       assigned_lb_idx;
     logic                     sq_head_rsvd;
-    logic                     sq_full;
     logic [`SQ_LEN-1:0]       sq_tail;
     logic                     sq_valid;
     logic [`XLEN-1:0]         sq_value;
@@ -657,7 +657,6 @@ module top_level (
         .commit_mis_pred(mis_pred_is_head),
         .rob_idx(rob_tail),
         .lb_idx(assigned_lb_idx),
-        .lb_full(lb_full),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result),
@@ -700,7 +699,6 @@ module top_level (
         .commit_mis_pred(mis_pred_is_head),
         .rob_idx(rob_tail),
         .sq_idx(sq_tail),
-        .sq_full(sq_full),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result), 

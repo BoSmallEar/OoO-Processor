@@ -193,7 +193,8 @@ module load_store_queue(
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (((SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= LB.entries[j].addr) || ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) >= SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
@@ -221,12 +222,17 @@ module load_store_queue(
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (!((SQ.entries[i].addr <= LB.entries[j].addr) && 
-                                    (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size))
-                                    && ( (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= LB.entries[j].addr || (LB.entries[j].addr + 1 << LB.entries[j].mem_size) >= SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
+                                // else if (!((SQ.entries[i].addr <= LB.entries[j].addr) && 
+                                //     (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size))
+                                //     && ( (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= LB.entries[j].addr || (LB.entries[j].addr + 1 << LB.entries[j].mem_size) >= SQ.entries[i].addr)) begin
+                                //     LB.issue_list[j] = 0; 
+                                //     LB.forward_list[j] = 0;
+                                // end
                             end
                         end
                         for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
@@ -249,12 +255,17 @@ module load_store_queue(
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                                    SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size)
-                                    && ( SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr || LB.entries[j].addr + 1 << LB.entries[j].mem_size >= SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
+                                // else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
+                                //     SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size)
+                                //     && ( SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr || LB.entries[j].addr + 1 << LB.entries[j].mem_size >= SQ.entries[i].addr)) begin
+                                //     LB.issue_list[j] = 0; 
+                                //     LB.forward_list[j] = 0;
+                                // end
                             end
                         end
                     end

@@ -175,7 +175,9 @@ module processor (
     logic rs_mul_full;
     logic rs_branch_full;
     logic rs_lb_full;
+    logic lb_full;
     logic rs_sq_full;
+    logic sq_full;
     logic [`XLEN-1:0] result_PC;
     logic result_cond_branch;
     logic result_uncond_branch;
@@ -194,7 +196,7 @@ module processor (
 	                                NO_ERROR;
     
 	logic [4:0] rs_full;
-    assign rs_full = {rs_sq_full,rs_lb_full,rs_branch_full,rs_mul_full,rs_alu_full};
+    assign rs_full = {(rs_sq_full|sq_full), (rs_lb_full|lb_full), rs_branch_full, rs_mul_full, rs_alu_full};
 //////////////////////////////////////////////////
 //                                              //
 //                  IF-ID Stage                 //
@@ -319,7 +321,9 @@ module processor (
         .rs_mul_full(rs_mul_full),
         .rs_branch_full(rs_branch_full),
         .rs_lb_full(rs_lb_full),
+        .lb_full(lb_full),
         .rs_sq_full(rs_sq_full),
+        .sq_full(sq_full),
         .result_valid(result_valid),   //TODO: connect result_valid
         .result_PC(result_PC),
         .result_cond_branch(result_cond_branch),
