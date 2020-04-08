@@ -220,15 +220,10 @@ module dcache(
     logic [`WAY_LEN-1:0] store_cache_hit_way;
 
     // Load Buffer Table
-<<<<<<< HEAD
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
     // logic load_buffer_full;
-=======
-    logic load_buffer_full;
-    logic load_buffer_empty;
->>>>>>> 1cabbc2a8ce7dfd40a020a9a7d3b7f338b4fa440
 	
     // Record value of load buffer send ptr last cycle
     //logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
