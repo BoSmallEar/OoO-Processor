@@ -35,6 +35,7 @@ module rs_lb(
     input                                       commit_mis_pred,
     input [`ROB_LEN-1:0]                        rob_idx,
     input [`LB_LEN-1:0]                         lb_idx,
+    input                                       lb_full,
     input [`PRF_LEN-1:0]                        cdb_dest_preg_idx,
     input                                       cdb_broadcast_valid,
     input [`XLEN-1:0]                           cdb_value,
@@ -76,7 +77,7 @@ module rs_lb(
     always_comb begin
         rs_lb_ex = `RS_LB_SIZE'h0;
         for (k = 0; k<`RS_LB_SIZE; k++) begin
-            rs_lb_ex[k] = (~rs_lb_free[k])&&(rs_lb_packets[k].base_ready);
+            rs_lb_ex[k] = (~rs_lb_free[k])&&(rs_lb_packets[k].base_ready) && (~lb_full);
         end
     end
 

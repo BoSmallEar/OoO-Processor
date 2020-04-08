@@ -657,6 +657,7 @@ module top_level (
         .commit_mis_pred(mis_pred_is_head),
         .rob_idx(rob_tail),
         .lb_idx(assigned_lb_idx),
+        .lb_full(lb_full),
         .cdb_dest_preg_idx(cdb_dest_preg_idx),
         .cdb_broadcast_valid(cdb_broadcast_valid),
         .cdb_value(cdb_result),
