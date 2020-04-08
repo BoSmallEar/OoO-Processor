@@ -143,7 +143,6 @@ module top_level (
      // RAT OUTPUTS
     // logic [`PRF_LEN-1:0]    opa_preg_idx;           // rat -> prf
     // logic [`PRF_LEN-1:0]    opb_preg_idx;           // rat -> prf
-
     // PRF OUTPUTS
 `ifndef DEBUG
     logic [`PRF_LEN-1:0]    prf_free_preg_idx;               // prf -> rat, rob, rs

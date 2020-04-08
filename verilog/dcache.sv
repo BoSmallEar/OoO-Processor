@@ -175,6 +175,9 @@ module dcache(
     output logic    [`PRF_LEN-1:0]  dcache_prf_idx,
     output logic    [`ROB_LEN-1:0]  dcache_rob_idx,
 
+    // LB
+    output logic                    load_buffer_full;
+
     // D-cache/I-cache Arbiter -> Main Memory
     output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
 	output logic    [`XLEN-1:0]     Dcache2mem_addr,         // Address sent to memory
@@ -214,7 +217,7 @@ module dcache(
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
     logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
-    logic load_buffer_full;
+    // logic load_buffer_full;
 	
     // Record value of load buffer send ptr last cycle
     //logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
@@ -383,9 +386,6 @@ module dcache(
             endcase
         end
     end
-
-
-
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if(reset) begin
@@ -430,8 +430,6 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
 
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
-                //load_buffer[load_buffer_tail_ptr].way_idx     <= `SD 0;
-
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end
 
@@ -445,7 +443,6 @@ module dcache(
                 dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
                 dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
             end
-
 
             // Update: accept data from Main Memory
             if (!load_buffer_empty) begin
@@ -485,7 +482,6 @@ module dcache(
                     default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                 endcase
             end
-
 
             // Update: load buffer send ptr
             //if (!sq2cache_request_valid && load_buffer[load_buffer_send_ptr].valid && ~load_buffer[load_buffer_send_ptr].done) begin

@@ -44,5 +44,6 @@ module cache_arbiter(
     assign cache2mem_size =  Dcache2mem_command!=0 ? Dcache2mem_size : DOUBLE;
     assign cache2mem_data =  Dcache2mem_command!=0 ? Dcache2mem_data : 0; 
 
+
 endmodule
 `endif
