@@ -183,6 +183,9 @@ module dcache(
     `ifdef DEBUG
         , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
         , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer
+        , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
+        , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
+        , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr
     `endif
 );
     `ifndef DEBUG
@@ -190,6 +193,9 @@ module dcache(
         DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
         // Load Buffer Table
         LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer;
+        logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+        logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+        logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
     `endif
 
     logic [9:0] load_tag;                            // Unique identifier of a specific block
@@ -211,9 +217,6 @@ module dcache(
     logic [`WAY_LEN-1:0] store_cache_hit_way;
 
     // Load Buffer Table
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
     logic load_buffer_full;
 	
     // Record value of load buffer send ptr last cycle

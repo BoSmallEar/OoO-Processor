@@ -136,6 +136,9 @@ module top_level (
     // Outputs of  dcache
     , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
     , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr
 `endif
 );
 
@@ -152,6 +155,9 @@ module top_level (
     logic [`XLEN-1:0]       opa_value;                       // prf -> rs
     logic                   opb_ready;                       // prf -> rs
     logic [`XLEN-1:0]       opb_value;                       // prf -> rs
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
 `endif
     // ROB OUTPUTS
     logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
@@ -947,6 +953,9 @@ module top_level (
         `ifdef DEBUG
             , .dcache_blocks(dcache_blocks)
             , .load_buffer(load_buffer)
+            , .load_buffer_head_ptr(load_buffer_head_ptr)
+            , .load_buffer_send_ptr(load_buffer_send_ptr)
+            , .load_buffer_tail_ptr(load_buffer_tail_ptr)
         `endif
 );
 

@@ -142,6 +142,9 @@ module proc_testbench;
     // Outputs of dcache
     DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks;
     LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
 
     // commit valid
     logic result_valid;
@@ -264,6 +267,9 @@ module proc_testbench;
         , .load_buffer(load_buffer)
 
         , .result_valid(result_valid)
+        , .load_buffer_head_ptr(load_buffer_head_ptr)
+        , .load_buffer_send_ptr(load_buffer_send_ptr)
+        , .load_buffer_tail_ptr(load_buffer_tail_ptr)
     `endif
     );
 
@@ -643,21 +649,37 @@ endtask
 
 task print_dcache_load_buffer;
     input LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer;
+    input [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    input [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    input [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
+
     $display("====================================== DCACHE LOAD BUFFER =================================================");
     $display("|PC      |prf_idx |rob_idx |address |mem_size|load_signed |mem_tag |done|valid |data    |set_idx |way_idx |");
     for (int i=0; i<`LOAD_BUFFER_SIZE; i++) begin
-        $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d|",  load_buffer[i].PC,
-                                                                        load_buffer[i].prf_idx,
-                                                                        load_buffer[i].rob_idx,
-                                                                        load_buffer[i].address,
-                                                                        load_buffer[i].mem_size,
-                                                                        load_buffer[i].load_signed,
-                                                                        load_buffer[i].mem_tag,
-                                                                        load_buffer[i].done,
-                                                                        load_buffer[i].valid,
-                                                                        load_buffer[i].data,
-                                                                        load_buffer[i].set_idx,
-                                                                        load_buffer[i].way_idx);
+        if (i == load_buffer_head_ptr && i == load_buffer_send_ptr && i == load_buffer_tail_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- HEAD & SEND & TAIL",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_head_ptr && i == load_buffer_send_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- HEAD & SEND",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_head_ptr && i == load_buffer_tail_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- HEAD & TAIL",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_send_ptr && i == load_buffer_tail_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- SEND & TAIL",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_head_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- HEAD",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_send_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- SEND",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else if (i == load_buffer_tail_ptr) begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d| <- TAIL",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
+        else begin
+            $display("|%8d|%8d|%8d|%8d|%8d|%12d|%8d|%4d|%6d|%8d|%8d|%8d|",  load_buffer[i].PC, load_buffer[i].prf_idx, load_buffer[i].rob_idx, load_buffer[i].address, load_buffer[i].mem_size, load_buffer[i].load_signed, load_buffer[i].mem_tag, load_buffer[i].done, load_buffer[i].valid, load_buffer[i].data, load_buffer[i].set_idx, load_buffer[i].way_idx);
+        end
     end
     $display("==========================================================================================================");
 endtask
@@ -784,7 +806,7 @@ endtask  // task show_clk_count
                 rs_sq_free);
             print_lsq(SQ, LB, sq_head, sq_counter, sq_empty, lq_free_idx, lq_issue_idx, lq_forward_idx);
             print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
-            print_dcache_load_buffer(load_buffer);
+            print_dcache_load_buffer(load_buffer, load_buffer_head_ptr, load_buffer_send_ptr, load_buffer_tail_ptr);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");  

@@ -132,6 +132,9 @@ module processor (
     , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
     , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer
     , output logic result_valid
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr
 `endif
 );
 
@@ -140,6 +143,9 @@ module processor (
 `ifndef DEBUG
 	ID_PACKET        id_packet_out;
     logic            result_valid;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
 `endif
 
     logic  	[`XLEN-1:0] 	 Icache2proc_data;
@@ -421,6 +427,9 @@ module processor (
         // Outputs of dcache
         , .dcache_blocks(dcache_blocks)
         , .load_buffer(load_buffer)
+        , .load_buffer_head_ptr(load_buffer_head_ptr)
+        , .load_buffer_send_ptr(load_buffer_send_ptr)
+        , .load_buffer_tail_ptr(load_buffer_tail_ptr)
     `endif
     );
 
