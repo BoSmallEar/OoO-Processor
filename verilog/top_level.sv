@@ -28,7 +28,9 @@ module top_level (
     output logic                    rs_mul_full,
     output logic                    rs_branch_full,
     output logic                    rs_lb_full,
+    output logic                    lb_full,
     output logic                    rs_sq_full,
+    output logic                    sq_full,
     output logic                    result_valid,          // the current output is valid or not    
     output logic  [`XLEN-1:0]       result_PC,              // branch target address that is committed
     output logic                    result_cond_branch,
@@ -136,6 +138,9 @@ module top_level (
     // Outputs of  dcache
     , output DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
     , output LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0]   load_buffer
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
+    , output    [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr
 `endif
 );
 
@@ -151,6 +156,9 @@ module top_level (
     logic [`XLEN-1:0]       opa_value;                       // prf -> rs
     logic                   opb_ready;                       // prf -> rs
     logic [`XLEN-1:0]       opb_value;                       // prf -> rs
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
 `endif
     // ROB OUTPUTS
     logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
@@ -201,10 +209,8 @@ module top_level (
     logic                     rs_sq_out_valid;
 
     // LB&SQ OUTPUTS
-    logic                     lb_full;
     logic [`LB_LEN-1:0]       assigned_lb_idx;
     logic                     sq_head_rsvd;
-    logic                     sq_full;
     logic [`SQ_LEN-1:0]       sq_tail;
     logic                     sq_valid;
     logic [`XLEN-1:0]         sq_value;
@@ -440,8 +446,8 @@ module top_level (
             end
 			OPA_IS_NPC:  fu_opa_value = id_packet.NPC;
 			OPA_IS_PC:  begin 
-                fu_opa_value = (id_packet.uncond_branch && ~id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? id_packet.PC : opa_value;
-                fu_opa_ready = (id_packet.uncond_branch && ~id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? 1'b1 : opa_ready;
+                fu_opa_value = (id_packet.uncond_branch && !id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? id_packet.PC : opa_value;
+                fu_opa_ready = (id_packet.uncond_branch && !id_packet.is_jalr) || (!id_packet.cond_branch && !id_packet.uncond_branch) ? 1'b1 : opa_ready;
             end
 			OPA_IS_ZERO: fu_opa_value = 0;
             default: begin
@@ -946,6 +952,9 @@ module top_level (
         `ifdef DEBUG
             , .dcache_blocks(dcache_blocks)
             , .load_buffer(load_buffer)
+            , .load_buffer_head_ptr(load_buffer_head_ptr)
+            , .load_buffer_send_ptr(load_buffer_send_ptr)
+            , .load_buffer_tail_ptr(load_buffer_tail_ptr)
         `endif
 );
 

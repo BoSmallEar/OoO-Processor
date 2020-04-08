@@ -9,7 +9,7 @@ module load_store_queue(
     // load inputs
     input                                       clock,
     input                                       reset,
-    input               [`XLEN-1:0]                PC,      
+    input               [`XLEN-1:0]             PC,      
     input                                       lb_enable,  
     // From RS_SQ
     input                                       rs_lb_out_valid,
@@ -154,6 +154,10 @@ module load_store_queue(
                 LB.forward_list[j] = 0;
                 LB.issue_list[j] = 0; // Unresolved loads are not considered
             end
+            else if (sq_empty) begin
+                LB.forward_list[j] = 0;
+                LB.issue_list[j] = 1;
+            end
             else begin  
                 // default: can issue
                 LB.forward_list[j] = 0;
@@ -177,20 +181,21 @@ module load_store_queue(
                                     LB.forward_list[j] = 0;
                                 end
                                 else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
-                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    ((SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= (LB.entries[j].addr + 1 << LB.entries[j].mem_size))) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
-                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
-                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 7]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 8]};
+                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 15]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 16]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (((SQ.entries[i].addr + SQ.entries[i].mem_size)>LB.entries[j].addr) || ((LB.entries[j].addr + LB.entries[j].mem_size)>SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
@@ -205,25 +210,30 @@ module load_store_queue(
                                     LB.forward_list[j] = 0;
                                 end
                                 else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
-                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    ((SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= (LB.entries[j].addr + 1 << LB.entries[j].mem_size))) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
-                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
-                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 7]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 8]};
+                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 15]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 16]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                                    SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
-                                    && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
+                                // else if (!((SQ.entries[i].addr <= LB.entries[j].addr) && 
+                                //     (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size))
+                                //     && ( (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= LB.entries[j].addr || (LB.entries[j].addr + 1 << LB.entries[j].mem_size) >= SQ.entries[i].addr)) begin
+                                //     LB.issue_list[j] = 0; 
+                                //     LB.forward_list[j] = 0;
+                                // end
                             end
                         end
                         for (int i=0; i <= `SQ_CAPACITY-1; i++) begin
@@ -233,25 +243,30 @@ module load_store_queue(
                                     LB.forward_list[j] = 0;
                                 end
                                 else if((SQ.entries[i].addr <= LB.entries[j].addr) && 
-                                    ((SQ.entries[i].addr + SQ.entries[i].mem_size) >= (LB.entries[j].addr + LB.entries[j].mem_size))) begin
+                                    ((SQ.entries[i].addr + 1 << SQ.entries[i].mem_size) >= (LB.entries[j].addr + 1 << LB.entries[j].mem_size))) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 1;
                                     addr_diff = LB.entries[j].addr-SQ.entries[i].addr;
                                      case (LB.entries[j].mem_size)
-                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 6]}
-                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 7]};
-                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 14]}
-                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 15]};
+                                        BYTE: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{25{SQ.entries[i].data[8*addr_diff+7]}},  SQ.entries[i].data[8*addr_diff +: 7]}
+                                                                                                : {24'b0, SQ.entries[i].data[8*addr_diff +: 8]};
+                                        HALF: LB.entries[j].forward_data = LB.entries[j].load_signed ? {{17{SQ.entries[i].data[8*addr_diff+15]}}, SQ.entries[i].data[addr_diff*8 +: 15]}
+                                                                                                : {16'b0, SQ.entries[i].data[addr_diff*8 +: 16]};
                                         WORD: LB.entries[j].forward_data = SQ.entries[i].data;
                                         default: LB.entries[j].forward_data = SQ.entries[i].data;
                                     endcase 
                                 end
-                                else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
-                                    SQ.entries[i].addr + SQ.entries[i].mem_size >= LB.entries[j].addr + LB.entries[j].mem_size)
-                                    && ( SQ.entries[i].addr + SQ.entries[i].mem_size>LB.entries[j].addr || LB.entries[j].addr + LB.entries[j].mem_size>SQ.entries[i].addr)) begin
+                                else if ((LB.entries[j].addr < (SQ.entries[i].addr + 1 << SQ.entries[i].mem_size)) &&
+                                ((LB.entries[j].addr + 1 << LB.entries[j].mem_size) > SQ.entries[i].addr)) begin
                                     LB.issue_list[j] = 0; 
                                     LB.forward_list[j] = 0;
                                 end
+                                // else if (!(SQ.entries[i].addr <= LB.entries[j].addr && 
+                                //     SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr + 1 << LB.entries[j].mem_size)
+                                //     && ( SQ.entries[i].addr + 1 << SQ.entries[i].mem_size >= LB.entries[j].addr || LB.entries[j].addr + 1 << LB.entries[j].mem_size >= SQ.entries[i].addr)) begin
+                                //     LB.issue_list[j] = 0; 
+                                //     LB.forward_list[j] = 0;
+                                // end
                             end
                         end
                     end
