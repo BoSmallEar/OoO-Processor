@@ -768,45 +768,45 @@ endtask  // task show_clk_count
                         $realtime);
             debug_counter <= 0;
         end else begin
-            $display("///////////////////// cycle: %d    time: %t", debug_counter, $realtime);
-            if (result_mis_pred) begin
-                $display("mis_predict!!!");
-            end
-            print_cdb(module_select,
-                cdb_broadcast_valid,
-                cdb_result,
-                cdb_dest_preg_idx,
-                cdb_rob_idx,
-                cdb_broadcast_inst_PC,
-                cdb_br_direction,
-                cdb_br_target_PC,
-                cdb_mis_pred,
-                cdb_local_pred_direction,
-                cdb_global_pred_direction,
-                rob_packets,
-                rob_head,
-                result_valid
-            );
-            print_id_packet(id_packet_out);
-            print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
-            print_rs_in_opab(fu_opa_ready, fu_opb_ready, fu_opa_value, fu_opb_value, fu_offset);
-            print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
-            print_rob(rob_packets, rob_head, rob_tail);
-            print_rat(rat_packets, opa_preg_idx, opb_preg_idx);
-            print_rrat(rrat_packets);
-            print_rs(rs_alu_packets, 
-                rs_alu_free,
-                rs_branch_packets, 
-                rs_branch_free,
-                rs_mul_packets,
-                rs_mul_free,
-                rs_lb_packets,
-                rs_lb_free,
-                rs_sq_packets,
-                rs_sq_free);
-            print_lsq(SQ, LB, sq_head, sq_counter, sq_empty, lq_free_idx, lq_issue_idx, lq_forward_idx);
-            print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
-            print_dcache_load_buffer(load_buffer, load_buffer_head_ptr, load_buffer_send_ptr, load_buffer_tail_ptr);
+            // $display("///////////////////// cycle: %d    time: %t", debug_counter, $realtime);
+            // if (result_mis_pred) begin
+            //     $display("mis_predict!!!");
+            // end
+            // print_cdb(module_select,
+            //     cdb_broadcast_valid,
+            //     cdb_result,
+            //     cdb_dest_preg_idx,
+            //     cdb_rob_idx,
+            //     cdb_broadcast_inst_PC,
+            //     cdb_br_direction,
+            //     cdb_br_target_PC,
+            //     cdb_mis_pred,
+            //     cdb_local_pred_direction,
+            //     cdb_global_pred_direction,
+            //     rob_packets,
+            //     rob_head,
+            //     result_valid
+            // );
+            // print_id_packet(id_packet_out);
+            // print_prf_out(prf_free_preg_idx, dest_preg_idx, opa_ready, opa_value, opb_ready, opb_value);
+            // print_rs_in_opab(fu_opa_ready, fu_opb_ready, fu_opa_value, fu_opb_value, fu_offset);
+            // print_prf(prf_values,prf_free,prf_valid,free_preg_queue,free_preg_queue_head,free_preg_queue_tail);
+            // print_rob(rob_packets, rob_head, rob_tail);
+            // print_rat(rat_packets, opa_preg_idx, opb_preg_idx);
+            // print_rrat(rrat_packets);
+            // print_rs(rs_alu_packets, 
+            //     rs_alu_free,
+            //     rs_branch_packets, 
+            //     rs_branch_free,
+            //     rs_mul_packets,
+            //     rs_mul_free,
+            //     rs_lb_packets,
+            //     rs_lb_free,
+            //     rs_sq_packets,
+            //     rs_sq_free);
+            // print_lsq(SQ, LB, sq_head, sq_counter, sq_empty, lq_free_idx, lq_issue_idx, lq_forward_idx);
+            // print_predict(btb_taken, btb_target_PC, tournament_taken, local_taken, global_taken);
+            // print_dcache_load_buffer(load_buffer, load_buffer_head_ptr, load_buffer_send_ptr, load_buffer_tail_ptr);
             // deal with any halting conditions
             if(processor_error_status != NO_ERROR || debug_counter > 50000000) begin
                 $display("@@@ Unified Memory contents hex on left, decimal on right: ");  

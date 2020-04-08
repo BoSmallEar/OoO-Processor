@@ -176,7 +176,7 @@ module dcache(
     output logic    [`ROB_LEN-1:0]  dcache_rob_idx,
 
     // LB
-    output logic                    load_buffer_full;
+    output logic                    load_buffer_full,
 
     // D-cache/I-cache Arbiter -> Main Memory
     output BUS_COMMAND              Dcache2mem_command,      // Issue a bus load
@@ -237,7 +237,7 @@ module dcache(
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[load_set][i].valid && (dcache_blocks[load_set][i].tag == load_tag)) begin
-                    load_cache_hit = 1;
+                    load_cache_hit = 0;
                     load_cache_hit_way = i;
                 end
             end
@@ -319,7 +319,7 @@ module dcache(
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[store_set][i].valid && (dcache_blocks[store_set][i].tag == store_tag)) begin
-                    store_cache_hit = 1;
+                    store_cache_hit = 0;
                     store_cache_hit_way = i;
                 end
             end

@@ -244,6 +244,7 @@ module top_level (
     logic [`PRF_LEN-1:0]      dcache_prf_idx;           // dcache->cdb
     logic [`ROB_LEN-1:0]      dcache_rob_idx;           // dcache->cdb 
     logic [`XLEN-1:0]         dcache_PC;                // dcache->cdb
+    logic                     dcache_load_buffer_full;  // dcache->lsq
 
 `ifndef DEBUG
     logic                           fu_opa_ready;
@@ -734,6 +735,8 @@ module top_level (
         .rs_sq_packet(rs_sq_packet),
         .store_enable(store_enable),
         .commit_mis_pred(mis_pred_is_head),
+        // dcache
+        .dcache_load_buffer_full(dcache_load_buffer_full),
         // outputs
         .lb_full(lb_full),
         .assigned_lb_idx(assigned_lb_idx),
@@ -942,7 +945,8 @@ module top_level (
         .dcache_value(dcache_value),
         .dcache_prf_idx(dcache_prf_idx),
         .dcache_rob_idx(dcache_rob_idx),
-
+        // LB
+        .load_buffer_full(dcache_load_buffer_full),
         // Main Memory
         .Dcache2mem_command(Dcache2mem_command),      // Issue a bus load
         .Dcache2mem_addr(Dcache2mem_addr),         // Address sent to memory
