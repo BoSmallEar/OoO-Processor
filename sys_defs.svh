@@ -664,7 +664,7 @@ typedef struct packed {
 } VICTIM;
 
 typedef struct packed {
-    logic valid;
+	logic valid;
     logic [`XLEN-1:0] PC;
     logic [`PRF_LEN-1:0]  prf_idx;
     logic [`ROB_LEN-1:0]  rob_idx;  
@@ -675,6 +675,8 @@ typedef struct packed {
     logic done;
     // logic [2*`XLEN-1:0] data; 
 	CACHE_BLOCK data;
+	logic cache_data_valid;
+	CACHE_BLOCK cache_data;
     logic [`SET_LEN-1:0] set_idx;
     logic [`WAY_LEN-1:0] way_idx;
 } LOAD_BUFFER_ENTRY;
