@@ -504,7 +504,7 @@ module dcache(
             end
 
             // Update: load buffer send ptr
-            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) || load_buffer[load_buffer_send_ptr].done) begin
+            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) || (load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].valid)) begin
                 if (!load_buffer[load_buffer_send_ptr].done) load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
