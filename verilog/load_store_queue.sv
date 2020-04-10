@@ -25,6 +25,7 @@ module load_store_queue(
     input                               commit_mis_pred,
     // From dcache
     input                               dcache_load_buffer_full,
+    input                               dcache_load_buffer_empty,
     // load outputs
     // To previous stage : no space for you
     output logic                       lb_full,
@@ -157,12 +158,12 @@ module load_store_queue(
             end
             else if (sq_empty) begin
                 LB.forward_list[j] = 0;
-                LB.issue_list[j] = 1;
+                LB.issue_list[j] = !dcache_load_buffer_full;
             end
             else begin  
                 // default: can issue
                 LB.forward_list[j] = 0;
-                LB.issue_list[j] = dcache_load_buffer_full? 0 : 1; // Unresolv
+                LB.issue_list[j] =  !dcache_load_buffer_full; // Unresolv
                 // Consider the loads older than the secure_age
                 // E.g. Index 0 - store ...
                 //                load (age: 1)
