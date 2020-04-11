@@ -768,6 +768,11 @@ endtask  // task show_clk_count
                         $realtime);
             debug_counter <= 0;
         end else begin
+            //if (result_valid) begin
+            //    $display("cycle: %d", debug_counter);
+            //    $display("commit PC: %d", rob_packets[rob_head].PC);
+            //    $display("commit value: %d", prf_values[rob_packets[rob_head].dest_preg_idx]);
+            //end
             // $display("///////////////////// cycle: %d    time: %t", debug_counter, $realtime);
             // if (result_mis_pred) begin
             //     $display("mis_predict!!!");
@@ -835,3 +840,4 @@ endtask  // task show_clk_count
     // $finish;    
 
 endmodule
+

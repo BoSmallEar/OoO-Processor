@@ -38,7 +38,7 @@ module cache_arbiter(
     assign mem2Icache_tag = mem2cache_tag;
     assign mem2Dcache_tag = mem2cache_tag;
     assign mem2Dcache_response_valid = (Dcache2mem_command != 0);
-    assign mem2Icache_response_valid =  (Dcache2mem_command == 0) && (Icache2mem_command!=0);
+    assign mem2Icache_response_valid =  (Dcache2mem_command == 0) && (Icache2mem_command!=0) ;
     assign cache2mem_command = Dcache2mem_command!=0 ? Dcache2mem_command : Icache2mem_command;
     assign cache2mem_addr =  Dcache2mem_command!=0 ? Dcache2mem_addr : Icache2mem_addr;
     assign cache2mem_size =  Dcache2mem_command!=0 ? Dcache2mem_size : DOUBLE;

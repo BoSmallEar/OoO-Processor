@@ -251,6 +251,7 @@ module processor (
         .mem2Icache_data(mem2Icache_data),             // Data coming back from memory
         .mem2Icache_tag(mem2Icache_tag),    
         .mem2Icache_response_valid(mem2Icache_response_valid),
+	    .commit_mis_pred(result_mis_pred),
 
         // outputs
         .Icache2proc_data(Icache2proc_data),

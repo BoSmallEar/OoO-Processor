@@ -8,51 +8,6 @@
 // TODO: Victim Cache
 
 
-
-// typedef struct packed {
-//     logic [7:0] tag;
-//     logic [4:0] block_num;
-//     logic [2:0] block_offset;
-// } DMAP_ADDR; //address breakdown for a direct-mapped cache
-
-// typedef struct packed {
-//     logic [9:0] tag;
-//     logic [2:0] set_index;
-//     logic [2:0] block_offset;
-// } SASS_ADDR; //address breakdown for a set associative cache
-
-// typedef union packed {
-//     DMAP_ADDR d; //for direct mapped
-//     SASS_ADDR s; //for set associative
-// } ADDR; //now we can pass around a common data type
-
-// typedef struct packed {
-//     logic [9:0]     tag;
-//     CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
-// } DCACHE_BLOCK;
-
-// typedef struct packed {
-//     logic [63:0]    data1;
-//     logic [63:0]    data2;  
-// } VICTIM;
-
-// typedef struct packed {
-//     logic valid;
-//     logic [`XLEN-1:0] PC;
-//     logic [`PRF_LEN-1:0]  prf_idx;
-//     logic [`ROB_LEN-1:0]  rob_idx;  
-//     logic [`XLEN-1:0] address;
-//     MEM_SIZE mem_size;
-//     logic load_signed;
-//     logic [3:0] mem_tag;
-//     logic done;
-//     logic [`XLEN-1:0] data; 
-
-//     logic [`SET_LEN-1:0] set_idx;
-//     logic [`WAY_LEN-1:0] way_idx;
-// } LOAD_BUFFER_ENTRY;
-
-
 /* Cache Restrictions:
  - 256 bytes of data in the data cache.   [32 blocks]
  - One victim cache of two 8-byte blocks (16 bytes of data)
@@ -67,19 +22,7 @@
 
        3'b: {Idx:2, Idx:1, Idx:0}
 */
-    // tree_plru tree_plru_0(
-    //     .load_set_idx_lookup(load_set),
 
-    //     .load_update_enable(),
-    //     .load_set_idx_hit(load_set),
-    //     .load_way_idx_hit(),
-        
-    //     .store_update_enable(),
-    //     .store_set_idx_hit(),
-    //     .store_way_idx_hit(),
-
-    //     .load_lru_way_idx(block_index_lru)
-    // );
 
 module tree_plru(
     input       clock,
@@ -117,6 +60,7 @@ module tree_plru(
     end
 
     int i;
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             for (i=0; i<`SET_SIZE; i++)
@@ -403,6 +347,7 @@ module dcache(
             endcase
         end
     end
+
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if(reset) begin

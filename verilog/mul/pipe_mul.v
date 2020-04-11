@@ -1,7 +1,7 @@
 `define STAGE 8
 `define DOUBLE_XLEN 2*`XLEN
 // Negative numbers are represented in 2's complement form
-
+ 
 module mult_stage(
 	input clock, reset, start,
 	input [`DOUBLE_XLEN-1:0] product_in, mplier_in, mcand_in,
@@ -69,87 +69,74 @@ endmodule
 
 /* -------------------------------  Modified Multiplier  ---------------------------------*/
 module mult2cdb(
-    input                        clock,
+  input                        clock,
 	input 						 reset,
-    input RS_MUL_PACKET          rs_mul_packet,
-    input                        mul_enable,
+  input RS_MUL_PACKET          rs_mul_packet,
+  input                        mul_enable,
 
 	output logic [`XLEN-1:0]     mul_value,
-    output logic                 mul_valid,
+  output logic                 mul_valid,
 	output logic				 mul_free,
-    output logic [`PRF_LEN-1:0]  mul_prf_idx,
-    output logic [`ROB_LEN-1:0]  mul_rob_idx,
+  output logic [`PRF_LEN-1:0]  mul_prf_idx,
+  output logic [`ROB_LEN-1:0]  mul_rob_idx,
 	output logic [`XLEN-1:0]     mul_PC
 );
-	/*
-	MUL performs an XLEN-bit×XLEN-bit multiplication and places the lower XLEN bits in the destination register. 
-	MULH, MULHU, and MULHSU perform the same multiplication 
-	but return the upper XLEN bits of the full 2×XLEN-bit product, 
-	for
-	signed×signed,
-	unsigned×unsigned,
-	and signed×unsigned multiplication respectively. 
-	*/
+	
+	logic		 			[`DOUBLE_XLEN-1:0] 	unsigned_opa, unsigned_opb;
+	logic signed 	[`DOUBLE_XLEN-1:0] 	signed_opa, signed_opb;
+	logic		 			[`DOUBLE_XLEN-1:0] 	absolute_opa, absolute_opb;
+	logic 		 												a_sign, b_sign;
+	logic 		 												a_sign_latch, b_sign_latch;
+	logic 				[`DOUBLE_XLEN-1:0] 	product;
+	logic 				[`DOUBLE_XLEN-1:0] 	product_inv;
+	// logic signed 	[`DOUBLE_XLEN-1:0] 	signed_mul;
+	// logic signed 	[`DOUBLE_XLEN-1:0] 	mixed_mul;
+	// logic        	[`DOUBLE_XLEN-1:0] 	unsigned_mul;
 
-	logic		 [`DOUBLE_XLEN-1:0] unsigned_opa, unsigned_opb;
-	// logic signed [`DOUBLE_XLEN-1:0] signed_opa, signed_opb;
-	logic		 [`DOUBLE_XLEN-1:0] absolute_opa, absolute_opb;
-	logic 		 					a_sign, b_sign;
-
-	assign a_sign = rs_mul_packet.opa_value[`XLEN-1];
-	assign b_sign = rs_mul_packet.opb_value[`XLEN-1];
-
-    assign unsigned_opa = {{`XLEN{1'b0}}, rs_mul_packet.opa_value};
-    assign unsigned_opb = {{`XLEN{1'b0}}, rs_mul_packet.opb_value};
-	// assign signed_opa   = a_sign == 0 ? unsigned_opa : {{`XLEN{1'b1}}, rs_mul_packet.opa_value};
-	// assign signed_opb   = b_sign == 0 ? unsigned_opb : {{`XLEN{1'b1}}, rs_mul_packet.opb_value};
-
+  assign unsigned_opa = {{`XLEN{1'b0}}, rs_mul_packet.opa_value};
+  assign unsigned_opb = {{`XLEN{1'b0}}, rs_mul_packet.opb_value};
+	assign signed_opa = rs_mul_packet.opa_value;
+	assign signed_opb = rs_mul_packet.opb_value;
+	assign a_sign =  (rs_mul_packet.mul_func == ALU_MULHU|| rs_mul_packet.mul_func == ALU_MULHSU)? 0: rs_mul_packet.opa_value[`XLEN-1];
+	assign b_sign =  (rs_mul_packet.mul_func == ALU_MULHU || rs_mul_packet.mul_func == ALU_MULHSU) ? 0: rs_mul_packet.opb_value[`XLEN-1];
 	assign absolute_opa   = a_sign == 0 ? unsigned_opa : 1 + ~{{`XLEN{1'b1}}, rs_mul_packet.opa_value};
 	assign absolute_opb   = b_sign == 0 ? unsigned_opb : 1 + ~{{`XLEN{1'b1}}, rs_mul_packet.opb_value};
-
-
-	
-	logic [`DOUBLE_XLEN-1:0] product;
-	// logic signed [2*`XLEN-1:0] mixed_mul;
-	// logic signed [`XLEN-1:0]   signed_opa;
-	logic done;
-
-	ALU_FUNC  mul_func;
 	
 	mult mult0 (
 		.mcand(absolute_opa),
 		.mplier(absolute_opb),
-        .clock(clock),
-        .reset(reset),
-        .start(mul_enable), 
-        .product(product),
-        .done(done)
-    );
+    .clock(clock),
+    .reset(reset),
+    .start(mul_enable), 
+    .product(product),
+    .done(done)
+  );
 
 	assign mul_valid = done;
+	assign product_inv = 1 + ~product;
 
 	always_comb begin
-		case (mul_func)
-			ALU_MUL:	mul_value = (a_sign==b_sign) ? product[`XLEN-1:0] : 1 + ~product[`XLEN-1:0];
-			ALU_MULH:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`XLEN-1:0];
-			ALU_MULHSU:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`DOUBLE_XLEN-1:`XLEN];
-			//ALU_MULHSU: mul_value = mixed_mul[2*`XLEN-1:`XLEN];
-			ALU_MULHU:	mul_value = (a_sign==b_sign) ? product[`DOUBLE_XLEN-1:`XLEN] : 1 + ~product[`DOUBLE_XLEN-1:`XLEN];
-			default:	mul_value = `XLEN'hfacebeec;  // here to prevent latches
+		case (rs_mul_packet.mul_func)
+			ALU_MUL:    mul_value = (a_sign_latch == b_sign_latch) ? product[`XLEN-1:0] : product_inv[`XLEN-1:0];
+			ALU_MULH:   mul_value = (a_sign_latch == b_sign_latch) ? product[`DOUBLE_XLEN-1:`XLEN] : product_inv[`DOUBLE_XLEN-1:`XLEN];
+			ALU_MULHSU:	mul_value = product[`DOUBLE_XLEN-1:`XLEN];
+			ALU_MULHU:  mul_value = product[`DOUBLE_XLEN-1:`XLEN];
+			default:    mul_value = `XLEN'hfacebeec;  // here to prevent latches
 		endcase
 	end
 
+	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (mul_enable) begin
-	    	mul_prf_idx <= `SD rs_mul_packet.dest_preg_idx;
-			mul_rob_idx <= `SD rs_mul_packet.rob_idx;
-			mul_PC	    <= `SD rs_mul_packet.PC;
-			mul_func    <= `SD rs_mul_packet.mul_func;
+	    mul_prf_idx  <= `SD rs_mul_packet.dest_preg_idx;
+			mul_rob_idx  <= `SD rs_mul_packet.rob_idx;
+			mul_PC	     <= `SD rs_mul_packet.PC;
+			a_sign_latch <= `SD a_sign;
+			b_sign_latch <= `SD b_sign;
 		end
 	end
 
-
-    // synopsys sync_set_reset "reset"
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin 
 			mul_free <= `SD 1'b1;
@@ -162,3 +149,5 @@ module mult2cdb(
 		end
 	end
 endmodule
+
+

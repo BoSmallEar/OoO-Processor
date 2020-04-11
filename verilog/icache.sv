@@ -7,7 +7,7 @@
 //icahe: 256 byte: 32 lines, block size: 8 byte
         /*
         Cache Size Restriction
-        I 256 bytes (32 x 8 bytes) of data in th，
+        I 256 bytes (32 x 8 bytes) of data in th?
     output logic                    Icahce_valid,e instruction cache
         I 256 bytes of data in the data cache.
         I One victim cache of two 8-byte blocks (16 bytes of data).
@@ -15,7 +15,7 @@
         I LRU bits, valid bits, tag bits, etc...
         I Levels the playing field for everyone, and avoids long synthesis times
         Number of CDBs can be at most number of ways you are superscalar
-        I Why? Design Compiler doesn’t punish you as much as it should
+        I Why? Design Compiler doesn?t punish you as much as it should
         I You will need to schedule or stall functional units
         */
 
@@ -27,7 +27,8 @@ module icache(
     input           [3:0]           mem2Icache_response,         // Tag from memory about current request
 	input           [63:0]          mem2Icache_data,             // Data coming back from memory
 	input           [3:0]           mem2Icache_tag,    
-    input                           mem2Icache_response_valid,    
+    input                           mem2Icache_response_valid,
+    input                           commit_mis_pred, 
 
     //outputs
     output logic  	[`XLEN-1:0] 	Icache2proc_data,
@@ -47,6 +48,7 @@ module icache(
     logic       data_write_enable;
 
     logic [3:0] curr_mem_tag;
+    logic commit_mis_pred_delay;
 
     assign Icache2proc_data = proc2Icache_addr[2]? icache_blocks[current_index].data[63:32]: icache_blocks[current_index].data[31:0];
     assign Icache2proc_valid = icache_blocks[current_index].valid && (icache_blocks[current_index].tag == current_tag);
@@ -56,14 +58,14 @@ module icache(
     wire unanswered_miss = changed_addr ? !Icache2proc_valid :
                             miss_outstanding & (mem2Icache_response==0 || !mem2Icache_response_valid);
 
-    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0);
+    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0) && !commit_mis_pred_delay;
     wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable;
-                            
+
     assign {current_tag, current_index} = proc2Icache_addr[31:3];
     assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
     assign Icache2mem_command = {1'b0,(miss_outstanding && !changed_addr)};
-    
-    
+
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
             int i;
@@ -74,8 +76,10 @@ module icache(
             last_index       <= `SD 5'b1;// arbitrary except 0
             last_tag         <= `SD 8'b1;//arbitrary except 0
             curr_mem_tag     <= `SD 4'b0;
-        end 
+            commit_mis_pred_delay <= `SD 1'b0;
+        end
         else begin
+            commit_mis_pred_delay <= `SD commit_mis_pred;
             miss_outstanding <= `SD unanswered_miss;
             last_index       <= `SD current_index;
             last_tag         <= `SD current_tag;

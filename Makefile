@@ -13,7 +13,7 @@
 #
 #
 
-SOURCE = test_progs/priority_queue.c
+SOURCE = test_progs/alexnet.c
 
 CRT = crt.s
 LINKERS = linker.lds
