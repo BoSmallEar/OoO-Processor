@@ -629,10 +629,6 @@ typedef union packed {
     logic [7:0][7:0] bytes;
 } CACHE_BLOCK;
 
-typedef struct packed{
-	logic lru;
-	DCACHE_BLOCK [1:0] victim_blocks;
-} VICTIM_CACHE;
 
 typedef struct packed{
     logic [7:0]     tag;
@@ -663,10 +659,10 @@ typedef struct packed {
     CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
 } DCACHE_BLOCK;
 
-typedef struct packed {
-    logic [63:0]    data1;
-    logic [63:0]    data2;  
-} VICTIM;
+typedef struct packed{
+	logic lru;
+	DCACHE_BLOCK [1:0] victim_blocks;
+} VICTIM_CACHE;
 
 typedef struct packed {
 	logic valid;
