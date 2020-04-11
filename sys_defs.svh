@@ -630,6 +630,11 @@ typedef union packed {
 } CACHE_BLOCK;
 
 typedef struct packed{
+	logic lru;
+	DCACHE_BLOCK [1:0] victim_blocks;
+} VICTIM_CACHE;
+
+typedef struct packed{
     logic [7:0]     tag;
     logic           valid;
     CACHE_BLOCK    data;  
@@ -672,11 +677,8 @@ typedef struct packed {
     MEM_SIZE mem_size;
     logic load_signed;
     logic [3:0] mem_tag;
-    logic done;
-    // logic [2*`XLEN-1:0] data; 
-	CACHE_BLOCK data;
-	logic cache_data_valid;
-	CACHE_BLOCK cache_data;
+    logic done; 
+	CACHE_BLOCK data; 
     logic [`SET_LEN-1:0] set_idx;
     logic [`WAY_LEN-1:0] way_idx;
 } LOAD_BUFFER_ENTRY;

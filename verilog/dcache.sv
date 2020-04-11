@@ -130,6 +130,7 @@ module dcache(
     output logic    [2*`XLEN-1:0]     Dcache2mem_data 
     `ifdef DEBUG
         , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
+        , output    VICTIM_CACHE victim_cache
         , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer
         , output    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
         , output    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
@@ -180,25 +181,25 @@ module dcache(
     always_comb begin
         // check cache hit/miss
         if (lb2cache_request_valid) begin
-            load_cache_hit = 0;
-            cache_data_valid = 0;
-            cache_data = 0;
+            load_cache_hit = 0; 
             load_cache_hit_set = load_set;
             load_cache_hit_way = 0;
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[load_set][i].valid && (dcache_blocks[load_set][i].tag == load_tag)) begin
-                    load_cache_hit = 0;
-                    cache_data_valid = 1;
-                    cache_data = dcache_blocks[load_set][i].data;
+                    load_cache_hit = 0; 
                     load_cache_hit_way = i;
                 end
             end
+            // for(int i = 0; i < 2; i++) begin
+            //     if (victim_cache.victim_blocks[i].valid && (victim_cache.victim_blocks[i].tag == load_tag)) begin
+            //         load_cache_hit = 0; 
+            //         load_cache_hit_way = i;
+            //     end
+            // end
         end
-        else begin
-            cache_data = 0;
-            load_cache_hit = 0;
-            cache_data_valid = 0;
+        else begin 
+            load_cache_hit = 0; 
             load_cache_hit_set = 0;
             load_cache_hit_way = 0;
         end
@@ -384,9 +385,7 @@ module dcache(
 
             // Update: load buffer tail ptr
            if (lb2cache_request_valid && !load_cache_hit) begin
-                load_buffer[load_buffer_tail_ptr].valid       <= `SD 1;
-                load_buffer[load_buffer_tail_ptr].cache_data_valid       <= `SD cache_data_valid;
-                load_buffer[load_buffer_tail_ptr].cache_data      <= `SD cache_data;
+                load_buffer[load_buffer_tail_ptr].valid       <= `SD 1; 
                 load_buffer[load_buffer_tail_ptr].PC          <= `SD lb2cache_request_entry.PC;
                 load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.rd_preg;
                 load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx;
@@ -395,8 +394,8 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].mem_size    <= `SD lb2cache_request_entry.mem_size;
                 load_buffer[load_buffer_tail_ptr].load_signed <= `SD lb2cache_request_entry.load_signed;
                 load_buffer[load_buffer_tail_ptr].mem_tag     <= `SD 0;
-                load_buffer[load_buffer_tail_ptr].done        <= `SD cache_data_valid;
-                load_buffer[load_buffer_tail_ptr].data        <= `SD cache_data_valid? cache_data : 0;
+                load_buffer[load_buffer_tail_ptr].done        <= `SD 0;
+                load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
 
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
@@ -406,23 +405,16 @@ module dcache(
             if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
                 load_buffer[load_buffer_head_ptr].valid   <= `SD 0;
                 load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
-
-                if (load_buffer[load_buffer_head_ptr].cache_data_valid) begin
-                  assert ( load_buffer[load_buffer_head_ptr].cache_data  == load_buffer[load_buffer_head_ptr].data)  else $error("It's gone wrong");  
-                end
-                else begin 
-                    // update cache block data
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
-                    for (int it = 0; it< `WAY_SIZE; it++) begin
-                        if (it != load_buffer_head_assigned_way && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag == load_buffer[load_buffer_head_ptr].address[15:6] && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid)
-                        begin
-                                assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].data == load_buffer[load_buffer_head_ptr].data)  else $error("It's gone wrong");                 
-                                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid <= `SD 0;
-                        end
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
+                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
+                for (int it = 0; it< `WAY_SIZE; it++) begin
+                    if (it != load_buffer_head_assigned_way && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag == load_buffer[load_buffer_head_ptr].address[15:6] && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid)
+                    begin
+                            assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].data == load_buffer[load_buffer_head_ptr].data)  else $error("It's gone wrong");                 
+                            dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid <= `SD 0;
                     end
-                end
+                end 
             end
 
             // Update: accept data from Main Memory
@@ -449,8 +441,8 @@ module dcache(
             end
 
             // Update: load buffer send ptr
-            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) || (load_buffer[load_buffer_send_ptr].done && load_buffer[load_buffer_send_ptr].valid)) begin
-                if (!load_buffer[load_buffer_send_ptr].done) load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
+            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD)) begin
+                load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
 
