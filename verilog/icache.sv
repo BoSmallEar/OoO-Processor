@@ -47,8 +47,7 @@ module icache(
     logic       miss_outstanding;
     logic       data_write_enable;
 
-    logic [3:0] curr_mem_tag;
-    logic commit_mis_pred_delay;
+    logic [3:0] curr_mem_tag; 
 
     assign Icache2proc_data = proc2Icache_addr[2]? icache_blocks[current_index].data[63:32]: icache_blocks[current_index].data[31:0];
     assign Icache2proc_valid = icache_blocks[current_index].valid && (icache_blocks[current_index].tag == current_tag);
@@ -58,8 +57,8 @@ module icache(
     wire unanswered_miss = changed_addr ? !Icache2proc_valid :
                             miss_outstanding & (mem2Icache_response==0 || !mem2Icache_response_valid);
 
-    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0) && !commit_mis_pred_delay;
-    wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable;
+    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0);
+    wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable ;
 
     assign {current_tag, current_index} = proc2Icache_addr[31:3];
     assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
@@ -75,17 +74,15 @@ module icache(
             miss_outstanding <= `SD 1'b0;
             last_index       <= `SD 5'b1;// arbitrary except 0
             last_tag         <= `SD 8'b1;//arbitrary except 0
-            curr_mem_tag     <= `SD 4'b0;
-            commit_mis_pred_delay <= `SD 1'b0;
+            curr_mem_tag     <= `SD 4'b0; 
         end
-        else begin
-            commit_mis_pred_delay <= `SD commit_mis_pred;
+        else begin 
             miss_outstanding <= `SD unanswered_miss;
             last_index       <= `SD current_index;
             last_tag         <= `SD current_tag;
 
             if (update_mem_tag) begin
-                if (changed_addr) begin
+                if (changed_addr ) begin
                     curr_mem_tag <= `SD 4'b0;
                 end
                 else if (miss_outstanding) begin
@@ -98,9 +95,9 @@ module icache(
 
             // update I-cache contents
             if(data_write_enable) begin
-                icache_blocks[current_index].tag <= `SD current_tag;
-                icache_blocks[current_index].valid <= `SD 1'b1;
-                icache_blocks[current_index].data <= `SD mem2Icache_data;
+                icache_blocks[last_index].tag <= `SD last_tag;
+                icache_blocks[last_index].valid <= `SD 1'b1;
+                icache_blocks[last_index].data <= `SD mem2Icache_data;
             end
         end
     end
