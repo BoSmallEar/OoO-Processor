@@ -131,8 +131,7 @@ module dcache(
     output MEM_SIZE                 Dcache2mem_size,         // load: always cache block; store: depends
     output logic    [2*`XLEN-1:0]     Dcache2mem_data 
     `ifdef DEBUG
-        , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks
-        , output    VICTIM_CACHE victim_cache
+        , output    DCACHE_BLOCK [`SET_SIZE-1:0][`WAY_SIZE-1:0] dcache_blocks 
         , output    LOAD_BUFFER_ENTRY [`LOAD_BUFFER_SIZE-1:0] load_buffer
         , output    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr
         , output    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr
@@ -152,6 +151,7 @@ module dcache(
     logic [9:0] load_tag;                            // Unique identifier of a specific block
     logic [2:0] load_set;  
     logic [12:0] victim_load_tag;                          // Decides the position in the cache
+    VICTIM_CACHE victim_cache
     assign load_tag = lb2cache_request_entry.addr[15:6];
     assign load_set = lb2cache_request_entry.addr[5:3];
     assign victim_load_tag = lb2cache_request_entry.addr[15:3];
@@ -179,11 +179,6 @@ module dcache(
     logic [`SET_LEN-1:0] store_cache_hit_set;
     logic [`WAY_LEN-1:0] store_cache_hit_way;
 
-    // Load Buffer Table
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_head_ptr;
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr;
-    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_tail_ptr;
-    // logic load_buffer_full;
 	
     // Record value of load buffer send ptr last cycle
     //logic [`LOAD_BUFFER_LEN-1:0] load_buffer_send_ptr_last_cycle;
