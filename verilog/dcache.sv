@@ -584,7 +584,7 @@ module dcache(
                                 BYTE: victim_cache.victim_blocks[store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
                                 HALF: victim_cache.victim_blocks[store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
                                 WORD: victim_cache.victim_blocks[store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
-                                default: victim_cache,victim_blocks[store_cache_hit_way].data.words[sq2casche_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: victim_cache.victim_blocks[store_cache_hit_way].data.words[sq2casche_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
                         endcase    
                         victim_cache.lru <= `SD ~store_cache_hit_way[0];
                     end
