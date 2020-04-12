@@ -359,7 +359,7 @@ module dcache(
 
     
     logic [2:0] plru_set_idx_lookup;
-    assigm plru_set_idx_lookup = load_cache_hit? load_cache_hit_set : load_buffer[load_buffer_head_ptr].set_idx;
+    assign plru_set_idx_lookup = load_cache_hit? load_cache_hit_set : load_buffer[load_buffer_head_ptr].set_idx;
     
     tree_plru tree_plru_0(
         .clock(clock),
