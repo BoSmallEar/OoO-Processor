@@ -172,7 +172,7 @@ module dcache(
     logic [12:0] victim_store_tag;                             // Decides the position in the cache
     assign store_tag = sq2cache_request_entry.addr[15:6];
     assign store_set = sq2cache_request_entry.addr[5:3];
-    assign victim_store_tag = lb2cache_request_entry.addr[15:3]; 
+    assign victim_store_tag = sq2cache_request_entry.addr[15:3]; 
 
     logic store_cache_hit;
     logic store_cache_hit_victim;
