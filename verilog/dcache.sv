@@ -157,7 +157,7 @@ module dcache(
     // load instruction
     logic load_cache_hit;
     logic load_cache_hit_victim;
-    logic load_buffer_forward;   ]
+    logic load_buffer_forward;  
     logic load_buffer_hit;
     logic [63:0] cache_data;
     logic [`SET_LEN-1:0] load_cache_hit_set;
@@ -217,6 +217,7 @@ module dcache(
                 if (load_buffer[i].valid && load_buffer[i].address[15:3] == lb2cache_request_entry.addr[15:3]) begin
                     if (load_buffer[i].data_valid) begin
                         load_cache_hit = 1; 
+                        load_cache_hit_victim = 0; 
                         load_buffer_hit_entry = i;
                         load_buffer_hit = 1;
                     end 
