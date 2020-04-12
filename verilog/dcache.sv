@@ -151,7 +151,7 @@ module dcache(
     logic [9:0] load_tag;                            // Unique identifier of a specific block
     logic [2:0] load_set;  
     logic [12:0] victim_load_tag;                          // Decides the position in the cache
-    VICTIM_CACHE victim_cache
+    VICTIM_CACHE victim_cache;
     assign load_tag = lb2cache_request_entry.addr[15:6];
     assign load_set = lb2cache_request_entry.addr[5:3];
     assign victim_load_tag = lb2cache_request_entry.addr[15:3];
