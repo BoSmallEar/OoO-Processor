@@ -659,13 +659,20 @@ typedef struct packed {
     CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
 } DCACHE_BLOCK;
 
+typedef struct packed {
+    logic [12:0]     tag;
+    logic           valid;
+    CACHE_BLOCK     data;   // 8 Byte (64 bits) per block plus metadata
+} VICTIM_BLOCK;
+
 typedef struct packed{
 	logic lru;
-	DCACHE_BLOCK [1:0] victim_blocks;
+	VICTIM_BLOCK [1:0] victim_blocks;
 } VICTIM_CACHE;
 
 typedef struct packed {
-	logic valid;
+	logic valid; 
+	logic allocate_dcache;
     logic [`XLEN-1:0] PC;
     logic [`PRF_LEN-1:0]  prf_idx;
     logic [`ROB_LEN-1:0]  rob_idx;  

@@ -148,24 +148,32 @@ module dcache(
     `endif
 
     logic [9:0] load_tag;                            // Unique identifier of a specific block
-    logic [2:0] load_set;                            // Decides the position in the cache
+    logic [2:0] load_set;  
+    logic [12:0] victim_load_tag;                          // Decides the position in the cache
     assign load_tag = lb2cache_request_entry.addr[15:6];
     assign load_set = lb2cache_request_entry.addr[5:3];
+    assign victim_load_tag = lb2cache_request_entry.addr[15:3];
 
     // load instruction
     logic load_cache_hit;
+    logic load_cache_hit_victim;
+    logic load_buffer_forward;
     logic cache_data_valid;
     logic [63:0] cache_data;
     logic [`SET_LEN-1:0] load_cache_hit_set;
     logic [`WAY_LEN-1:0] load_cache_hit_way;
+    logic [`LOAD_BUFFER_LEN-1:0] load_buffer_hit_entry;
 
     // store instruction
     logic [9:0] store_tag;                            // Unique identifier of a specific block
-    logic [2:0] store_set;                            // Decides the position in the cache
+    logic [2:0] store_set;   
+    logic [12:0] victim_store_tag;                             // Decides the position in the cache
     assign store_tag = sq2cache_request_entry.addr[15:6];
     assign store_set = sq2cache_request_entry.addr[5:3];
+    assign victim_store_tag = lb2cache_request_entry.addr[15:3]; 
 
     logic store_cache_hit;
+    logic store_cache_hit_victim;
     logic [`SET_LEN-1:0] store_cache_hit_set;
     logic [`WAY_LEN-1:0] store_cache_hit_way;
 
@@ -182,25 +190,42 @@ module dcache(
         // check cache hit/miss
         if (lb2cache_request_valid) begin
             load_cache_hit = 0; 
+            load_cache_hit_victim = 0; 
             load_cache_hit_set = load_set;
             load_cache_hit_way = 0;
+            load_buffer_hit_entry = 0;
+            load_buffer_forward = 0;
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[load_set][i].valid && (dcache_blocks[load_set][i].tag == load_tag)) begin
-                    load_cache_hit = 0; 
+                    load_cache_hit = 1; 
+                    load_cache_hit_victim = 0; 
+                    load_buffer_forward = 0; 
                     load_cache_hit_way = i;
                 end
             end
-            // for(int i = 0; i < 2; i++) begin
-            //     if (victim_cache.victim_blocks[i].valid && (victim_cache.victim_blocks[i].tag == load_tag)) begin
-            //         load_cache_hit = 0; 
-            //         load_cache_hit_way = i;
-            //     end
-            // end
+            for(int i = 0; i < 2; i++) begin
+                if (victim_cache.victim_blocks[i].valid && (victim_cache.victim_blocks[i].tag == victim_load_tag)) begin
+                    load_cache_hit = 1; 
+                    load_cache_hit_victim = 1; 
+                    load_buffer_forward = 0; 
+                    load_cache_hit_way = i;
+                end
+            end
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
+                if (load_buffer[i].valid && load_buffer.address[15:3] == lb2cache_request_entry.addr[15:3]) begin
+                    load_cache_hit = 0; 
+                    load_cache_hit_victim = 0;  
+                    load_buffer_forward = 1;
+                    load_cache_hit_way = 0;
+                end 
+            end
         end
         else begin 
             load_cache_hit = 0; 
+            load_cache_hit_victim = 0; 
             load_cache_hit_set = 0;
+            load_buffer_forward = 0;
             load_cache_hit_way = 0;
         end
     end
@@ -212,10 +237,10 @@ module dcache(
     // 1st/2nd 4 byte of cache hit block data
     logic [31:0] cache_hit_data_select_word;
     logic [15:0] cache_hit_data_select_half;
-    logic [7:0] cache_hit_data_select_byte;
-    assign cache_hit_data_select_word =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.words[lb2cache_request_entry.addr[2]];
-    assign cache_hit_data_select_half =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.halves[lb2cache_request_entry.addr[2:1]];
-    assign cache_hit_data_select_byte =  dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.bytes[lb2cache_request_entry.addr[2:0]];
+    logic [7:0]  cache_hit_data_select_byte;
+    assign cache_hit_data_select_word =  load_cache_hit_victim?  victim_cache.victim_blocks[load_cache_hit_way].data.words[lb2cache_request_entry.addr[2]] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.words[lb2cache_request_entry.addr[2]];
+    assign cache_hit_data_select_half =  load_cache_hit_victim? victim_cache.victim_blocks[load_cache_hit_way].data.halves[lb2cache_request_entry.addr[2:1]] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.halves[lb2cache_request_entry.addr[2:1]];
+    assign cache_hit_data_select_byte =  load_cache_hit_victim? victim_cache.victim_blocks[load_cache_hit_way].data.bytes[lb2cache_request_entry.addr[2:0]] : dcache_blocks[load_cache_hit_set][load_cache_hit_way].data.bytes[lb2cache_request_entry.addr[2:0]];
 
     // 1st/2nd 4 byte of load_buffer_head_data
     logic [31:0] load_buffer_head_data_select_word; // [63:32] or [31:0] of the cache line
@@ -230,6 +255,7 @@ module dcache(
 
         // cache hit
         if (load_cache_hit) begin
+           
             case(lb2cache_request_entry.mem_size) 
                 BYTE: dcache_value = lb2cache_request_entry.load_signed ? { {24{cache_hit_data_select_byte[7]}}, cache_hit_data_select_byte } : {24'b0,cache_hit_data_select_byte};
                 HALF: dcache_value = lb2cache_request_entry.load_signed ? { {16{cache_hit_data_select_half[15]}}, cache_hit_data_select_half } : {16'b0,cache_hit_data_select_half};
@@ -270,18 +296,28 @@ module dcache(
     always_comb begin
         if (sq2cache_request_valid) begin
             store_cache_hit = 0;
+            store_cache_hit_victim = 0; 
             store_cache_hit_set = store_set;
             store_cache_hit_way = 0;
 
             for(int i = 0; i < `WAY_SIZE; i++) begin
                 if (dcache_blocks[store_set][i].valid && (dcache_blocks[store_set][i].tag == store_tag)) begin
                     store_cache_hit = 1;
+                    store_cache_hit_victim = 0; 
+                    store_cache_hit_way = i;
+                end
+            end
+            for(int i = 0; i < 2; i++) begin
+                if (victim_cache.victim_blocks[i].valid && (victim_cache.victim_blocks[i].tag == victim_store_tag)) begin
+                    store_cache_hit = 1; 
+                    store_cache_hit_victim = 1; 
                     store_cache_hit_way = i;
                 end
             end
         end
         else begin
             store_cache_hit = 0;
+            store_cache_hit_victim = 0; 
             store_cache_hit_set = 0;
             store_cache_hit_way = 0;
         end
@@ -357,6 +393,10 @@ module dcache(
                     dcache_blocks[j][k].valid <= `SD 1'b0;
                 end
             end
+            for(int i = 0; i < 2; i++) begin
+                victim_cache.victim_blocks[i].valid <= `SD 1'b0;  
+            end
+            victim_cache.lru <= `SD 1'b0;
 
             for(int i = 0; i < `LOAD_BUFFER_SIZE; i++)
                 load_buffer[i].valid <= `SD 0;
@@ -385,36 +425,44 @@ module dcache(
 
             // Update: load buffer tail ptr
            if (lb2cache_request_valid && !load_cache_hit) begin
+                for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin 
+                    if (load_buffer[i].valid && load_buffer[i].address[15:3] == lb2cache_request_entry.addr[15:3]) begin
+                        load_buffer[i].allocate_dcache <= `SD 0; 
+                    end
+                end
                 load_buffer[load_buffer_tail_ptr].valid       <= `SD 1; 
                 load_buffer[load_buffer_tail_ptr].PC          <= `SD lb2cache_request_entry.PC;
                 load_buffer[load_buffer_tail_ptr].prf_idx     <= `SD lb2cache_request_entry.rd_preg;
-                load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx;
-
+                load_buffer[load_buffer_tail_ptr].rob_idx     <= `SD lb2cache_request_entry.rob_idx; 
                 load_buffer[load_buffer_tail_ptr].address     <= `SD lb2cache_request_entry.addr;
                 load_buffer[load_buffer_tail_ptr].mem_size    <= `SD lb2cache_request_entry.mem_size;
                 load_buffer[load_buffer_tail_ptr].load_signed <= `SD lb2cache_request_entry.load_signed;
                 load_buffer[load_buffer_tail_ptr].mem_tag     <= `SD 0;
-                load_buffer[load_buffer_tail_ptr].done        <= `SD 0;
+                load_buffer[load_buffer_tail_ptr].done        <= `SD load_buffer_forward;
                 load_buffer[load_buffer_tail_ptr].data        <= `SD 0;
-
+                load_buffer[load_buffer_tail_ptr].allocate_dcache        <= `SD 1;
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end
 
             // Update: load buffer head ptr
             if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
-                load_buffer[load_buffer_head_ptr].valid   <= `SD 0;
-                load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
-                dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
-                for (int it = 0; it< `WAY_SIZE; it++) begin
-                    if (it != load_buffer_head_assigned_way && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag == load_buffer[load_buffer_head_ptr].address[15:6] && dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid)
-                    begin
-                            assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].data == load_buffer[load_buffer_head_ptr].data)  else $error("It's gone wrong");                 
-                            dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid <= `SD 0;
+                for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin 
+                    if (load_buffer[i].valid && load_buffer[i].address[15:3] ==  load_buffer[load_buffer_head_ptr].address[15:3]) begin
+                        load_buffer[i].data <= `SD   load_buffer[load_buffer_head_ptr].data; 
                     end
-                end 
+                end
+                load_buffer[load_buffer_head_ptr].valid   <= `SD 0;
+                load_buffer[load_buffer_head_ptr].done   <= `SD 0;
+                load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
+                if (load_buffer[load_buffer_head_ptr].allocate_dcache) begin
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
+                    for (int it = 0; it< `WAY_SIZE; it++) begin 
+                        assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag != load_buffer[load_buffer_head_ptr].tag)  else $error("It's gone wrong");    
+                    end 
+                end
             end
 
             // Update: accept data from Main Memory
@@ -441,8 +489,10 @@ module dcache(
             end
 
             // Update: load buffer send ptr
-            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD)) begin
-                load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
+            if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) ||   load_buffer[load_buffer_send_ptr].done) begin
+                if (!load_buffer[load_buffer_send_ptr].done) begin
+                    load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
+                end
                 load_buffer_send_ptr                        <= `SD (load_buffer_send_ptr == `LOAD_BUFFER_SIZE-1)? 0: (load_buffer_send_ptr + 1);
             end
 
