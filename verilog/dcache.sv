@@ -55,7 +55,7 @@ module tree_plru(
             3'b100: load_lru_way_idx = 0;
             3'b101: load_lru_way_idx = 3;
             3'b110: load_lru_way_idx = 1;
-            3'b111: load_lru_way_idx = 3;
+            3'b111: load_lru_way_idx = 3; 
         endcase
     end
 
@@ -574,7 +574,7 @@ module dcache(
                     end
                 end
                 else begin
-                    if (!(!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done) && (store_cache_hit_way != victim_cache.lru))) begin
+                    if (!(!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done) && (store_cache_hit_way == victim_cache.lru))) begin
                        case (sq2cache_request_entry.mem_size)
                                 BYTE: victim_cache.victim_blocks[store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
                                 HALF: victim_cache.victim_blocks[store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
