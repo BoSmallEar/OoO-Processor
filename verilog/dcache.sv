@@ -474,7 +474,7 @@ module dcache(
             end
 
             // Update: load buffer head ptr
-            if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
+            if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].data_valid)) begin
                 for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin 
                     if (load_buffer[i].valid && load_buffer[i].address[15:3] ==  load_buffer[load_buffer_head_ptr].address[15:3]) begin
                         assert (load_buffer[i].done)  else $error("wrong go go");    
