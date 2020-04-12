@@ -460,7 +460,7 @@ module dcache(
                     dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
                     dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
                     for (int it = 0; it< `WAY_SIZE; it++) begin 
-                        assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag != load_buffer[load_buffer_head_ptr].tag)  else $error("It's gone wrong");    
+                        assert (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag != load_buffer[load_buffer_head_ptr].address[15:6])  else $error("It's gone wrong");    
                     end 
                 end
             end
