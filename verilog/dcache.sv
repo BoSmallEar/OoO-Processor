@@ -66,21 +66,23 @@ module tree_plru(
             for (i=0; i<`SET_SIZE; i++)
                 status_bit_table[i] <= `SD 3'h0;
         end 
-        else if(load_update_enable) begin
-            case (load_way_idx_hit)
-                2'b00: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b11};
-                2'b01: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b10};
-                2'b10: status_bit_table[load_set_idx_hit] <= `SD {1'b1, status_bit_table[load_set_idx_hit][1], 1'b0};
-                2'b11: status_bit_table[load_set_idx_hit] <= `SD {1'b0, status_bit_table[load_set_idx_hit][1], 1'b0};
-            endcase
-        end
-        else if(store_update_enable) begin
-            case (store_way_idx_hit)
-                2'b00: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b11};
-                2'b01: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b10};
-                2'b10: status_bit_table[store_set_idx_hit] <= `SD {1'b1, status_bit_table[store_set_idx_hit][1], 1'b0};
-                2'b11: status_bit_table[store_set_idx_hit] <= `SD {1'b0, status_bit_table[store_set_idx_hit][1], 1'b0};
-            endcase
+        else begin 
+            if(load_update_enable) begin
+                case (load_way_idx_hit)
+                    2'b00: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b11};
+                    2'b01: status_bit_table[load_set_idx_hit] <= `SD {status_bit_table[load_set_idx_hit][2], 2'b10};
+                    2'b10: status_bit_table[load_set_idx_hit] <= `SD {1'b1, status_bit_table[load_set_idx_hit][1], 1'b0};
+                    2'b11: status_bit_table[load_set_idx_hit] <= `SD {1'b0, status_bit_table[load_set_idx_hit][1], 1'b0};
+                endcase
+            end
+            if(store_update_enable) begin
+                case (store_way_idx_hit)
+                    2'b00: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b11};
+                    2'b01: status_bit_table[store_set_idx_hit] <= `SD {status_bit_table[store_set_idx_hit][2], 2'b10};
+                    2'b10: status_bit_table[store_set_idx_hit] <= `SD {1'b1, status_bit_table[store_set_idx_hit][1], 1'b0};
+                    2'b11: status_bit_table[store_set_idx_hit] <= `SD {1'b0, status_bit_table[store_set_idx_hit][1], 1'b0};
+                endcase
+            end
         end
     end
 
@@ -348,7 +350,7 @@ module dcache(
     logic [`WAY_LEN-1:0] load_buffer_head_plru_way;
 
     logic load_plru_update_enable;
-    assign load_plru_update_enable = dcache_valid;
+    assign load_plru_update_enable = dcache_valid && !load_buffer_hit;
 
     logic [`SET_LEN-1:0] load_plru_update_set;
     assign load_plru_update_set = load_cache_hit ? load_set : load_buffer[load_buffer_head_ptr].set_idx;
@@ -365,7 +367,7 @@ module dcache(
         .load_set_idx_hit(load_plru_update_set),
         .load_way_idx_hit(load_plru_update_way),
         
-        .store_update_enable(sq2cache_request_valid && store_cache_hit),
+        .store_update_enable(sq2cache_request_valid && store_cache_hit && ((store_cache_hit_set != store_cache_hit_set) || (!load_plru_update_enable))),
         .store_set_idx_hit(store_cache_hit_set),
         .store_way_idx_hit(store_cache_hit_way),
 
