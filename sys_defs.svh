@@ -673,6 +673,7 @@ typedef struct packed{
 typedef struct packed {
 	logic valid; 
 	logic allocate_dcache;
+	logic data_valid;
     logic [`XLEN-1:0] PC;
     logic [`PRF_LEN-1:0]  prf_idx;
     logic [`ROB_LEN-1:0]  rob_idx;  
