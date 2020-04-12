@@ -213,7 +213,7 @@ module dcache(
                 end
             end
             for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
-                if (load_buffer[i].valid && load_buffer.address[15:3] == lb2cache_request_entry.addr[15:3]) begin
+                if (load_buffer[i].valid && load_buffer[i].address[15:3] == lb2cache_request_entry.addr[15:3]) begin
                     load_cache_hit = 0; 
                     load_cache_hit_victim = 0;  
                     load_buffer_forward = 1;
