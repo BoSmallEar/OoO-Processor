@@ -346,7 +346,7 @@ module dcache(
     logic [`WAY_SIZE-1:0] way_psel_gnt;
     logic no_way_selected;
     logic [`WAY_SIZE-1:0] way_gnt_bus;
-    logic [`WAY_LEN-1:0] load_buffer_head_assigned_way;
+    logic [`WAY_LEN-1:0] dcache_evict_way;
     logic [`WAY_LEN-1:0] load_buffer_head_plru_way;
 
     logic load_plru_update_enable;
@@ -355,19 +355,23 @@ module dcache(
     logic [`SET_LEN-1:0] load_plru_update_set;
     assign load_plru_update_set = load_cache_hit ? load_set : load_buffer[load_buffer_head_ptr].set_idx;
     logic [`WAY_LEN-1:0] load_plru_update_way;
-    assign load_plru_update_way = load_cache_hit ? load_cache_hit_way : load_buffer_head_assigned_way;
+    assign load_plru_update_way = load_cache_hit&& !load_cache_hit_victim ? load_cache_hit_way : dcache_evict_way;
+
+    
+    logic [2:0] plru_set_idx_lookup;
+    assigm plru_set_idx_lookup = load_cache_hit? load_cache_hit_set : load_buffer[load_buffer_head_ptr].set_idx;
     
     tree_plru tree_plru_0(
         .clock(clock),
         .reset(reset),
         
-        .load_set_idx_lookup(load_buffer[load_buffer_head_ptr].set_idx),
+        .load_set_idx_lookup(plru_set_idx_lookup),
 
         .load_update_enable(load_plru_update_enable),
         .load_set_idx_hit(load_plru_update_set),
         .load_way_idx_hit(load_plru_update_way),
         
-        .store_update_enable(sq2cache_request_valid && store_cache_hit && ((store_cache_hit_set != store_cache_hit_set) || (!load_plru_update_enable))),
+        .store_update_enable(sq2cache_request_valid && store_cache_hit && ((store_cache_hit_set != load_plru_update_set) || (!load_plru_update_enable))),
         .store_set_idx_hit(store_cache_hit_set),
         .store_way_idx_hit(store_cache_hit_way),
 
@@ -375,7 +379,7 @@ module dcache(
     );
     
     psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
-        .req({~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][3].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][2].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][1].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][0].valid}),
+        .req({~dcache_blocks[plru_set_idx_lookup][3].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][2].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][1].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][0].valid}),
         .gnt(way_psel_gnt),
         .gnt_bus(way_gnt_bus),
         .empty(no_way_selected)
@@ -383,15 +387,15 @@ module dcache(
     
     always_comb begin
         if (no_way_selected) begin
-            load_buffer_head_assigned_way = load_buffer_head_plru_way;
+            dcache_evict_way = load_buffer_head_plru_way;
         end
         else begin
             case(way_psel_gnt) 
-                4'b0001: load_buffer_head_assigned_way = `WAY_LEN'h0;
-                4'b0010: load_buffer_head_assigned_way = `WAY_LEN'h1;
-                4'b0100: load_buffer_head_assigned_way = `WAY_LEN'h2;
-                4'b1000: load_buffer_head_assigned_way = `WAY_LEN'h3;
-                default: load_buffer_head_assigned_way = load_buffer_head_plru_way;
+                4'b0001: dcache_evict_way = `WAY_LEN'h0;
+                4'b0010: dcache_evict_way = `WAY_LEN'h1;
+                4'b0100: dcache_evict_way = `WAY_LEN'h2;
+                4'b1000: dcache_evict_way = `WAY_LEN'h3;
+                default: dcache_evict_way = load_buffer_head_plru_way;
             endcase
         end
     end
@@ -461,6 +465,18 @@ module dcache(
                 load_buffer[load_buffer_tail_ptr].set_idx     <= `SD load_set;
                 load_buffer_tail_ptr              <= `SD (load_buffer_tail_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_tail_ptr + 1);
             end
+            // swap data between dcache and victim cache
+            if (load_cache_hit && load_cache_hit_victim) begin
+                dcache_blocks[load_cache_hit_set][dcache_evict_way].data <= `SD  victim_cache.victim_blocks[load_cache_hit_way].data;
+                dcache_blocks[load_cache_hit_set][dcache_evict_way].tag <= `SD   victim_cache.victim_blocks[load_cache_hit_way].tag[15:6];
+                dcache_blocks[load_cache_hit_set][dcache_evict_way].valid <= `SD  victim_cache.victim_blocks[load_cache_hit_way].valid;
+
+                victim_cache.victim_blocks[load_cache_hit_way].tag <= `SD {dcache_blocks[load_cache_hit_set][dcache_evict_way].tag,load_cache_hit_set};
+                victim_cache.victim_blocks[load_cache_hit_way].data <= `SD dcache_blocks[load_cache_hit_set][dcache_evict_way].data;
+                victim_cache.victim_blocks[load_cache_hit_way].valid <= `SD dcache_blocks[load_cache_hit_set][dcache_evict_way].valid;
+                victim_cache.lru <= `SD ~load_cache_hit_way[0];
+
+            end
 
             // Update: load buffer head ptr
             if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
@@ -476,12 +492,19 @@ module dcache(
 	            load_buffer[load_buffer_tail_ptr].data_valid  <= `SD 0;
                 load_buffer_head_ptr                      <= `SD (load_buffer_head_ptr == `LOAD_BUFFER_SIZE-1) ? 0 : (load_buffer_head_ptr + 1);
                 if (load_buffer[load_buffer_head_ptr].allocate_dcache) begin
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
-                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][load_buffer_head_assigned_way].valid <= `SD 1;
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].data <= `SD load_buffer[load_buffer_head_ptr].data;
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].tag <= `SD load_buffer[load_buffer_head_ptr].address[15:6];
+                    dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].valid <= `SD 1;
                     for (int it = 0; it< `WAY_SIZE; it++) begin 
                         assert ((!dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].valid) || dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][it].tag != load_buffer[load_buffer_head_ptr].address[15:6])  else $error("It's gone wrong");    
                     end 
+                    //if valid, we should update the evicted one to victim cache
+                    if (dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].valid) begin
+                        victim_cache.victim_blocks[victim_cache.lru].valid <= `SD 1'b1;
+                        victim_cache.victim_blocks[victim_cache.lru].tag <= `SD {dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].tag,load_buffer[load_buffer_head_ptr].set_idx};
+                        victim_cache.victim_blocks[victim_cache.lru].data <= `SD dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][dcache_evict_way].data;
+                        victim_cache.lru <= `SD ~victim_cache.lru;
+                    end
                 end
             end
 
@@ -506,14 +529,66 @@ module dcache(
             end
 
             // Update: store hit -> cache
-            if (store_cache_hit&& !(!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)&& store_cache_hit_set ==load_buffer[load_buffer_head_ptr].set_idx && load_buffer_head_assigned_way ==  store_cache_hit_way)) begin
-                //dcache_blocks[store_cache_hit_set][store_cache_hit_way].valid <= `SD 1'b0;
-                case (sq2cache_request_entry.mem_size)
-                    BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
-                    HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
-                    WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
-                    default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
-                endcase
+            if (store_cache_hit) begin
+                if(!store_cache_hit_victim) begin
+                    if  (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
+                        if (store_cache_hit_set ==load_buffer[load_buffer_head_ptr].set_idx && dcache_evict_way ==  store_cache_hit_way) begin
+                    //dcache_blocks[store_cache_hit_set][store_cache_hit_way].valid <= `SD 1'b0;
+                            case (sq2cache_request_entry.mem_size)
+                                BYTE: victim_cache.victim_blocks[victim_cache.lru].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: victim_cache.victim_blocks[victim_cache.lru].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: victim_cache.victim_blocks[victim_cache.lru].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: victim_cache.victim_blocks[victim_cache.lru].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                            endcase
+                        end
+                        else begin
+                            case (sq2cache_request_entry.mem_size)
+                                BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                            endcase
+                        end
+                    end
+                    //update victim 
+                    else if (load_cache_hit && load_cache_hit_victim)  begin
+                        if (load_set == store_cache_hit_set && dcache_evict_way ==  store_cache_hit_way) begin
+                            case (sq2cache_request_entry.mem_size)
+                                BYTE: victim_cache.victim_blocks[load_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: victim_cache.victim_blocks[load_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: victim_cache.victim_blocks[load_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: victim_cache.victim_blocks[load_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                            endcase 
+                        end
+                        else begin
+                            case (sq2cache_request_entry.mem_size)
+                                BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                            endcase
+                        end
+                    end
+                    else begin
+                        case (sq2cache_request_entry.mem_size)
+                                BYTE: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: dcache_blocks[store_cache_hit_set][store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                        endcase
+                    end
+                end
+                else begin
+                    if (!(!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done) && (store_cache_hit_way != victim_cache.lru))) begin
+                       case (sq2cache_request_entry.mem_size)
+                                BYTE: victim_cache.victim_blocks[store_cache_hit_way].data.bytes[sq2cache_request_entry.addr[2:0]] <= `SD sq2cache_request_entry.data[7:0];
+                                HALF: victim_cache.victim_blocks[store_cache_hit_way].data.halves[sq2cache_request_entry.addr[2:1]] <= `SD sq2cache_request_entry.data[15:0];
+                                WORD: victim_cache.victim_blocks[store_cache_hit_way].data.words[sq2cache_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                                default: victim_cache,victim_blocks[store_cache_hit_way].data.words[sq2casche_request_entry.addr[2]] <= `SD sq2cache_request_entry.data;
+                        endcase    
+                        victim_cache.lru <= `SD ~store_cache_hit_way[0];
+                    end
+                end
             end
 
             // Update: load buffer send ptr
