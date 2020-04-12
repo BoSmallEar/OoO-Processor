@@ -468,7 +468,7 @@ module dcache(
             // swap data between dcache and victim cache
             if (load_cache_hit && load_cache_hit_victim) begin
                 dcache_blocks[load_cache_hit_set][dcache_evict_way].data <= `SD  victim_cache.victim_blocks[load_cache_hit_way].data;
-                dcache_blocks[load_cache_hit_set][dcache_evict_way].tag <= `SD   victim_cache.victim_blocks[load_cache_hit_way].tag[15:6];
+                dcache_blocks[load_cache_hit_set][dcache_evict_way].tag <= `SD   victim_cache.victim_blocks[load_cache_hit_way].tag[12:3];
                 dcache_blocks[load_cache_hit_set][dcache_evict_way].valid <= `SD  victim_cache.victim_blocks[load_cache_hit_way].valid;
 
                 victim_cache.victim_blocks[load_cache_hit_way].tag <= `SD {dcache_blocks[load_cache_hit_set][dcache_evict_way].tag,load_cache_hit_set};
