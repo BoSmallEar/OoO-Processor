@@ -398,8 +398,10 @@ module dcache(
             end
             victim_cache.lru <= `SD 1'b0;
 
-            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++)
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
                 load_buffer[i].valid <= `SD 0;
+                load_buffer[i].done <= `SD 0;
+            end
             
             load_buffer_head_ptr <= `SD 0;
             load_buffer_send_ptr <= `SD 0;
@@ -407,8 +409,10 @@ module dcache(
 
         end
         else if(commit_mis_pred) begin
-            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++)
+            for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin
                 load_buffer[i].valid <= `SD 0;
+                load_buffer[i].done <= `SD 0;
+            end
             // for (int j = 0; j < `SET_SIZE; j++) begin
             //     for (int k = 0; k < `WAY_SIZE; k++) begin
             //         dcache_blocks[j][k].valid <= `SD 1'b0;
@@ -449,6 +453,7 @@ module dcache(
             if (!load_cache_hit && (load_buffer[load_buffer_head_ptr].valid && load_buffer[load_buffer_head_ptr].done)) begin
                 for(int i = 0; i < `LOAD_BUFFER_SIZE; i++) begin 
                     if (load_buffer[i].valid && load_buffer[i].address[15:3] ==  load_buffer[load_buffer_head_ptr].address[15:3]) begin
+                        assert (load_buffer[i].done)  else $error("wrong go go");    
                         load_buffer[i].data <= `SD   load_buffer[load_buffer_head_ptr].data; 
                     end
                 end
@@ -490,6 +495,7 @@ module dcache(
 
             // Update: load buffer send ptr
             if ((mem2Dcache_response != 0 && mem2Dcache_response_valid && Dcache2mem_command == BUS_LOAD) ||   load_buffer[load_buffer_send_ptr].done) begin
+                assert( load_buffer[load_buffer_send_ptr].valid) else  $error("ha ha ha ha");   
                 if (!load_buffer[load_buffer_send_ptr].done) begin
                     load_buffer[load_buffer_send_ptr].mem_tag   <= `SD mem2Dcache_response;
                 end
