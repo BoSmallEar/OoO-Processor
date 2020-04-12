@@ -372,27 +372,29 @@ module dcache(
         .load_lru_way_idx(load_buffer_head_plru_way)
     );
     
-    psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
-        .req({~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][3].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][2].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][1].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][0].valid}),
-        .gnt(way_psel_gnt),
-        .gnt_bus(way_gnt_bus),
-        .empty(no_way_selected)
-    );
+    // psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
+    //     .req({~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][3].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][2].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][1].valid, ~dcache_blocks[load_buffer[load_buffer_head_ptr].set_idx][0].valid}),
+    //     .gnt(way_psel_gnt),
+    //     .gnt_bus(way_gnt_bus),
+    //     .empty(no_way_selected)
+    // );
+
+    assign load_buffer_head_assigned_way = load_buffer_head_plru_way;
     
-    always_comb begin
-        if (no_way_selected) begin
-            load_buffer_head_assigned_way = load_buffer_head_plru_way;
-        end
-        else begin
-            case(way_psel_gnt) 
-                4'b0001: load_buffer_head_assigned_way = `WAY_LEN'h0;
-                4'b0010: load_buffer_head_assigned_way = `WAY_LEN'h1;
-                4'b0100: load_buffer_head_assigned_way = `WAY_LEN'h2;
-                4'b1000: load_buffer_head_assigned_way = `WAY_LEN'h3;
-                default: load_buffer_head_assigned_way = load_buffer_head_plru_way;
-            endcase
-        end
-    end
+    // always_comb begin
+    //     if (no_way_selected) begin
+    //         load_buffer_head_assigned_way = load_buffer_head_plru_way;
+    //     end
+    //     else begin
+    //         case(way_psel_gnt) 
+    //             4'b0001: load_buffer_head_assigned_way = `WAY_LEN'h0;
+    //             4'b0010: load_buffer_head_assigned_way = `WAY_LEN'h1;
+    //             4'b0100: load_buffer_head_assigned_way = `WAY_LEN'h2;
+    //             4'b1000: load_buffer_head_assigned_way = `WAY_LEN'h3;
+    //             default: load_buffer_head_assigned_way = load_buffer_head_plru_way;
+    //         endcase
+    //     end
+    // end
 
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
