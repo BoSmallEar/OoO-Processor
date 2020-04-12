@@ -379,7 +379,7 @@ module dcache(
     );
     
     psel_gen #(.WIDTH(`WAY_SIZE), .REQS(1)) psel (
-        .req({~dcache_blocks[plru_set_idx_lookup][3].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][2].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][1].valid, ~dcache_blocks[plru_set_idx_lookup].set_idx][0].valid}),
+        .req({~dcache_blocks[plru_set_idx_lookup][3].valid, ~dcache_blocks[plru_set_idx_lookup][2].valid, ~dcache_blocks[plru_set_idx_lookup][1].valid, ~dcache_blocks[plru_set_idx_lookup][0].valid}),
         .gnt(way_psel_gnt),
         .gnt_bus(way_gnt_bus),
         .empty(no_way_selected)
