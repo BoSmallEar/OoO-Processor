@@ -28,7 +28,7 @@ module if_id_stage(
 	input	[`XLEN-1:0]	  	 result_target_PC,
 	input         			 result_local_taken,   // result_local_taken
     input         			 result_global_taken,  // result_global_taken
-	input                    result_taken,        // result_taken
+	input                    result_taken,         // result_taken
 	input					 result_mis_pred,
 	input					 result_valid,
 
@@ -65,6 +65,11 @@ module if_id_stage(
 	assign update_predictor = result_valid? result_cond_branch : 0;
 	assign update_btb = result_valid? (result_cond_branch || result_uncond_branch) : 0;
 	assign result_mis_pred_valid = result_valid? result_mis_pred : 0;
+
+	logic 				ras_push_enable;
+	logic 				ras_pop_enable;
+	logic               read_from_ras;
+	logic [`XLEN-1:0]   jal_ret_addr;
 
 	predictor predictor0(
 		// current instruction
@@ -122,19 +127,9 @@ module if_id_stage(
 		.valid_inst(decoder_valid)
 	);
 
-	assign id_packet_out.local_taken = local_taken;
-	assign id_packet_out.global_taken = global_taken;
-
-	assign next_PC =  ((id_packet_out.cond_branch && tournament_taken) || id_packet_out.uncond_branch) ? btb_target_PC : PC_plus_4;
-
-	assign proc2Icache_addr = {PC_reg[`XLEN-1:2], 2'b0};
-	
 	// this mux is because the Imem gives us 64 bits not 32 bits
 	assign id_packet_out.inst = Icache2proc_data;
 	assign id_packet_out.valid = Icache2proc_valid && !result_mis_pred_valid && !rob_full && !rs_full[id_packet_out.fu_type]; 
-
-	assign id_packet_out.NPC = next_PC;
-	assign id_packet_out.PC  = PC_reg;
 	
 	assign id_packet_out.opa_areg_idx =  id_packet_out.inst.r.rs1;
 	assign id_packet_out.opb_areg_idx =  id_packet_out.inst.r.rs2;
@@ -148,6 +143,31 @@ module if_id_stage(
 		endcase
 	end
 
+	assign ras_push_enable = decoder_valid && (id_packet_out.uncond_branch) && (id_packet_out.dest_areg_idx == 1);
+	assign ras_pop_enable = decoder_valid && (id_packet_out.uncond_branch) && (id_packet_out.is_jalr) && (id_packet_out.dest_areg_idx == `ZERO_REG);
+
+	ras ras0(
+		// inputs
+		.clock(clock),
+		.reset(reset),
+		.jal_PC_plus_4(PC_reg+4),
+		.ras_push_enable(ras_push_enable),
+		.ras_pop_enable(ras_pop_enable),
+		.commit_mis_pred(result_mis_pred_valid),
+		// outputs
+		.read_from_ras(read_from_ras),
+		.jal_ret_addr(jal_ret_addr)
+	);
+
+	assign id_packet_out.local_taken = local_taken;
+	assign id_packet_out.global_taken = global_taken;
+
+	assign next_PC = (ras_pop_enable && read_from_ras) ? jal_ret_addr : 
+					 ((id_packet_out.cond_branch && tournament_taken) || id_packet_out.uncond_branch) ? btb_target_PC : PC_plus_4;
+
+	assign proc2Icache_addr = {PC_reg[`XLEN-1:2], 2'b0};
+	assign id_packet_out.NPC = next_PC;
+	assign id_packet_out.PC  = PC_reg;
 	
 	// default next PC value
 	assign PC_plus_4 = PC_reg + 4; 
