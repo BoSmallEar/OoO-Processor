@@ -13,7 +13,7 @@
 #
 #
 
-SOURCE = test_progs/alexnet.c
+SOURCE = test_progs/backtrack.c
 
 CRT = crt.s
 LINKERS = linker.lds
@@ -107,6 +107,7 @@ SIMFILES =	verilog/alu.sv	\
 		verilog/prf.sv	\
 		verilog/processor.sv	\
 		verilog/psel_gen.sv	\
+		verilog/ras.sv  \
 		verilog/rat.sv	\
 		verilog/rob.sv	\
 		verilog/rrat.sv	\

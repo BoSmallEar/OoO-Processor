@@ -48,8 +48,6 @@ always_ff @(posedge clock) begin
         tosp_plus_1 <= `SD `RAS_LEN'b0;
         // reset the ras counter (to zero)
         ras_counter <= `SD `RAS_LEN'h0;
-        // reset the use when empty reg (to zero)
-        use_when_empty_reg <= `SD `XLEN'h0;
     end
     else if (commit_mis_pred) begin
         // reset ras (make every entry 0)
@@ -61,8 +59,6 @@ always_ff @(posedge clock) begin
         tosp_plus_1 <= `SD `RAS_LEN'b00;
         // reset the ras counter (to zero)
         ras_counter <= `SD `RAS_COUNTER_LEN'h0;
-        // reset the use when empty reg (to zero)
-        use_when_empty_reg <= `SD `XLEN'h0;
     end
     else if (ras_push_enable) begin
         // store jal_PC_plus_4 to ras, if ras is full, the stack frame just get overwritten
@@ -75,8 +71,6 @@ always_ff @(posedge clock) begin
             ras_counter <= `SD ras_counter+1;
     end 
     else if (ras_pop_enable && !ras_empty) begin
-        // store the last poped address to use_when_empty_reg
-        use_when_empty_reg <= `SD ras[tosp]; 
         // move tosp and tosp_plus_1
         tosp <= `SD (tosp == `RAS_LEN'b00) ? `RAS_LEN'b11 : (tosp-1);
         tosp_plus_1 <= `SD (tosp_plus_1 == `RAS_LEN'b00) ? `RAS_LEN'b00 : (tosp_plus_1-1); // tosp_plus_1 <= `SD tosp;
