@@ -70,7 +70,7 @@ module icache(
     assign send_idx = send_addr[7:3];
     assign send_addr_hit = ((icache_blocks[send_idx].valid) && (icache_blocks[send_idx].tag == send_tag)) || send_victim_cache_hit;
     assign Icache2mem_addr = send_buffer[send_buffer_send_ptr].addr;
-    assign Icache2mem_command =  (send_buffer[send_buffer_send_ptr].valid && ~send_buffer[send_buffer_send_ptr].done) ? BUS_LOAD : BUS_NONE; 
+    assign Icache2mem_command =  (send_buffer[send_buffer_send_ptr].valid && ~send_buffer[send_buffer_send_ptr].done &&  send_buffer[send_buffer_send_ptr].mem_tag == 0 ) ? BUS_LOAD : BUS_NONE; 
     assign Icache2proc_valid = ((icache_blocks[curr_idx].valid) && (icache_blocks[curr_idx].tag == curr_tag)) || curr_victim_cache_hit; 
     assign Icache2proc_data =  curr_victim_cache_hit? (proc2Icache_addr[2]? victim_cache.victim_blocks[curr_victim_cache_way].data[63:32]:  victim_cache.victim_blocks[curr_victim_cache_way].data[31:0]) : (proc2Icache_addr[2]? icache_blocks[curr_idx].data[63:32]: icache_blocks[curr_idx].data[31:0]);
     assign change_addr = (proc2Icache_addr != last_addr) && (proc2Icache_addr != last_addr+4);
@@ -147,7 +147,7 @@ module icache(
                                 victim_cache.lru <= `SD ~send_victim_cache_way;
                             end
                         end
-                        else if (!send_buffer[send_buffer_tail_ptr].valid || send_buffer[send_buffer_tail_ptr].done)begin
+                        else if ((!send_buffer[send_buffer_tail_ptr].valid) || send_buffer[send_buffer_tail_ptr].done)begin
                             send_buffer[send_buffer_tail_ptr].valid <= `SD 1'b1;
                             send_buffer[send_buffer_tail_ptr].done <= `SD 1'b0;
                             send_buffer[send_buffer_tail_ptr].addr <= `SD send_addr;
@@ -155,7 +155,7 @@ module icache(
                             send_buffer_tail_ptr              <= `SD (send_buffer_tail_ptr == `SEND_BUFFER_SIZE-1) ? 0 : (send_buffer_tail_ptr + 1);
                         end 
                 end
-                if (mem2Icache_response != 0 && mem2Icache_response_valid && Icache2mem_command == BUS_LOAD) begin
+                if (mem2Icache_response != 0 && mem2Icache_response_valid && Icache2mem_command == BUS_LOAD ) begin
                     send_buffer[send_buffer_send_ptr].mem_tag   <= `SD mem2Icache_response; 
                     send_buffer_send_ptr                        <= `SD (send_buffer_send_ptr == `SEND_BUFFER_SIZE-1)? 0: (send_buffer_send_ptr + 1);
                 end
@@ -163,11 +163,11 @@ module icache(
                     if (send_buffer[i].valid && !send_buffer[i].done && (send_buffer[i].mem_tag == mem2Icache_tag) && (mem2Icache_tag != 0)) begin
                         send_buffer[i].done <= `SD 1; 
                         icache_blocks[send_buffer[i].addr[7:3]].tag <= `SD send_buffer[i].addr[15:8];
-                        icache_blocks[send_idx].valid <= `SD 1'b1;
-                        icache_blocks[send_idx].data <= `SD mem2Icache_data;
-                        victim_cache.victim_blocks[victim_cache.lru].data <=  `SD    icache_blocks[send_idx].data;
-                        victim_cache.victim_blocks[victim_cache.lru].valid <=  `SD   icache_blocks[send_idx].valid ;
-                        victim_cache.victim_blocks[victim_cache.lru].tag <=  `SD   {icache_blocks[send_idx].tag,send_idx};
+                        icache_blocks[send_buffer[i].addr[7:3]].valid <= `SD 1'b1;
+                        icache_blocks[send_buffer[i].addr[7:3]].data <= `SD mem2Icache_data;
+                        victim_cache.victim_blocks[victim_cache.lru].data <=  `SD    icache_blocks[send_buffer[i].addr[7:3]].data;
+                        victim_cache.victim_blocks[victim_cache.lru].valid <=  `SD   icache_blocks[send_buffer[i].addr[7:3]].valid ;
+                        victim_cache.victim_blocks[victim_cache.lru].tag <=  `SD   {icache_blocks[send_buffer[i].addr[7:3]].tag,send_buffer[i].addr[7:3]};
                         victim_cache.lru <= `SD ~victim_cache.lru;
                     end 
                 end            
