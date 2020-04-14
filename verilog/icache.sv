@@ -117,7 +117,7 @@ module icache(
         else begin  
             last_addr <= `SD proc2Icache_addr;
             if (change_addr) begin   
-                if (proc2Icache_addr > last_addr && proc2Icache_addr< last_addr +  num_block_prefetch*8 && send_addr > {proc2Icache_addr[31:3],3'b0}) begin
+                if (proc2Icache_addr > last_addr && proc2Icache_addr< last_addr +  num_block_prefetch*8 &&  send_buffer[send_buffer_send_ptr] > {proc2Icache_addr[31:3],3'b0}) begin
                     for(int i = 0; i < `SEND_BUFFER_SIZE; i++) begin
                         if (send_buffer[i].addr< {proc2Icache_addr[31:3],3'b0}) begin
                             send_buffer[i].valid <= `SD 0;
