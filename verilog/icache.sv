@@ -56,8 +56,7 @@ module icache(
     logic             curr_victim_cache_way;
     logic             send_victim_cache_hit;
     logic             send_victim_cache_way;
-    SEND_BUFFER_ENTRY [`SEND_BUFFER_SIZE-1:0] send_buffer;
-    logic [`SEND_BUFFER_LEN-1:0] send_buffer_head_ptr;
+    SEND_BUFFER_ENTRY [`SEND_BUFFER_SIZE-1:0] send_buffer; 
     logic [`SEND_BUFFER_LEN-1:0] send_buffer_send_ptr;
     logic [`SEND_BUFFER_LEN-1:0] send_buffer_tail_ptr;
  
@@ -100,8 +99,7 @@ module icache(
         if (reset) begin 
             for (int i=0; i<32; i++) begin
                 icache_blocks[i].valid <= `SD 1'b0;
-            end
-            send_buffer_head_ptr <= `SD 0; 
+            end 
             send_buffer_send_ptr <= `SD 0;
             send_buffer_tail_ptr <= `SD 0;
             send_addr <= `SD 0;
@@ -119,18 +117,27 @@ module icache(
         else begin  
             last_addr <= `SD proc2Icache_addr;
             if (change_addr) begin   
-                if (!Icache2proc_valid) begin
-                    send_addr <= `SD {proc2Icache_addr[31:3],3'b0}; 
+                if (proc2Icache_addr > last_addr && proc2Icache_addr< last_addr +  num_block_prefetch*8 && send_addr > {proc2Icache_addr[31:3],3'b0}) begin
+                    for(int i = 0; i < `SEND_BUFFER_SIZE; i++) begin
+                        if (send_buffer[i].addr< {proc2Icache_addr[31:3],3'b0}) begin
+                            send_buffer[i].valid <= `SD 0;
+                            send_buffer[i].done <= `SD 0; 
+                        end
+                    end
                 end
-                else begin 
-                    send_addr <= `SD {proc2Icache_addr[31:3],3'b0} + 8; 
-                end
-                send_buffer_head_ptr <= `SD 0; 
-                send_buffer_send_ptr <= `SD 0;
-                send_buffer_tail_ptr <= `SD 0; 
-                for(int i = 0; i < `SEND_BUFFER_SIZE; i++) begin
-                    send_buffer[i].valid <= `SD 0;
-                    send_buffer[i].done <= `SD 0; 
+                else begin
+                    if (!Icache2proc_valid) begin
+                        send_addr <= `SD {proc2Icache_addr[31:3],3'b0}; 
+                    end
+                    else begin 
+                        send_addr <= `SD {proc2Icache_addr[31:3],3'b0} + 8; 
+                    end 
+                    send_buffer_send_ptr <= `SD 0;
+                    send_buffer_tail_ptr <= `SD 0; 
+                    for(int i = 0; i < `SEND_BUFFER_SIZE; i++) begin
+                        send_buffer[i].valid <= `SD 0;
+                        send_buffer[i].done <= `SD 0; 
+                    end
                 end
             end
             else begin
