@@ -46,7 +46,7 @@ module icache(
     logic [`XLEN-1:0] send_addr;
     logic [7:0] send_tag;
     logic [4:0] send_idx;
-    logic       send_addr_state;
+    logic [1:0]      send_addr_state;
     logic [1:0] send_addr_hit;//0-check icache 1-send request. receive respose. 2-receive data
     logic [3:0] send_mem_tag;
     logic [`XLEN-1:0] goal_addr; 
