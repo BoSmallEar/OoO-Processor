@@ -30,7 +30,7 @@ module icache(
 	input           [63:0]          mem2Icache_data,             // Data coming back from memory
 	input           [3:0]           mem2Icache_tag,    
     input                           mem2Icache_response_valid,
-    input                           change_addr, 
+    input                           commit_mis_pred, 
 
     //outputs
     output logic  	[`XLEN-1:0] 	Icache2proc_data,
