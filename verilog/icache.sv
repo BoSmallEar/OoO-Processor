@@ -72,7 +72,7 @@ module icache(
     assign Icache2mem_command =  (send_buffer[send_buffer_send_ptr].valid && ~send_buffer[send_buffer_send_ptr].done &&  send_buffer[send_buffer_send_ptr].mem_tag == 0 ) ? BUS_LOAD : BUS_NONE; 
     assign Icache2proc_valid = ((icache_blocks[curr_idx].valid) && (icache_blocks[curr_idx].tag == curr_tag)) || curr_victim_cache_hit; 
     assign Icache2proc_data =  curr_victim_cache_hit? (proc2Icache_addr[2]? victim_cache.victim_blocks[curr_victim_cache_way].data[63:32]:  victim_cache.victim_blocks[curr_victim_cache_way].data[31:0]) : (proc2Icache_addr[2]? icache_blocks[curr_idx].data[63:32]: icache_blocks[curr_idx].data[31:0]);
-    assign change_addr = !(proc2Icache_addr >= last_addr && proc2Icache_addr < last_addr +  num_block_prefetch*8 &&  send_buffer[send_buffer_send_ptr].addr > {proc2Icache_addr[31:3],3'b0});
+    assign change_addr = !(proc2Icache_addr >= last_addr && proc2Icache_addr <= last_addr +  num_block_prefetch*8 &&  send_buffer[send_buffer_send_ptr].addr >= {proc2Icache_addr[31:3],3'b0});
 
     ICACHE_BLOCK [31:0] icache_blocks;
     VICTIM_CACHE victim_cache;
