@@ -19,6 +19,8 @@
         I You will need to schedule or stall functional units
         */
 
+    
+
 module icache(
     //inputs
     input                           clock,
@@ -28,7 +30,7 @@ module icache(
 	input           [63:0]          mem2Icache_data,             // Data coming back from memory
 	input           [3:0]           mem2Icache_tag,    
     input                           mem2Icache_response_valid,
-    input                           commit_mis_pred, 
+    input                           change_addr, 
 
     //outputs
     output logic  	[`XLEN-1:0] 	Icache2proc_data,
@@ -36,34 +38,34 @@ module icache(
     output BUS_COMMAND              Icache2mem_command,    // command sent to memory
 	output logic    [`XLEN-1:0]     Icache2mem_addr  // Address sent to memory
 );
-
+    logic [3:0] num_block_prefetch;
+    assign num_block_prefetch = 1; 
+    logic [`XLEN-1:0] last_addr;
+    logic [7:0] send_tag;
+    logic [4:0] send_idx;
+    logic [`XLEN-1:0] send_addr;
+    logic [7:0] send_tag;
+    logic [4:0] send_idx;
+    logic       send_addr_state;
+    logic [1:0] send_addr_hit;//0-check icache 1-send request. receive respose. 2-receive data
+    logic [3:0] send_mem_tag;
+    logic [`XLEN-1:0] goal_addr; 
+    logic             change_addr;
+ 
+    assign goal_addr = {proc2Icache_addr[31:3],3'b0} + num_block_prefetch*8; 
+    assign curr_tag = proc2Icache_addr[15:8];
+    assign curr_idx = proc2Icache_addr[7:3];
+    assign send_tag = send_addr[15:8];
+    assign send_idx = send_addr[7:3];
+    assign send_addr_hit = (icache_blocks[send_idx].valid) && (icache_blocks[send_idx].tag == send_tag);
+    assign Icache2mem_addr = send_addr;
+    assign Icache2mem_command = (send_addr_state == 1) ? BUS_LOAD : BUS_NONE;
+    assign Icache2proc_valid = (icache_blocks[curr_idx].valid) && (icache_blocks[curr_idx].tag == curr_tag); 
+    assign Icache2proc_data =  proc2Icache_addr[2]? icache_blocks[curr_idx].data[63:32]: icache_blocks[curr_idx].data[31:0];
+    assign change_addr = (proc2Icache_addr != last_addr) && (proc2Icache_addr != last_addr+4);
     ICACHE_BLOCK [31:0] icache_blocks;
 
-    logic [7:0] current_tag;
-    logic [4:0] current_index;
-    logic [4:0] last_index;
-    logic [7:0] last_tag;
-    
-    logic       miss_outstanding;
-    logic       data_write_enable;
-
-    logic [3:0] curr_mem_tag; 
-
-    assign Icache2proc_data = proc2Icache_addr[2]? icache_blocks[current_index].data[63:32]: icache_blocks[current_index].data[31:0];
-    assign Icache2proc_valid = icache_blocks[current_index].valid && (icache_blocks[current_index].tag == current_tag);
-
-    wire changed_addr = (current_index!=last_index) || (current_tag!=last_tag);
-
-    wire unanswered_miss = changed_addr ? !Icache2proc_valid :
-                            miss_outstanding & (mem2Icache_response==0 || !mem2Icache_response_valid);
-
-    assign data_write_enable = (curr_mem_tag == mem2Icache_tag) && (curr_mem_tag != 4'b0);
-    wire update_mem_tag = changed_addr | miss_outstanding | data_write_enable ;
-
-    assign {current_tag, current_index} = proc2Icache_addr[31:3];
-    assign Icache2mem_addr = {proc2Icache_addr[31:3], 3'b0};
-    assign Icache2mem_command = {1'b0,(miss_outstanding && !changed_addr)};
-
+ 
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset) begin
@@ -71,33 +73,40 @@ module icache(
             for (i=0; i<32; i++) begin
                 icache_blocks[i].valid <= `SD 1'b0;
             end
-            miss_outstanding <= `SD 1'b0;
-            last_index       <= `SD 5'b1;// arbitrary except 0
-            last_tag         <= `SD 8'b1;//arbitrary except 0
-            curr_mem_tag     <= `SD 4'b0; 
+            send_addr <= `SD 0;
+            last_addr <= `SD 0;
+            send_addr_state <= `SD 0;
         end
-        else begin 
-            miss_outstanding <= `SD unanswered_miss;
-            last_index       <= `SD current_index;
-            last_tag         <= `SD current_tag;
-
-            if (update_mem_tag) begin
-                if (changed_addr ) begin
-                    curr_mem_tag <= `SD 4'b0;
-                end
-                else if (miss_outstanding) begin
-                    curr_mem_tag <= `SD mem2Icache_response_valid? mem2Icache_response : 4'b0;
-                end
-                else if (data_write_enable) begin
-                    curr_mem_tag <= `SD 4'b0;
-                end
+        else begin  
+            last_addr <= `SD proc2Icache_addr;
+            if (change_addr) begin
+               send_addr <= `SD {proc2Icache_addr[31:3],3'b0};
+               send_addr_state <= `SD 0; 
             end
-
-            // update I-cache contents
-            if(data_write_enable) begin
-                icache_blocks[last_index].tag <= `SD last_tag;
-                icache_blocks[last_index].valid <= `SD 1'b1;
-                icache_blocks[last_index].data <= `SD mem2Icache_data;
+            else if (send_addr <= goal_addr)begin 
+                if (send_addr_state ==0) begin
+                    if (send_addr_hit) begin
+                        send_addr <= `SD send_addr + 4'h8;
+                        send_addr_state <= `SD 0;
+                    end
+                    else    send_addr_state <= `SD 1;
+                end
+                else if (send_addr_state ==1) begin
+                    if (mem2Icache_response==0 || !mem2Icache_response_valid) begin
+                        send_mem_tag <= `SD mem2Icache_response;
+                        send_addr_state <= `SD 2;
+                    end
+                end
+                else begin
+                    if (send_mem_tag == mem2Icache_tag) begin
+                        send_addr <= `SD send_addr + 4'h8;
+                        send_addr_state <= `SD 0;
+                        send_mem_tag <= `SD 0;
+                        icache_blocks[send_idx].tag <= `SD send_tag;
+                        icache_blocks[send_idx].valid <= `SD 1'b1;
+                        icache_blocks[send_idx].data <= `SD mem2Icache_data;
+                    end
+                end
             end
         end
     end
