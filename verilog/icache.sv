@@ -41,8 +41,8 @@ module icache(
     logic [3:0] num_block_prefetch;
     assign num_block_prefetch = 1; 
     logic [`XLEN-1:0] last_addr;
-    logic [7:0] send_tag;
-    logic [4:0] send_idx;
+    logic [7:0] curr_tag;
+    logic [4:0] curr_idx;
     logic [`XLEN-1:0] send_addr;
     logic [7:0] send_tag;
     logic [4:0] send_idx;
@@ -82,6 +82,7 @@ module icache(
             if (change_addr) begin
                send_addr <= `SD {proc2Icache_addr[31:3],3'b0};
                send_addr_state <= `SD 0; 
+                send_mem_tag <= `SD 0;
             end
             else if (send_addr <= goal_addr)begin 
                 if (send_addr_state ==0) begin
