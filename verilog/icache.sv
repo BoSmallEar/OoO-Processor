@@ -92,7 +92,7 @@ module icache(
                     else    send_addr_state <= `SD 1;
                 end
                 else if (send_addr_state ==1) begin
-                    if (mem2Icache_response==0 || !mem2Icache_response_valid) begin
+                    if (mem2Icache_response!=0 && mem2Icache_response_valid) begin
                         send_mem_tag <= `SD mem2Icache_response;
                         send_addr_state <= `SD 2;
                     end
