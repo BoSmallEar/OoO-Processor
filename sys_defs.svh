@@ -622,6 +622,9 @@ typedef struct packed {
 `define LOAD_BUFFER_SIZE       16
 `define LOAD_BUFFER_LEN        4
 
+`define SEND_BUFFER_SIZE       8
+`define SEND_BUFFER_LEN        3
+
 typedef union packed {
     logic [63:0] double;
     logic [1:0][31:0] words;
@@ -686,5 +689,12 @@ typedef struct packed {
     logic [`SET_LEN-1:0] set_idx;
     logic [`WAY_LEN-1:0] way_idx;
 } LOAD_BUFFER_ENTRY;
+
+typedef struct packed {
+	logic valid;   
+    logic [`XLEN-1:0] addr; 
+    logic [3:0] mem_tag;
+    logic done;  
+} SEND_BUFFER_ENTRY;
 
 `endif // __SYS_DEFS_VH__
