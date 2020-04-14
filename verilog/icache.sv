@@ -135,8 +135,8 @@ module icache(
             end
             else begin
                 if (send_addr <= goal_addr)begin  
+                        send_addr <= `SD send_addr + 4'h8; 
                         if (send_addr_hit) begin
-                            send_addr <= `SD send_addr + 4'h8; 
                             if (send_victim_cache_hit) begin
                                 icache_blocks[send_idx].data <= `SD victim_cache.victim_blocks[send_victim_cache_way].data;
                                 icache_blocks[send_idx].tag <= `SD send_tag;
