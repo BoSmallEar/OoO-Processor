@@ -143,8 +143,8 @@ module if_id_stage(
 		endcase
 	end
 
-	assign ras_push_enable = decoder_valid && (id_packet_out.uncond_branch) && (id_packet_out.dest_areg_idx == 1);
-	assign ras_pop_enable = decoder_valid && (id_packet_out.uncond_branch) && (id_packet_out.is_jalr) && (id_packet_out.dest_areg_idx == `ZERO_REG);
+	assign ras_push_enable = id_packet_out.valid && (id_packet_out.uncond_branch) && (id_packet_out.dest_areg_idx == 1);
+	assign ras_pop_enable = id_packet_out.valid && (id_packet_out.uncond_branch) && (id_packet_out.is_jalr) && (id_packet_out.dest_areg_idx == `ZERO_REG);
 
 	ras ras0(
 		// inputs
