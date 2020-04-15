@@ -17,7 +17,7 @@ suppress_message {"VER-130"}
 #/* The following five lines must be updated for every      */
 #/* new design                                              */
 #/***********************************************************/
-analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cache_arbiter.sv" "../verilog/cdb.sv"  "../verilog/dcache.sv" "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv" "../verilog/load_store_queue.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/rs_lb.sv" "../verilog/rs_sq.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
+analyze -f sverilog [list "../sys_defs.svh" "../ISA.svh" "../verilog/alu.sv" "../verilog/branch.sv"	"../verilog/btb.sv"	"../verilog/cache_arbiter.sv" "../verilog/cdb.sv"  "../verilog/dcache.sv" "../verilog/decoder.sv" "../verilog/icache.sv" "../verilog/if_id_stage.sv" "../verilog/load_store_queue.sv"	"../verilog/predictor.sv" "../verilog/prf.sv" "../verilog/processor.sv" "../verilog/psel_gen.sv" "../verilog/ras.sv" "../verilog/rat.sv" "../verilog/rob.sv" "../verilog/rrat.sv" "../verilog/rs_alu.sv" "../verilog/rs_branch.sv" "../verilog/rs_mul.sv" "../verilog/rs_lb.sv" "../verilog/rs_sq.sv" "../verilog/top_level.sv" "../verilog/wand_sel.sv" "../verilog/mul/pipe_mul.v"]
 elaborate processor
 set design_name processor
 set clock_name clock
