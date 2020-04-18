@@ -118,22 +118,28 @@ module cdb(
         // select a result to broacast
         case(module_select)
             5'b10000: begin
-                cdb_dest_preg_idx       = cdb_alu_queue_empty ? alu_prf_idx : cdb_alu_queue[cdb_alu_queue_head].alu_prf_idx;
-                cdb_broadcast_value     = cdb_alu_queue_empty ? alu_value   : cdb_alu_queue[cdb_alu_queue_head].alu_value;
-                cdb_rob_idx             = cdb_alu_queue_empty ? alu_rob_idx : cdb_alu_queue[cdb_alu_queue_head].alu_rob_idx;
-                cdb_broadcast_inst_PC   = cdb_alu_queue_empty ? alu_PC      : cdb_alu_queue[cdb_alu_queue_head].alu_PC;
-                cdb_mis_pred            = 1'b0;
-                cdb_br_direction        = 1'b0;
-                cdb_broadcast_valid     = 1'b1;
+                cdb_dest_preg_idx         = cdb_alu_queue_empty ? alu_prf_idx : cdb_alu_queue[cdb_alu_queue_head].alu_prf_idx;
+                cdb_broadcast_value       = cdb_alu_queue_empty ? alu_value   : cdb_alu_queue[cdb_alu_queue_head].alu_value;
+                cdb_rob_idx               = cdb_alu_queue_empty ? alu_rob_idx : cdb_alu_queue[cdb_alu_queue_head].alu_rob_idx;
+                cdb_broadcast_inst_PC     = cdb_alu_queue_empty ? alu_PC      : cdb_alu_queue[cdb_alu_queue_head].alu_PC;
+		        cdb_br_direction          = 1'b0;
+		        cdb_br_target_PC          = `XLEN'hfacebeec;
+                cdb_mis_pred              = 1'b0;
+		        cdb_local_pred_direction  = 1'b0;
+		        cdb_global_pred_direction = 1'b0;
+                cdb_broadcast_valid       = 1'b1;
             end
             5'b01000: begin
-                cdb_dest_preg_idx       = cdb_mul_queue_empty ? mul_prf_idx : cdb_mul_queue[cdb_mul_queue_head].mul_prf_idx;
-                cdb_broadcast_value     = cdb_mul_queue_empty ? mul_value   : cdb_mul_queue[cdb_mul_queue_head].mul_value;
-                cdb_rob_idx             = cdb_mul_queue_empty ? mul_rob_idx : cdb_mul_queue[cdb_mul_queue_head].mul_rob_idx;
-                cdb_broadcast_inst_PC   = cdb_mul_queue_empty ? mul_PC      : cdb_mul_queue[cdb_mul_queue_head].mul_PC;
-                cdb_mis_pred            = 1'b0;
-                cdb_br_direction        = 1'b0;
-                cdb_broadcast_valid     = 1'b1;
+                cdb_dest_preg_idx         = cdb_mul_queue_empty ? mul_prf_idx : cdb_mul_queue[cdb_mul_queue_head].mul_prf_idx;
+                cdb_broadcast_value       = cdb_mul_queue_empty ? mul_value   : cdb_mul_queue[cdb_mul_queue_head].mul_value;
+                cdb_rob_idx               = cdb_mul_queue_empty ? mul_rob_idx : cdb_mul_queue[cdb_mul_queue_head].mul_rob_idx;
+                cdb_broadcast_inst_PC     = cdb_mul_queue_empty ? mul_PC      : cdb_mul_queue[cdb_mul_queue_head].mul_PC;
+                cdb_br_direction          = 1'b0;
+		        cdb_br_target_PC          = `XLEN'hfacebeec;
+                cdb_mis_pred              = 1'b0;
+		        cdb_local_pred_direction  = 1'b0;
+		        cdb_global_pred_direction = 1'b0;
+                cdb_broadcast_valid       = 1'b1;
             end
             5'b00100: begin
                 cdb_dest_preg_idx         = cdb_br_queue_empty ? br_prf_idx :
@@ -157,31 +163,40 @@ module cdb(
                 cdb_broadcast_valid       = 1'b1;
             end
             5'b00010: begin
-                cdb_dest_preg_idx       = cdb_dcache_queue_empty ? dcache_prf_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_prf_idx;
-                cdb_broadcast_value     = cdb_dcache_queue_empty ? dcache_value   : cdb_dcache_queue[cdb_dcache_queue_head].dcache_value;
-                cdb_rob_idx             = cdb_dcache_queue_empty ? dcache_rob_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_rob_idx;
-                cdb_broadcast_inst_PC   = cdb_dcache_queue_empty ? dcache_PC      : cdb_dcache_queue[cdb_dcache_queue_head].dcache_PC;
-                cdb_mis_pred            = 1'b0;
-                cdb_br_direction        = 1'b0;
-                cdb_broadcast_valid     = 1'b1;
+                cdb_dest_preg_idx         = cdb_dcache_queue_empty ? dcache_prf_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_prf_idx;
+                cdb_broadcast_value       = cdb_dcache_queue_empty ? dcache_value   : cdb_dcache_queue[cdb_dcache_queue_head].dcache_value;
+                cdb_rob_idx               = cdb_dcache_queue_empty ? dcache_rob_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_rob_idx;
+                cdb_broadcast_inst_PC     = cdb_dcache_queue_empty ? dcache_PC      : cdb_dcache_queue[cdb_dcache_queue_head].dcache_PC;
+                cdb_br_direction          = 1'b0;
+		        cdb_br_target_PC          = `XLEN'hfacebeec;
+                cdb_mis_pred              = 1'b0;
+		        cdb_local_pred_direction  = 1'b0;
+		        cdb_global_pred_direction = 1'b0;
+                cdb_broadcast_valid       = 1'b1;
             end
             5'b00001: begin
-                cdb_dest_preg_idx       = cdb_sq_queue_empty ? sq_prf_idx : cdb_sq_queue[cdb_sq_queue_head].sq_prf_idx;
-                cdb_broadcast_value     = cdb_sq_queue_empty ? sq_value   : cdb_sq_queue[cdb_sq_queue_head].sq_value;
-                cdb_rob_idx             = cdb_sq_queue_empty ? sq_rob_idx : cdb_sq_queue[cdb_sq_queue_head].sq_rob_idx;
-                cdb_broadcast_inst_PC   = cdb_sq_queue_empty ? sq_PC      : cdb_sq_queue[cdb_sq_queue_head].sq_PC;
-                cdb_mis_pred            = 1'b0;
-                cdb_br_direction        = 1'b0;
-                cdb_broadcast_valid     = 1'b1;
+                cdb_dest_preg_idx         = cdb_sq_queue_empty ? sq_prf_idx : cdb_sq_queue[cdb_sq_queue_head].sq_prf_idx;
+                cdb_broadcast_value       = cdb_sq_queue_empty ? sq_value   : cdb_sq_queue[cdb_sq_queue_head].sq_value;
+                cdb_rob_idx               = cdb_sq_queue_empty ? sq_rob_idx : cdb_sq_queue[cdb_sq_queue_head].sq_rob_idx;
+                cdb_broadcast_inst_PC     = cdb_sq_queue_empty ? sq_PC      : cdb_sq_queue[cdb_sq_queue_head].sq_PC;
+                cdb_br_direction          = 1'b0;
+		        cdb_br_target_PC          = `XLEN'hfacebeec;
+                cdb_mis_pred              = 1'b0;
+		        cdb_local_pred_direction  = 1'b0;
+		        cdb_global_pred_direction = 1'b0;
+                cdb_broadcast_valid       = 1'b1;
             end
             default: begin 
-                cdb_broadcast_inst_PC   = `XLEN'hfacebeec;
-                cdb_dest_preg_idx       = 0;
-                cdb_broadcast_value     = 0;
-                cdb_rob_idx             = 0;
-                cdb_mis_pred            = 1'b0;
-                cdb_br_direction        = 1'b0;
-                cdb_broadcast_valid     = 1'b0;
+                cdb_broadcast_inst_PC     = `XLEN'hfacebeec;
+                cdb_dest_preg_idx         = 0;
+                cdb_broadcast_value       = 0;
+                cdb_rob_idx               = 0;
+                cdb_br_direction         = 1'b0;
+		        cdb_br_target_PC          = `XLEN'hfacebeec;
+                cdb_mis_pred              = 1'b0;
+		        cdb_local_pred_direction  = 1'b0;
+		        cdb_global_pred_direction = 1'b0;
+                cdb_broadcast_valid       = 1'b0;
             end
         endcase
     end
@@ -190,13 +205,6 @@ module cdb(
     // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
-            // cdb_broadcast_valid       <= `SD 1'b0;
-            // cdb_broadcast_inst_PC     <= `SD `XLEN'hfacebeec;
-            // cdb_mis_pred              <= `SD 1'b0;
-            // cdb_br_direction          <= `SD 1'b0;
-            // cdb_br_target_PC          <= `SD `XLEN'hfacebeec;
-            // cdb_local_pred_direction  <= `SD 1'b0;
-            // cdb_global_pred_direction <= `SD 1'b0;
             cdb_alu_queue_head        <= `SD `ALU_QUEUE_LEN'b0;
             cdb_alu_queue_tail        <= `SD `ALU_QUEUE_LEN'b0;
             cdb_mul_queue_head        <= `SD `MUL_QUEUE_LEN'b0;
@@ -255,75 +263,19 @@ module cdb(
             // select a result to broacast
             case(module_select)
                 5'b10000: begin
-                    // cdb_dest_preg_idx       <= `SD cdb_alu_queue_empty ? alu_prf_idx : cdb_alu_queue[cdb_alu_queue_head].alu_prf_idx;
-                    // cdb_broadcast_value     <= `SD cdb_alu_queue_empty ? alu_value   : cdb_alu_queue[cdb_alu_queue_head].alu_value;
-                    // cdb_rob_idx             <= `SD cdb_alu_queue_empty ? alu_rob_idx : cdb_alu_queue[cdb_alu_queue_head].alu_rob_idx;
-                    // cdb_broadcast_inst_PC   <= `SD cdb_alu_queue_empty ? alu_PC      : cdb_alu_queue[cdb_alu_queue_head].alu_PC;
-                    // cdb_mis_pred            <= `SD 1'b0;
-                    // cdb_br_direction        <= `SD 1'b0;
                     cdb_alu_queue_head      <= `SD (cdb_alu_queue_head == `ALU_QUEUE_SIZE-1) ? 0 : cdb_alu_queue_head + 1;
-                    // cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 5'b01000: begin
-                    // cdb_dest_preg_idx       <= `SD cdb_mul_queue_empty ? mul_prf_idx : cdb_mul_queue[cdb_mul_queue_head].mul_prf_idx;
-                    // cdb_broadcast_value     <= `SD cdb_mul_queue_empty ? mul_value   : cdb_mul_queue[cdb_mul_queue_head].mul_value;
-                    // cdb_rob_idx             <= `SD cdb_mul_queue_empty ? mul_rob_idx : cdb_mul_queue[cdb_mul_queue_head].mul_rob_idx;
-                    // cdb_broadcast_inst_PC   <= `SD cdb_mul_queue_empty ? mul_PC      : cdb_mul_queue[cdb_mul_queue_head].mul_PC;
-                    // cdb_mis_pred            <= `SD 1'b0;
-                    // cdb_br_direction        <= `SD 1'b0;
                     cdb_mul_queue_head      <= `SD (cdb_mul_queue_head == `MUL_QUEUE_SIZE-1) ? 0 : cdb_mul_queue_head + 1;
-                    // cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 5'b00100: begin
-                    // cdb_dest_preg_idx         <= `SD cdb_br_queue_empty ? br_prf_idx :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_prf_idx;
-                    // cdb_broadcast_value       <= `SD cdb_br_queue_empty ? br_value :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_value;                                                      
-                    // cdb_rob_idx               <= `SD cdb_br_queue_empty ? br_rob_idx :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_rob_idx;
-                    // cdb_broadcast_inst_PC     <= `SD cdb_br_queue_empty ? br_PC :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_PC;
-                    // cdb_br_direction          <= `SD cdb_br_queue_empty ? br_direction :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_direction;
-                    // cdb_br_target_PC          <= `SD cdb_br_queue_empty ? br_target_PC : 
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_target_PC;
-                    // cdb_mis_pred              <= `SD cdb_br_queue_empty ? br_mis_pred :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_mis_pred;
-                    // cdb_local_pred_direction  <= `SD cdb_br_queue_empty ? br_local_pred_direction :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_local_pred_direction;
-                    // cdb_global_pred_direction <= `SD cdb_br_queue_empty ? br_global_pred_direction :
-                    //                                                       cdb_br_queue[cdb_br_queue_head].br_global_pred_direction;
                     cdb_br_queue_head         <= `SD (cdb_br_queue_head == `BR_QUEUE_SIZE-1) ? 0 : cdb_br_queue_head + 1;
-                    // cdb_broadcast_valid       <= `SD 1'b1;
                 end
                 5'b00010: begin
-                    // cdb_dest_preg_idx       <= `SD cdb_dcache_queue_empty ? dcache_prf_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_prf_idx;
-                    // cdb_broadcast_value     <= `SD cdb_dcache_queue_empty ? dcache_value   : cdb_dcache_queue[cdb_dcache_queue_head].dcache_value;
-                    // cdb_rob_idx             <= `SD cdb_dcache_queue_empty ? dcache_rob_idx : cdb_dcache_queue[cdb_dcache_queue_head].dcache_rob_idx;
-                    // cdb_broadcast_inst_PC   <= `SD cdb_dcache_queue_empty ? dcache_PC      : cdb_dcache_queue[cdb_dcache_queue_head].dcache_PC;
-                    // cdb_mis_pred            <= `SD 1'b0;
-                    // cdb_br_direction        <= `SD 1'b0;
                     cdb_dcache_queue_head   <= `SD (cdb_dcache_queue_head == `DCACHE_QUEUE_SIZE-1) ? 0 : cdb_dcache_queue_head + 1;
-                    // cdb_broadcast_valid     <= `SD 1'b1;
                 end
                 5'b00001: begin
-                    // cdb_dest_preg_idx       <= `SD cdb_sq_queue_empty ? sq_prf_idx : cdb_sq_queue[cdb_sq_queue_head].sq_prf_idx;
-                    // cdb_broadcast_value     <= `SD cdb_sq_queue_empty ? sq_value   : cdb_sq_queue[cdb_sq_queue_head].sq_value;
-                    // cdb_rob_idx             <= `SD cdb_sq_queue_empty ? sq_rob_idx : cdb_sq_queue[cdb_sq_queue_head].sq_rob_idx;
-                    // cdb_broadcast_inst_PC   <= `SD cdb_sq_queue_empty ? sq_PC      : cdb_sq_queue[cdb_sq_queue_head].sq_PC;
-                    // cdb_mis_pred            <= `SD 1'b0;
-                    // cdb_br_direction        <= `SD 1'b0;
                     cdb_sq_queue_head       <= `SD (cdb_sq_queue_head == `SQ_QUEUE_SIZE-1) ? 0 : cdb_sq_queue_head + 1;
-                    // cdb_broadcast_valid     <= `SD 1'b1;
-                end
-                default: begin 
-                    // cdb_broadcast_inst_PC   <= `SD `XLEN'hfacebeec;
-                    // cdb_dest_preg_idx       <= `SD 0;
-                    // cdb_broadcast_value     <= `SD 0;
-                    // cdb_rob_idx             <= `SD 0;
-                    // cdb_mis_pred            <= `SD 1'b0;
-                    // cdb_br_direction        <= `SD 1'b0;
-                    // cdb_broadcast_valid     <= `SD 1'b0;
                 end
             endcase 
         end
