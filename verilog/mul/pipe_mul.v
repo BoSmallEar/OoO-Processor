@@ -100,6 +100,7 @@ module mult2cdb(
 	logic 		[`DOUBLE_XLEN-1:0] 	product;
 	logic 		[`DOUBLE_XLEN-1:0] 	product_inv;
 	ALU_FUNC 						mul_func;
+	logic                           done;
 
 	MUL_PACKET  [`STAGE-1:0]		mul_packets;
 	MUL_PACKET						mul_packet_in;
