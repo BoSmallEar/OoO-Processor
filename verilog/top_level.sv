@@ -163,7 +163,7 @@ module top_level (
     // ROB OUTPUTS
     logic [4:0]             rob_commit_dest_areg_idx;   // rob -> rrat
     logic [`PRF_LEN-1:0]    rob_commit_dest_preg_idx;   // rob -> rrat
-    // logic [`ROB_LEN-1:0]    rob_tail;                   // rob -> rs
+    logic                   store_enable;
     logic                   mis_pred_is_head;           // rob -> rs, prf, rat
 
     assign  result_mis_pred = mis_pred_is_head;
