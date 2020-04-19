@@ -102,6 +102,7 @@ module rs_lb(
     assign rs_lb_out_valid = !no_rs_selected;
 
     int t;
+    // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if (reset || commit_mis_pred) begin
             rs_lb_free      <= `SD ~`RS_LB_SIZE'h0;
