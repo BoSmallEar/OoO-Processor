@@ -59,6 +59,9 @@ module icache(
     SEND_BUFFER_ENTRY [`SEND_BUFFER_SIZE-1:0] send_buffer; 
     logic [`SEND_BUFFER_LEN-1:0] send_buffer_send_ptr;
     logic [`SEND_BUFFER_LEN-1:0] send_buffer_tail_ptr;
+    
+    ICACHE_BLOCK [31:0] icache_blocks;
+    VICTIM_CACHE victim_cache;
  
     assign goal_addr = {proc2Icache_addr[31:3],3'b0} + num_block_prefetch*8; 
     assign curr_tag = proc2Icache_addr[15:8];
@@ -74,8 +77,6 @@ module icache(
     assign Icache2proc_data =  curr_victim_cache_hit? (proc2Icache_addr[2]? victim_cache.victim_blocks[curr_victim_cache_way].data[63:32]:  victim_cache.victim_blocks[curr_victim_cache_way].data[31:0]) : (proc2Icache_addr[2]? icache_blocks[curr_idx].data[63:32]: icache_blocks[curr_idx].data[31:0]);
     assign change_addr = (proc2Icache_addr != last_addr) && (proc2Icache_addr != last_addr+4);
 
-    ICACHE_BLOCK [31:0] icache_blocks;
-    VICTIM_CACHE victim_cache;
 
     
     always_comb begin
